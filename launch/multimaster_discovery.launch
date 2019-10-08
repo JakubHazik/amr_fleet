@@ -2,7 +2,7 @@
   <node name="master_discovery" pkg="fkie_master_discovery" type="master_discovery">
     <param name="log_level" value="INFO" />
     <!-- Specifies the multicast group. You can bind the to defined interface by adding @address to the group -->
-    <param name="mcast_group" value="226.0.0.0" />
+    <param name="mcast_group" value="224.0.0.1" />
     <param name="mcast_port" value="11511" />
     <!-- Bind the master_discovery to an interface address. If this is not specified the ROS_IP or default interface will be used. -->
     <param name="interface" value="" />
