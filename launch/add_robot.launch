@@ -18,4 +18,16 @@
         <arg name="robot_id" value="$(arg robot_id)"/>
     </include>
 
+    <group ns="$(arg robot_id)">
+        <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+            <remap from="map" to="/map" />
+            <param name="controller_frequency" value="10.0" />
+            <rosparam file="$(find amr_fleet)/config/move_base/costmap_common_params.yaml" command="load" ns="global_costmap" />
+            <rosparam file="$(find amr_fleet)/config/move_base/costmap_common_params.yaml" command="load" ns="local_costmap" />
+            <rosparam file="$(find amr_fleet)/config/move_base/local_costmap_params.yaml" command="load" />
+            <rosparam file="$(find amr_fleet)/config/move_base/global_costmap_params.yaml" command="load" />
+            <rosparam file="$(find amr_fleet)/config/move_base/base_local_planner_params.yaml" command="load" />
+        </node>
+    </group>
+
 </launch>
