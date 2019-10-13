@@ -1,0 +1,4 @@
+<launch>
+    <include file="$(find amr_fleet)/launch/multimaster/multimaster_discovery.launch"/>
+    <include file="$(find amr_fleet)/launch/multimaster/multimaster_sync.launch"/>
+</launch>

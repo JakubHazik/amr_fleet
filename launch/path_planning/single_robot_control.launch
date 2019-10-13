@@ -1,0 +1,29 @@
+<launch>
+    <arg name="robot_id"                            default="$(optenv ROBOT_ID robot_0)"/>
+<!--    <arg name="launch_move_base"                    default="false"/>-->
+    <arg name="launch_rviz"                         default="false"      />
+
+    <!-- Map server -->
+<!--    <node pkg="map_server" type="map_server" name="map_server_world" args="$(find tuw_multi_robot_demo)/cfg/maps/$(arg room)/map.yaml">-->
+<!--        <remap from="static_map" to="world/static_map"/>-->
+<!--        <remap from="map" to="world/map"/>-->
+<!--        <param name="frame_id" value="world"/>-->
+<!--    </node>-->
+
+    <group ns="$(arg robot_id)" >
+        <node pkg="tuw_multi_robot_local_behavior_controller" type="local_behavior_node" name="local_behavior" output="screen" respawn="true" >
+            <remap from="local_goal" to="/$(arg robot_id)/move_base_simple/goal" />
+            <param name="robot_name" value="$(arg robot_id)" />
+            <param name="robot_width" value="0.76" />
+            <param name="frame_id" value="world" />
+            <param name="update_rate" value="1"/>
+        </node>
+    </group>
+
+    <!-- start rviz -->
+    <group if="$(arg launch_rviz)">
+        <include file="$(find amr_fleet)/launch/rviz.launch">
+        </include>
+    </group>
+
+</launch>

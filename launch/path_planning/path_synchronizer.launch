@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+    <node pkg="tuw_multi_robot_local_behavior_controller" type="tuw_multi_robot_local_behavior_controller_node" name="path_synchronizer" output="screen">
+        <rosparam command="load" file="$(find amr_fleet)/config/path_synchronizer.yaml" />
+    </node>
+</launch>
+
+	

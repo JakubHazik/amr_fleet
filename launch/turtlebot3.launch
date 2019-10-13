@@ -14,8 +14,6 @@
         <arg name="debug" value="false"/>
     </include>
 
-<!--    <include file="$(find amr_fleet)/launch/multimaster.launch"/>-->
-
     <group ns="$(arg ns)">
         <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
         <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">

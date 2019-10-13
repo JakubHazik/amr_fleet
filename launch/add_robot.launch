@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="robot_id" default="none"/>
+
+    <!-- spaw robot: robot_description + state publisher -->
+    <include file="$(find amr_fleet)/launch/simulation/spawn_simulation_robot.launch">
+        <arg name="robot_id" value="$(arg robot_id)"/>
+    </include>
+
+    <!-- run robot controller -->
+    <include file="$(find amr_fleet)/launch/path_planning/single_robot_control.launch">
+        <arg name="robot_id" value="$(arg robot_id)"/>
+    </include>
+
+    <!-- run localization -->
+    <include file="$(find amr_fleet)/launch/amcl.launch">
+        <arg name="robot_id" value="$(arg robot_id)"/>
+    </include>
+
+</launch>
