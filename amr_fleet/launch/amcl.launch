@@ -14,6 +14,8 @@
             <param name="tf_broadcast" value="true"/>
             <param name="use_map_topic"             value="$(arg use_map_topic)"/>
             <param name="tf_prefix"	value="$(arg robot_id)"/>
+            <remap from="map" to="/map"/>
+
             <!-- Publish scans from best pose at a max of 10 Hz -->
             <param name="odom_model_type"           value="diff"/>
             <param name="odom_alpha5"               value="0.1"/>
@@ -52,7 +54,6 @@
             <param name="initial_pose_y"            value="$(arg initial_pose_y)"/>
             <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
             <remap from="scan"                      to="$(arg scan_topic)"/>
-            <remap from="map" to="/map"/>
         </node>
     </group>
 </launch>

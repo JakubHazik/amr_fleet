@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="robot_id" default="none"/>
+
+    <group ns="$(arg robot_id)">
+        <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+            <remap from="map" to="/map" />
+            <param name="tf_prefix" value="$(arg robot_id)" />
+            <param name="controller_frequency" value="10.0" />
+            <rosparam file="$(find amr_fleet)/config/move_base/costmap_common_params.yaml" command="load" ns="global_costmap" />
+            <rosparam file="$(find amr_fleet)/config/move_base/costmap_common_params.yaml" command="load" ns="local_costmap" />
+            <rosparam file="$(find amr_fleet)/config/move_base/local_costmap_params.yaml" command="load" />
+            <rosparam file="$(find amr_fleet)/config/move_base/global_costmap_params.yaml" command="load" />
+            <rosparam file="$(find amr_fleet)/config/move_base/base_local_planner_params.yaml" command="load" />
+        </node>
+
+<!--        <param name="global_costmap/global_frame" value="$(arg global_frame_id)"/>-->
+<!--        <param name="global_costmap/robot_base_frame" value="$(arg base_frame_id)"/>-->
+<!--        <param name="local_costmap/global_frame" value="$(arg odom_frame_id)"/>-->
+<!--        <param name="local_costmap/robot_base_frame" value="$(arg base_frame_id)"/>-->
+<!--        <param name="DWAPlannerROS/global_frame_id" value="$(arg odom_frame_id)"/>-->
+
+<!--        <remap from="cmd_vel" to="navigation_velocity_smoother/raw_cmd_vel"/>-->
+<!--        <remap from="odom" to="$(arg odom_topic)"/>-->
+<!--        <remap from="scan" to="$(arg laser_topic)"/>-->
+
+        <group ns="move_base/global_costmap">
+            <param name="global_frame" value="/map" />
+            <param name="robot_base_frame" value="$(arg robot_id)/base_link" />
+<!--            <param name="obstacle_layer/frontHokuyo_laser_scan_sensor/sensor_frame" value="$(arg robot_id)/frontHokuyo"/>-->
+        </group>
+
+        <group ns="move_base/local_costmap">
+            <param name="global_frame" value="/map" />
+            <param name="robot_base_frame" value="$(arg robot_id)/base_link" />
+<!--            <param name="obstacle_layer/frontHokuyo_laser_scan_sensor/sensor_frame" value="$(arg robot_id)/frontHokuyo" />-->
+        </group>
+
+        <group ns="move_base/TebLocalPlannerROS">
+            <param name="map_frame" value="$/map" />
+        </group>
+    </group>
+</launch>

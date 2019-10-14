@@ -46,3 +46,5 @@ TrajectoryPlannerROS:
 
   #Eat up the plan as the robot moves along it
   prune_plan: true
+
+  meter_scoring: true
