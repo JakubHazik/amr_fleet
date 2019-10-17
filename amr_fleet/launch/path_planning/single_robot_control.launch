@@ -11,7 +11,7 @@
 <!--    </node>-->
 
     <group ns="$(arg robot_id)" >
-        <node pkg="tuw_multi_robot_local_behavior_controller" type="local_behavior_node" name="local_behavior" output="screen" respawn="true" >
+        <node pkg="tuw_multi_robot_local_behavior_controller" type="tuw_local_behavior_controller_node" name="local_behavior" output="screen" respawn="true" >
             <remap from="local_goal" to="/$(arg robot_id)/move_base_simple/goal" />
             <param name="robot_name" value="$(arg robot_id)" />
             <param name="robot_width" value="0.76" />
@@ -20,10 +20,43 @@
         </node>
     </group>
 
-    <!-- start rviz -->
-    <group if="$(arg launch_rviz)">
-        <include file="$(find amr_fleet)/launch/rviz.launch">
-        </include>
+    <!--&lt;!&ndash; start rviz &ndash;&gt;-->
+    <!--<group if="$(arg launch_rviz)">-->
+        <!--<include file="$(find amr_fleet)/launch/rviz.launch">-->
+        <!--</include>-->
+    <!--</group>-->
+
+
+
+    <!--My custom robot controller-->
+    <group ns="$(arg robot_id)" >
+        <node pkg="local_robot_controller" type="local_robot_controller_node" name="local_robot_controller"/>
+        <param name="waypoint_zone" value="0.3"/>
     </group>
+
+
+
+
+    <!-- TUW basic pose controller -->
+    <!--<group ns="$(arg robot_id)">-->
+        <!--&lt;!&ndash;<node pkg="tf2_ros" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 map $(arg robot_id)/odom" />&ndash;&gt;-->
+
+        <!--<node pkg="tuw_multi_robot_ctrl" type="tuw_velocity_controller" name="trajectory_controller" output="screen" >-->
+            <!--&lt;!&ndash;remap from="cmd_vel" to="cmd_vel_not_connected"/&ndash;&gt;-->
+        <!--</node>-->
+
+        <!--<node pkg="tuw_multi_robot_local_behavior_controller" type="tuw_local_behavior_controller_node" name="local_behavior" output="screen">-->
+            <!--<param name="robot_name" value="$(arg robot_id)" />-->
+            <!--<param name="robot_radius" value="0.3" />-->
+            <!--<remap from="robot_info" to="/robot_info" />-->
+            <!--<param name="frame_id" value="/map" />-->
+            <!--<param name="update_rate" value="1"/>-->
+        <!--</node>-->
+
+        <!--<node pkg="nodelet" type="nodelet" name="self_localization" args="standalone FakePoseEstimationNodelet"/>-->
+    <!--</group>-->
+
+
+
 
 </launch>
