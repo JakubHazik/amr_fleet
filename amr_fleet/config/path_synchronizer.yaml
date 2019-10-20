@@ -1,4 +1,4 @@
-robot_names:            ["r1"]
+robot_names:            ["r1", "r2"]
 robot_default_radius:   0.4
 path_topic:             "path_synced"
 odom_topic:             "odom"

@@ -5,9 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Pose1
-        - /Map2
-        - /Map3
         - /TF1/Frames1
       Splitter Ratio: 0.476694912
     Tree Height: 399
@@ -30,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Toolbars:
   toolButtonStyle: 2
 Visualization Manager:
@@ -64,14 +61,14 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: VoronoiSegment
-      Enabled: true
+      Enabled: false
       History Length: 1
       Name: VoronoiSegment
       Path Color: 50; 51; 204
       Path Scale: 1
       Topic: /segments
       Unreliable: false
-      Value: true
+      Value: false
     - Class: MultiRobotInfo
       Color Pose: 204; 51; 0
       Enabled: true
@@ -80,6 +77,7 @@ Visualization Manager:
       Name: MultiRobotInfo
       Robots:
         r1: true
+        r2: true
       Scale Pose: 0.400000006
       Topic: /robot_info
       Unreliable: false
@@ -102,65 +100,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        base_scan:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        camera_depth_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_depth_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        camera_rgb_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_rgb_optical_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        caster_back_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        caster_back_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        imu_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        wheel_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wheel_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: RobotModel
       Robot Description: r1/robot_description
       TF Prefix: r1
@@ -178,50 +117,34 @@ Visualization Manager:
       Use Timestamp: false
       Value: true
     - Alpha: 1
-      Arrow Length: 0.300000012
-      Axes Length: 0.300000012
-      Axes Radius: 0.00999999978
-      Class: rviz/PoseArray
-      Color: 255; 25; 0
-      Enabled: false
-      Head Length: 0.0700000003
-      Head Radius: 0.0299999993
-      Name: PoseArray
-      Shaft Length: 0.230000004
-      Shaft Radius: 0.00999999978
-      Shape: Arrow (Flat)
-      Topic: /r1/particlecloud
-      Unreliable: false
-      Value: false
-    - Alpha: 1
-      Autocompute Intensity Bounds: true
-      Autocompute Value Bounds:
-        Max Value: 10
-        Min Value: -10
-        Value: true
-      Axis: Z
-      Channel Name: intensity
-      Class: rviz/LaserScan
-      Color: 255; 255; 255
-      Color Transformer: Intensity
-      Decay Time: 0
+      Axes Length: 1
+      Axes Radius: 0.100000001
+      Class: rviz/Pose
+      Color: 170; 0; 255
       Enabled: true
-      Invert Rainbow: false
-      Max Color: 255; 255; 255
-      Max Intensity: 999999
-      Min Color: 0; 0; 0
-      Min Intensity: 4.20389539e-44
-      Name: LaserScan
-      Position Transformer: XYZ
-      Queue Size: 10
-      Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.00999999978
-      Style: Flat Squares
-      Topic: /r1/scan
+      Head Length: 0.300000012
+      Head Radius: 0.100000001
+      Name: Current goal r1
+      Shaft Length: 1
+      Shaft Radius: 0.0500000007
+      Shape: Arrow
+      Topic: /r1/move_base/current_goal
       Unreliable: false
-      Use Fixed Frame: true
-      Use rainbow: true
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.100000001
+      Class: rviz/Pose
+      Color: 255; 0; 255
+      Enabled: true
+      Head Length: 0.300000012
+      Head Radius: 0.100000001
+      Name: Current goal r2
+      Shaft Length: 1
+      Shaft Radius: 0.0500000007
+      Shape: Arrow
+      Topic: /r2/move_base/current_goal
+      Unreliable: false
       Value: true
     - Alpha: 1
       Buffer Length: 1
@@ -270,28 +193,13 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Alpha: 1
-      Axes Length: 1
-      Axes Radius: 0.100000001
-      Class: rviz/Pose
-      Color: 170; 0; 255
-      Enabled: true
-      Head Length: 0.300000012
-      Head Radius: 0.100000001
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.0500000007
-      Shape: Arrow
-      Topic: /r1/move_base/current_goal
-      Unreliable: false
-      Value: true
-    - Alpha: 1
       Class: rviz/Polygon
       Color: 25; 255; 0
-      Enabled: true
+      Enabled: false
       Name: Polygon
       Topic: /r1/move_base/local_costmap/footprint
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 0.699999988
       Class: rviz/Map
       Color Scheme: map
@@ -306,78 +214,26 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: /r1/move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        map:
-          Value: false
-        r1/base_footprint:
-          Value: false
-        r1/base_link:
-          Value: false
-        r1/base_scan:
-          Value: true
-        r1/camera_depth_frame:
-          Value: false
-        r1/camera_depth_optical_frame:
-          Value: false
-        r1/camera_link:
-          Value: false
-        r1/camera_rgb_frame:
-          Value: false
-        r1/camera_rgb_optical_frame:
-          Value: false
-        r1/caster_back_left_link:
-          Value: false
-        r1/caster_back_right_link:
-          Value: false
-        r1/imu_link:
-          Value: false
-        r1/odom:
-          Value: false
-        r1/wheel_left_link:
-          Value: false
-        r1/wheel_right_link:
-          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          r1/odom:
-            r1/base_footprint:
-              r1/base_link:
-                r1/base_scan:
-                  {}
-                r1/camera_link:
-                  r1/camera_depth_frame:
-                    r1/camera_depth_optical_frame:
-                      {}
-                  r1/camera_rgb_frame:
-                    r1/camera_rgb_optical_frame:
-                      {}
-                r1/caster_back_left_link:
-                  {}
-                r1/caster_back_right_link:
-                  {}
-                r1/imu_link:
-                  {}
-                r1/wheel_left_link:
-                  {}
-                r1/wheel_right_link:
-                  {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -411,25 +267,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.18101883
+      Distance: 7.24263287
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.12341097
-        Y: 0.406268537
-        Z: -0.117727414
+        X: -0.584367812
+        Y: 0.0132547356
+        Z: -1.18948936
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.169797242
+      Pitch: 1.27979684
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.27670097
+      Yaw: 3.16169739
     Saved: ~
 Window Geometry:
   Displays:
@@ -447,5 +303,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1248
-  X: 1382
-  Y: 272
+  X: 1312
+  Y: 732

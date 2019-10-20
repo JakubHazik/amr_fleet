@@ -16,6 +16,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <std_srvs/Trigger.h>
 
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
@@ -31,6 +32,7 @@ public:
 
 private:
     ros::NodeHandle nh;
+    ros::ServiceServer resetGoalsSrvServer;
     ros::Subscriber pathSubscriber;
     ros::Subscriber amclPoseSubscriber;
     MoveBaseClient mbClient;
@@ -43,6 +45,7 @@ private:
 
     void subPathCb(const nav_msgs::Path::ConstPtr& msg);
     void subAmclPoseCb(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr &msg);
+    bool resetGoalsServiceCb(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
     void sendNewGoal();
     double calculatePosesDistance(geometry_msgs::Pose p1, geometry_msgs::Pose p2);
 

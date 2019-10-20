@@ -10,7 +10,7 @@ project(local_robot_controller)
 find_package(catkin REQUIRED COMPONENTS
         roscpp
         move_base
-
+        std_srvs
         geometry_msgs
         nav_msgs
         roscpp
@@ -114,7 +114,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES local_robot_controller
-  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp tuw_multi_robot_msgs
+  CATKIN_DEPENDS std_srvs geometry_msgs nav_msgs roscpp tuw_multi_robot_msgs
 #  DEPENDS system_lib
 )
 

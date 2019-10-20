@@ -4,6 +4,7 @@
 
 #include <local_robot_controller/local_robot_controller.h>
 #include <nav_msgs/Path.h>
+#include <std_srvs/Trigger.h>
 
 // todo service for reset path/points queue
 //todo improve statuses checking
@@ -13,7 +14,8 @@ LocalRobotController::LocalRobotController(ros::NodeHandle &nh): nh(nh), mbClien
 
     pathSubscriber = nh.subscribe("path_synced", 100, &LocalRobotController::subPathCb, this);
     amclPoseSubscriber = nh.subscribe("amcl_pose", 2, &LocalRobotController::subAmclPoseCb, this);
-
+    resetGoalsSrvServer = nh.advertiseService("reset_goals", &LocalRobotController::resetGoalsServiceCb, this);
+    
     nh.param<double>("waypoint_zone", waypointZone, 0.20);
 
 
@@ -96,5 +98,11 @@ void LocalRobotController::subPathCb(const nav_msgs::Path::ConstPtr& msg) {
 
 double LocalRobotController::calculatePosesDistance(geometry_msgs::Pose p1, geometry_msgs::Pose p2) {
     return sqrt(pow(p1.position.x - p2.position.x, 2) +  pow(p1.position.y - p2.position.y, 2));
+}
+
+bool LocalRobotController::resetGoalsServiceCb(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res) {
+    requiredPoses.clear();
+    mbClient.cancelAllGoals();
+    return true;
 }
 
