@@ -7,11 +7,13 @@
 #include "amr_planner/Graph.h"
 
 #include <fstream>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_utility.hpp>
 
 using namespace boost;
 
 
-void Graph::add_edge(const Node& nFrom, const Node& nTo) {
+void Graph::addEdge(const Node& nFrom, const Node& nTo) {
     vertex_t v1, v2;
     if (!findVertex(nFrom, v1)) {
         v1 = boost::add_vertex(nFrom, graph);
@@ -24,18 +26,18 @@ void Graph::add_edge(const Node& nFrom, const Node& nTo) {
     // add edge if not exist
     if (!boost::edge(v1, v2, graph).second) {
         Edge edge {Node::distance(nFrom, nTo)}; // compute distance between nodes
-        boost::add_edge(v1, v2, edge, graph);
+        boost::add_edge(v1, v2, Node::distance(nFrom, nTo), graph);
     }
 }
 
-void Graph::write_to_file(const std::string& filepath) {
+void Graph::writeToFile(const std::string& filepath) {
     std::ofstream dotfile;
     dotfile.open(filepath);
 
     boost::dynamic_properties dp;
     dp.property("node_id", get(&Node::uuid, graph));
     dp.property("label", get(&Node::uuid, graph));
-//    dp.property("label", get(&Edge::distance, graph));
+    dp.property("label", get(boost::edge_weight_t(), graph));
 
     write_graphviz_dp(dotfile, graph, dp);
     dotfile.close();
@@ -53,6 +55,48 @@ bool Graph::findVertex(const Node& node, vertex_t& foundNodeVertex){
     }
     return false;
 }
+
+
+graph_t Graph::getBoostGraph() {
+    return graph;
+}
+
+
+
+
+std::vector<Neighbor> Graph::getNeighbors(const Node& currentNode) {
+
+    vertex_t currentVertex;
+    if (findVertex(currentNode, currentVertex)) {
+
+        std::vector<Neighbor> result;
+        auto neighbours = adjacent_vertices(currentVertex, graph);
+
+
+        for (auto n : make_iterator_range(neighbours)) {
+
+            std::pair<edge_t, bool> ed = boost::edge(currentVertex, n, graph);
+            double weight = get(boost::edge_weight_t(), graph, ed.first);
+
+            Neighbor tmp {graph[n], weight};
+            result.push_back(tmp);
+        }
+
+        return result;
+    } else {
+        return std::vector<Neighbor> {};
+    }
+}
+
+
+void Graph::clear() {
+    graph_t newGraph;
+    graph = newGraph;
+}
+
+//void Graph::printGraph() {
+//    boost::print_graph(graph, boost::get(boost::edge_weight_t(), graph));
+//}
 
 //bool Graph::findEdge(const Node& n1, const Node& n2, edge_t& foundNodesEdge){
 //    edgeIt_t ei, ei_end;

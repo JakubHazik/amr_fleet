@@ -59,6 +59,8 @@
 
   <build_depend>tuw_multi_robot_msgs</build_depend>
   <exec_depend>tuw_multi_robot_msgs</exec_depend>
+  <build_depend>std_srvs</build_depend>
+  <exec_depend>std_srvs</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

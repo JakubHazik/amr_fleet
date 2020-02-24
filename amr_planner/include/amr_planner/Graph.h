@@ -61,13 +61,34 @@
 using namespace boost;
 
 
+typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS> GraphTraits;
+
+typedef GraphTraits::vertex_descriptor vertex_t;
+
 struct Node {
     int uuid;
     double posX;
     double posY;
 
+//    vertex_t predecessor;
+//    boost::default_color_type color;
+
     static double distance(const Node& n1, const Node& n2) {
         return std::sqrt(sqr(n1.posX - n2.posX) + sqr(n1.posY - n2.posY));
+    }
+
+    bool operator==(const Node& n) const {
+        return this->uuid == n.uuid;
+    }
+
+//    std::ostream & operator << (std::ostream &out) {
+//        out << this->uuid;
+//        return out;
+//    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Node& n) {
+//        return os << "(" << s.x << "," << s.y << ")";
+        return os << n.uuid;
     }
 };
 
@@ -75,24 +96,20 @@ struct Edge {
     double distance;
 };
 
+struct Neighbor {
+    Node node;
+    double weight;
+};
 
-// Edge weight.
+//typedef boost::property<boost::edge_weight_t, int> EdgeWeightProperty;
+
 typedef boost::property<boost::edge_weight_t, double> EdgeWeightProperty;
-
-// specify some types
-//typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
-typedef adjacency_list<listS, vecS, directedS, Node, Edge> graph_t;
-//typedef property_map<mygraph_t, edge_weight_t>::type WeightMap;
-//typedef mygraph_t::vertex_descriptor vertex;
-//typedef mygraph_t::edge_descriptor edge_descriptor;
-
-typedef boost::graph_traits<graph_t>::vertex_descriptor vertex_t;
+typedef adjacency_list<listS, vecS, directedS, Node, EdgeWeightProperty> graph_t;
 using vertexIt_t = boost::graph_traits<graph_t>::vertex_iterator;
-typedef boost::graph_traits<graph_t>::edge_descriptor edge_t;
+//typedef boost::graph_traits<graph_t>::edge_descriptor edge_t;
 using edgeIt_t = boost::graph_traits<graph_t>::edge_iterator;
+typedef graph_t::edge_descriptor edge_t;
 
-//typedef boost::graph_trails<mygraph_t>::vertex_descriptor vertex_t;
-//typedef std::pair<int, int> edge;
 
 template <class Name>
 class label_writer {
@@ -106,46 +123,33 @@ private:
     Name name;
 };
 
-//template <class Name, class LocMap>
-//class city_writer {
-//public:
-//    city_writer(Name n, LocMap l, float _minx, float _maxx,
-//                float _miny, float _maxy,
-//                unsigned int _ptx, unsigned int _pty)
-//            : name(n), loc(l), minx(_minx), maxx(_maxx), miny(_miny),
-//              maxy(_maxy), ptx(_ptx), pty(_pty) {}
-//    template <class Vertex>
-//    void operator()(ostream& out, const Vertex& v) const {
-//        float px = 1 - (loc[v].x - minx) / (maxx - minx);
-//        float py = (loc[v].y - miny) / (maxy - miny);
-//        out << "[label=\"" << name[v] << "\", pos=\""
-//            << static_cast<unsigned int>(ptx * px) << ","
-//            << static_cast<unsigned int>(pty * py)
-//            << "\", fontsize=\"11\"]";
-//    }
-//private:
-//    Name name;
-//    LocMap loc;
-//    float minx, maxx, miny, maxy;
-//    unsigned int ptx, pty;
-//};
+
 
 class Graph {
 public:
     Graph() = default;
 
-    void add_edge(const Node& nFrom, const Node& nTo);
+    void addEdge(const Node& nFrom, const Node& nTo);
 //    void add_node(const Node& n);
-    void write_to_file(const std::string& filepath);
+    void writeToFile(const std::string& filepath);
+
+    graph_t getBoostGraph();
+
+    bool findVertex(const Node& node, vertex_t& foundNodeIt);
+
+    std::vector<Neighbor> getNeighbors(const Node& currentNode);
 
 
+    void printGraph();
+
+    void clear();
 
 private:
 
     graph_t graph;
 
-    bool findVertex(const Node& node, vertex_t& foundNodeIt);
-    bool findEdge(const Node& n1, const Node& n2, edge_t& foundNodesEdge);
+
+//    bool findEdge(const Node& n1, const Node& n2, edge_t& foundNodesEdge);
 };
 
 

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
         roscpp
         rospy
         tuw_multi_robot_msgs
+        std_srvs
         )
 
 #find_package(Boost COMPONENTS regex date_time system filesystem thread graph program_options)
@@ -141,6 +142,8 @@ add_executable(amr_planner
         src/PlannerCore.cpp
         src/RosWrapper.cpp
         src/Graph.cpp
+        src/GraphSearchBoost.cpp
+        src/GraphSearchMultiRobot.cpp
         )
 
 ## Rename C++ executable without prefix
