@@ -21,48 +21,34 @@ void RosWrapper::newSegmentsCb(const tuw_multi_robot_msgs::Graph::ConstPtr& segm
 
     graph.clear();
 
-    for (const auto &node: segments->vertices) {
-
-        Node nFrom;
-        nFrom.uuid = node.id;
-        nFrom.posX = node.path[0].x;
-        nFrom.posY = node.path[0].y;
-
+    for (const tuw_multi_robot_msgs::Vertex &node: segments->vertices) {
+        Node nFrom(node.id, node.path[0].x, node.path[0].y);
         for (const auto &nextNodeIds: node.successors) {
             auto nextNode = segments->vertices[nextNodeIds];
-            Node nTo;
-            nTo.uuid = nextNode.id;
-            nTo.posX = nextNode.path[0].x;
-            nTo.posY = nextNode.path[0].y;
-
+            Node nTo(nextNode.id, nextNode.path[0].x, nextNode.path[0].y);
             graph.addEdge(nFrom, nTo);
         }
     }
 
-//    Node n;
-//    n.uuid = 5;
-//    graph.getNeighbors(n);
-
     graph.writeToFile("/home/jakub/amr_ws/ros_result.dot");
-
     ROS_INFO("Graph has been generated successfully");
 }
 
-std::vector<Node> RosWrapper::getPlan(const Node& start, const Node& end) {
+
+bool RosWrapper::planPathSrvCallback(amr_planner::PlanPathRequest& req, amr_planner::PlanPathResponse& res) {
 
     graphSearch = std::make_shared<GraphSearchMultiRobot>(graph, GraphSearchMultiRobot::SearchMethod::A_STAR);
-    auto result = graphSearch->getPath(start, end);
-    return std::vector<Node>();
-}
+    auto startNode = graphSearch->getNearestNode(req.startPose.position.x, req.startPose.position.y);
+    auto endNode = graphSearch->getNearestNode(req.endPose.position.x, req.endPose.position.y);
+    auto result = graphSearch->getPath(startNode, endNode);
 
-bool RosWrapper::planPathSrvCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res) {
-    Node s;
-    Node e;
-    s.uuid = 28;
-    e.uuid = 27;
+    std::cout<<"Result path:\n";
+    for (auto n: result) {
+        std::cout<<n.uuid<<" -> ";
+    }
+    std::cout<<std::endl;
 
-    auto plan = getPlan(s, e);
+    res.pathWaypoints = nodes2poses(result);
 
     return true;
-
 }

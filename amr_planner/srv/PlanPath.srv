@@ -1,0 +1,5 @@
+geometry_msgs/Pose startPose
+geometry_msgs/Pose endPose
+---
+geometry_msgs/Pose[] pathWaypoints
+

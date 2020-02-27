@@ -18,8 +18,9 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>    // for sqrt
+#include <amr_planner/DataTypesAndConversions.h>
 
-#define sqr(x) ((x)*(x))
+
 
 // specify data
 //enum nodes {
@@ -65,41 +66,6 @@ typedef boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirected
 
 typedef GraphTraits::vertex_descriptor vertex_t;
 
-struct Node {
-    int uuid;
-    double posX;
-    double posY;
-
-//    vertex_t predecessor;
-//    boost::default_color_type color;
-
-    static double distance(const Node& n1, const Node& n2) {
-        return std::sqrt(sqr(n1.posX - n2.posX) + sqr(n1.posY - n2.posY));
-    }
-
-    bool operator==(const Node& n) const {
-        return this->uuid == n.uuid;
-    }
-
-//    std::ostream & operator << (std::ostream &out) {
-//        out << this->uuid;
-//        return out;
-//    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Node& n) {
-//        return os << "(" << s.x << "," << s.y << ")";
-        return os << n.uuid;
-    }
-};
-
-struct Edge {
-    double distance;
-};
-
-struct Neighbor {
-    Node node;
-    double weight;
-};
 
 //typedef boost::property<boost::edge_weight_t, int> EdgeWeightProperty;
 
@@ -139,6 +105,7 @@ public:
 
     std::vector<Neighbor> getNeighbors(const Node& currentNode);
 
+    Node getNearestNode(double x, double y);
 
     void printGraph();
 

@@ -4,11 +4,10 @@
 
 #include <amr_planner/Graph.h>
 
-#include "amr_planner/Graph.h"
-
 #include <fstream>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_utility.hpp>
+#include <limits>
 
 using namespace boost;
 
@@ -92,6 +91,22 @@ std::vector<Neighbor> Graph::getNeighbors(const Node& currentNode) {
 void Graph::clear() {
     graph_t newGraph;
     graph = newGraph;
+}
+
+Node Graph::getNearestNode(double x, double y) {
+    vertexIt_t vi, vi_end;
+    std::pair<double, Node> minDistanceNode{std::numeric_limits<double>::max(), Node{}};
+
+    for (boost::tie(vi, vi_end) = vertices(graph); vi != vi_end; ++vi) {
+        double distance = Node::distance(graph[*vi], x, y);
+
+        if (distance < minDistanceNode.first) {
+            minDistanceNode.first = distance;
+            minDistanceNode.second = graph[*vi];
+        }
+    }
+
+    return minDistanceNode.second;
 }
 
 //void Graph::printGraph() {

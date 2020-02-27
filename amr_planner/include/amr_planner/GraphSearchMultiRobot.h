@@ -137,6 +137,8 @@ public:
 
     std::vector<Node> getPath(const Node& nStart, const Node& nEnd) override;
 
+    Node getNearestNode(double x, double y);
+
 private:
     SearchMethod searchMethod;
 

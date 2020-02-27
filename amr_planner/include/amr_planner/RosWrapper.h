@@ -10,6 +10,8 @@
 #include <amr_planner/GraphSearchInterface.h>
 #include <amr_planner/GraphSearchMultiRobot.h>
 #include <std_srvs/Trigger.h>
+#include <amr_planner/PlanPath.h>
+#include <amr_planner/DataTypesAndConversions.h>
 
 #include <amr_planner/Graph.h>
 #include <memory>
@@ -20,7 +22,7 @@ public:
 
     explicit RosWrapper(ros::NodeHandle& nh);
 
-    std::vector<Node> getPlan(const Node& start, const Node& end);
+//    std::vector<Node> getPlan(const Node& start, const Node& end);
 
 private:
     ros::Subscriber segSubscriber;
@@ -31,7 +33,7 @@ private:
 
     void newSegmentsCb(const tuw_multi_robot_msgs::Graph::ConstPtr &segments);
 
-    bool planPathSrvCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
+    bool planPathSrvCallback(amr_planner::PlanPathRequest& req, amr_planner::PlanPathResponse& res);
 
 };
 

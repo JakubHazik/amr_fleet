@@ -34,6 +34,8 @@ public:
     enum class SearchMethod {
         A_STAR,         // https://www.boost.org/doc/libs/1_58_0/libs/graph/doc/astar_search.html
         DIJGSTRA,       // https://www.boost.org/doc/libs/1_58_0/libs/graph/doc/dijkstra_shortest_paths.html
+                        // example https://www.boost.org/doc/libs/1_58_0/libs/graph/example/dijkstra-example.cpp
+        //todo example  https://paste.ubuntu.com/26136129/
     };
 
     GraphSearchBoost(const Graph& graph, GraphSearchBoost::SearchMethod searchMethod);
