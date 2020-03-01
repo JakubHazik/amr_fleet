@@ -1,5 +1,19 @@
 <launch>
+    <!--<node pkg="map_server" type="map_server" name="map_server" args="$(find tuw_multi_robot_demo)/cfg/maps/$(arg room)/map.yaml"/>-->
+
+
+    <include file="$(find amr_fleet)/launch/path_planning/map_server.launch">
+        <!--<arg name="robot_name" value="$(arg robot_name_prefix)$(arg robot_id)" />-->
+    </include>
+
     <node pkg="amr_graph_generator" type="amr_graph_generator" name="graph_generator" output="screen">
         <rosparam command="load" file="$(find amr_graph_generator)/config/config.yaml" />
     </node>
+
+
+    <!--<node pkg="rviz" type="rviz" name="rviz" args="-d $(find tuw_multi_robot_demo)/cfg/rviz/$(arg cfg).rviz" output="screen"/>-->
+    <node pkg="rviz" type="rviz" name="rviz" output="screen"/>
+    <!--<node launch-prefix="xterm -e gdb &#45;&#45;args" pkg="rviz" type="rviz" name="rviz" output="screen"/>-->
+
+
 </launch>

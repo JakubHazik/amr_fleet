@@ -30,6 +30,10 @@ struct Node {
     std::vector<unsigned int> successors;
 };
 
+/**
+ * https://qcad.org/en/90-dxflib
+ * https://qcad.org/doc/dxflib/2.5/classref/class_d_l___creation_interface.html#a34
+ */
 class PathDxfParser : public DL_CreationAdapter {
 public:
 
