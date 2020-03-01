@@ -10,6 +10,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
         roscpp
         amr_msgs
+        rviz_visual_tools
         )
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV 3 REQUIRED)
@@ -111,7 +112,7 @@ endif ()
 catkin_package(
         #  INCLUDE_DIRS include
         #  LIBRARIES amr_graph_generator
-          CATKIN_DEPENDS amr_msgs
+          CATKIN_DEPENDS amr_msgs rviz_visual_tools
         DEPENDS dxflib
 )
 
@@ -142,6 +143,7 @@ include_directories(
 add_executable(amr_graph_generator
         src/GraphGeneratorNode.cpp
         src/PathDxfParser.cpp
+        src/GraphVisualizer.cpp
         )
 
 ## Rename C++ executable without prefix

@@ -11,24 +11,7 @@
 #include <dxflib/dl_entities.h>
 #include <vector>
 #include <eigen3/Eigen/StdVector>
-
-struct Line {
-    Eigen::Vector2d start;
-    Eigen::Vector2d end;
-    Line(Eigen::Vector2d _start, Eigen::Vector2d _end) : start(std::move(_start)), end(std::move(_end)) {}
-    Line(double xStart, double yStart, double xEnd, double yEnd) {
-        start << xStart, yStart;
-        end << xEnd, yEnd;
-    }
-    Line() {}
-};
-
-struct Node {
-    unsigned int uuid;
-    double x;
-    double y;
-    std::vector<unsigned int> successors;
-};
+#include <amr_graph_generator/DataTypes.h>
 
 /**
  * https://qcad.org/en/90-dxflib

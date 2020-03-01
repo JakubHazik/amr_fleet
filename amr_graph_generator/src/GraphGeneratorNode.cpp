@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <amr_graph_generator/PathDxfParser.h>
 #include <amr_msgs/Graph.h>
+#include <amr_graph_generator/GraphVisualizer.h>
 
 
 int main(int argc, char **argv) {
@@ -39,8 +40,16 @@ int main(int argc, char **argv) {
     }
 
     graphPublisher.publish(graphMsg);
+    ROS_INFO("Graph has been generated and published.");
 
-    ros::spin();
+
+    GraphVisualizer visualizer(graph);
+
+    ros::Rate r(1);
+    while (ros::ok()) {
+        visualizer.publish();
+        r.sleep();
+    }
 
     return 0;
 }

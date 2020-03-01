@@ -213,7 +213,6 @@ bool PathDxfParser::nodesPoseIsEqual(const Node& n1, const Node& n2) {
 
 std::vector<Node> PathDxfParser::generateGraph() {
 
-
     // unify first/end Nodes ids
     for (auto currentSegmentIt = sampledPathSegements.begin(); currentSegmentIt < sampledPathSegements.end(); currentSegmentIt++) {
         for (auto segmentInsideIt = currentSegmentIt + 1; segmentInsideIt < sampledPathSegements.end(); segmentInsideIt++) {
