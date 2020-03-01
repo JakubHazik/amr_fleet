@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="amr_graph_generator" type="amr_graph_generator" name="graph_generator" output="screen">
+        <rosparam command="load" file="$(find amr_graph_generator)/config/config.yaml" />
+    </node>
+</launch>
