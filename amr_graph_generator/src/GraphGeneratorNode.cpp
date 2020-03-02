@@ -10,20 +10,22 @@
 
 int main(int argc, char **argv) {
 
-    ros::init(argc, argv, "amr_graph_generator"); /// initializes the ros node with default name
+    ros::init(argc, argv, "graph_generator"); /// initializes the ros node with default name
     ros::NodeHandle n("~");
 
-    double edgeLenght;
+    double maxEdgeLength;
     std::string dxfFilepath;
+    int graphVisualizationRate;
 
-    n.getParam("edgeLenght", edgeLenght);
+    n.getParam("maxEdgeLength", maxEdgeLength);
     n.getParam("dxfFilepath", dxfFilepath);
+    n.getParam("graphVisualizationRate", graphVisualizationRate);
 
     ROS_INFO_STREAM("Dxf input file: " + dxfFilepath);
 
     ros::Publisher graphPublisher = n.advertise<amr_msgs::Graph>("graph", 1, true);
 
-    PathDxfParser pathParser(dxfFilepath, edgeLenght);
+    PathDxfParser pathParser(dxfFilepath, maxEdgeLength);
     auto graph = pathParser.generateGraph();
 
     amr_msgs::Graph graphMsg;
@@ -42,10 +44,8 @@ int main(int argc, char **argv) {
     graphPublisher.publish(graphMsg);
     ROS_INFO("Graph has been generated and published.");
 
-
     GraphVisualizer visualizer(graph);
-
-    ros::Rate r(1);
+    ros::Rate r(1.0/graphVisualizationRate);
     while (ros::ok()) {
         visualizer.publish();
         r.sleep();

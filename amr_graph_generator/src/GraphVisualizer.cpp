@@ -5,7 +5,7 @@
 #include <amr_graph_generator/GraphVisualizer.h>
 
 
-GraphVisualizer::GraphVisualizer(std::vector<Node> graph) {
+GraphVisualizer::GraphVisualizer(const std::vector<Node>& graph) {
 
     for (const auto& node: graph) {
         graphNodes[node.uuid] = node;

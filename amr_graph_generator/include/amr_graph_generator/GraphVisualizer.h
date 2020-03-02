@@ -16,7 +16,7 @@ namespace rvt = rviz_visual_tools;
 class GraphVisualizer {
 public:
 
-    GraphVisualizer(std::vector<Node> graph);
+    GraphVisualizer(const std::vector<Node>& graph);
 
     void publish();
 

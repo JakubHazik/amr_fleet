@@ -12,6 +12,22 @@
 #include <vector>
 #include <eigen3/Eigen/StdVector>
 #include <amr_graph_generator/DataTypes.h>
+#include <boost/asio/detail/shared_ptr.hpp>
+#include <memory>
+
+constexpr double NODES_INTERSECTION_TOLERANCE = 0.0002;
+
+template<typename T>
+constexpr T sqr(T x) {
+    return ((x)*(x));
+}
+
+struct Block {
+    std::vector<DL_LineData> pathLines;
+    std::vector<DL_LineData> arrowLines;
+    std::vector<DL_ArcData> arcs;
+};
+
 
 /**
  * https://qcad.org/en/90-dxflib
@@ -31,6 +47,7 @@ private:
     void addArc(const DL_ArcData& arc) override;
     void addImage(const DL_ImageData& image) override;
     void addBlock(const DL_BlockData& block) override;
+    void addInsert(const DL_InsertData &insert) override;
     void endBlock() override;
 
     /**
@@ -43,24 +60,21 @@ private:
     std::vector<Line> splitCircle(const DL_CircleData &_circle, float _segLength);
     std::vector<Line> splitArc(const DL_ArcData&_arc, float _segLength);
 
+    std::vector<Node> convertBlockToSegments(const Block& block, const DL_InsertData& insert);
+
     double lineLength(const DL_LineData& line);
 
     int getLargestLine(std::vector<DL_LineData>& lines);
 
     bool nodesPoseIsEqual(const Node& n1, const Node& n2);
 
-
     unsigned int addNodeCounter = 0;
-    bool readThisBlock = false;
-    double edgeLength;
-    std::string blockName;
-    std::vector<DL_LineData> blockArrowLines;
-    std::vector<DL_LineData> blockLines;
-    std::vector<DL_ArcData> blockArcs;
-    std::vector<DL_ImageData> images;
-    std::vector<Line> pathSegments;
+    double maxEdgeLength;
 
-    std::vector<std::vector<Node>> sampledPathSegements;
+    std::string currentBlockName;
+    std::map<std::string, Block> blocks;
+    std::vector<DL_ImageData> images;
+    std::vector<std::vector<Node>> sampledPathNodes;
 };
 
 
