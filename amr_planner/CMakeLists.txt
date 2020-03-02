@@ -10,7 +10,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
         roscpp
         rospy
-        tuw_multi_robot_msgs
+        amr_msgs
         std_srvs
         message_generation
         std_msgs
@@ -111,7 +111,7 @@ generate_messages(
 catkin_package(
         #          INCLUDE_DIRS include
         #  LIBRARIES amr_planner
-        CATKIN_DEPENDS tuw_multi_robot_msgs message_runtime
+        CATKIN_DEPENDS amr_msgs message_runtime
         #  DEPENDS system_lib
 )
 

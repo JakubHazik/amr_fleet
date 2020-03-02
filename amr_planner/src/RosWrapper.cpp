@@ -12,20 +12,24 @@
 
 
 RosWrapper::RosWrapper(ros::NodeHandle& nh) {
-    segSubscriber = nh.subscribe("segments", 5, &RosWrapper::newSegmentsCb, this);
+    // todo configure
+    segSubscriber = nh.subscribe("/graph_generator/graph", 5, &RosWrapper::newGraphCb, this);
     planPathSrv = nh.advertiseService("plan_path", &RosWrapper::planPathSrvCallback, this);
 }
 
-void RosWrapper::newSegmentsCb(const tuw_multi_robot_msgs::Graph::ConstPtr& segments) {
+void RosWrapper::newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg) {
     ROS_INFO("New graph segments received");
 
     graph.clear();
 
-    for (const tuw_multi_robot_msgs::Vertex &node: segments->vertices) {
-        Node nFrom(node.id, node.path[0].x, node.path[0].y);
-        for (const auto &nextNodeIds: node.successors) {
-            auto nextNode = segments->vertices[nextNodeIds];
-            Node nTo(nextNode.id, nextNode.path[0].x, nextNode.path[0].y);
+    for (const amr_msgs::Node &node: graphMsg->nodes) {
+        Node nFrom(node.uuid, node.position.x, node.position.y);
+        for (const auto &successorNode: node.successors) {
+            auto nodesIt = std::find_if(graphMsg->nodes.begin(), graphMsg->nodes.end(),
+                    [&successorNode](const amr_msgs::Node& obj) {return obj.uuid == successorNode;});
+            auto index = std::distance(graphMsg->nodes.begin(), nodesIt);
+            auto nextNode = graphMsg->nodes[index];
+            Node nTo(nextNode.uuid, nextNode.position.x, nextNode.position.y);
             graph.addEdge(nFrom, nTo);
         }
     }

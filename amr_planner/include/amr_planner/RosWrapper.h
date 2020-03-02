@@ -6,7 +6,7 @@
 #define PROJECT_ROSWRAPPER_H
 
 #include <ros/ros.h>
-#include <tuw_multi_robot_msgs/Graph.h>
+#include <amr_msgs/Graph.h>
 #include <amr_planner/GraphSearchInterface.h>
 #include <amr_planner/GraphSearchMultiRobot.h>
 #include <std_srvs/Trigger.h>
@@ -31,7 +31,7 @@ private:
     Graph graph;
     std::shared_ptr<GraphSearchMultiRobot> graphSearch;
 
-    void newSegmentsCb(const tuw_multi_robot_msgs::Graph::ConstPtr &segments);
+    void newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg);
 
     bool planPathSrvCallback(amr_planner::PlanPathRequest& req, amr_planner::PlanPathResponse& res);
 
