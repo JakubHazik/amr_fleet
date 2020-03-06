@@ -31,7 +31,7 @@ void PathDxfParser::addLine(const DL_LineData& line) {
 
 void PathDxfParser::addArc(const DL_ArcData& arc) {
     if (!currentBlockName.empty()) {
-        blocks.at(currentBlockName).arcs.push_back(arc);
+        blocks.at(currentBlockName).pathArcs.push_back(arc);
     }
 }
 
@@ -60,46 +60,63 @@ void PathDxfParser::addInsert(const DL_InsertData &insert) {
 
 std::vector<Node> PathDxfParser::convertBlockToSegments(const Block& block, const DL_InsertData& insert) {
 
-    if (!block.arcs.empty()) {
+    // block have to contain just one path line
+    if (block.pathArcs.size() != 1 && block.pathLines.size() != 1) {
+        throw std::runtime_error("Block '" + insert.name + "' contain wrong number of path lines, "
+              + "number of lines=" + std::to_string(block.pathLines.size())
+              + ", number of arcs=" + std::to_string(block.pathArcs.size()) + ". Required is just 1 path line");
+    }
+
+    // block have to contain 1 and more arrow lines
+    if (block.arrowLines.empty()) {
+        throw std::runtime_error("Block '" + insert.name + "' contain no arrow lines, number of arrow lines: "
+                                 + std::to_string(block.arrowLines.size()) + ". Required is 1 and more");
+    }
+
+    if (!block.pathArcs.empty()) {
         // path is defined by arc
 
-    } else {
+        DL_ArcData pathArc = block.pathArcs.back();
+        auto direction = detectPathDirection(
+                {pathArc.cx + pathArc.radius * cos(DEG2RAD(pathArc.angle1)), pathArc.cy + pathArc.radius * sin(DEG2RAD(pathArc.angle1))},
+                {pathArc.cx + pathArc.radius * cos(DEG2RAD(pathArc.angle2)), pathArc.cy + pathArc.radius * sin(DEG2RAD(pathArc.angle2))},
+                block.arrowLines);
+        assertPathDirection(direction, insert.name);
 
-        // block have to contain just one line
-        if (block.pathLines.size() != 1) {
-            throw std::runtime_error("Block '" + insert.name + "' contain wrong number of path lines: "
-                                     + std::to_string(block.pathLines.size()) + ". Required is 1 line");
+        // move center of arc about insert point
+        pathArc.cx += insert.ipx;
+        pathArc.cy += insert.ipy;
+
+        if (direction.first) {
+            // start is in angle2, end is in angle1
+            // switch angles
+            double tmpAngle = pathArc.angle1;
+            pathArc.angle1 = pathArc.angle2;
+            pathArc.angle2 = tmpAngle;
+            return sampleArc(pathArc);
+        } else if (direction.second) {
+            // start is in angle1, end is in angle2
+            return sampleArc(pathArc);
         }
+
+    } else if (!block.pathLines.empty()){
         DL_LineData pathLine = block.pathLines.back();
 
-        // detect intersection between arrow lines and path lines
-        bool p1Intersection = false, p2Intersection = false;
-        for (auto arrowLine: block.arrowLines) {
-            if ((pathLine.x1 == arrowLine.x1 && pathLine.y1 == arrowLine.y1)
-                || (pathLine.x1 == arrowLine.x2 && pathLine.y1 == arrowLine.y2)) {
-                p1Intersection = true;
-            }
-            if ((pathLine.x2 == arrowLine.x1 && pathLine.y2 == arrowLine.y1)
-                || (pathLine.x2 == arrowLine.x2 && pathLine.y2 == arrowLine.y2)) {
-                p2Intersection = true;
-            }
-        }
+        auto direction = detectPathDirection(
+                {pathLine.x1, pathLine.y1},
+                {pathLine.x2, pathLine.y2},
+                block.arrowLines);
+        assertPathDirection(direction, insert.name);
 
-        if (p1Intersection && p2Intersection) {
-            throw std::runtime_error("Detected two arrows in '" + insert.name + "' block.");
-        } else if (!p1Intersection && !p2Intersection) {
-            throw std::runtime_error("No arrows detected in '" + insert.name + "' block.");
-        }
-
-        if (p1Intersection) {
+        if (direction.first) {
             // start is in x2,y2, end is in x1,y1
-            Eigen::Vector2d start{(pathLine.x2 + insert.ipx) * insert.sx, (pathLine.y2 + insert.ipy) * insert.sy};
-            Eigen::Vector2d end{(pathLine.x1 + insert.ipx) * insert.sx, (pathLine.y1 + insert.ipy) * insert.sy};
+            Eigen::Vector2d start{pathLine.x2 + insert.ipx, pathLine.y2 + insert.ipy};
+            Eigen::Vector2d end{pathLine.x1 + insert.ipx, pathLine.y1 + insert.ipy};
             return sampleLine(start, end);
-        } else if (p2Intersection) {
+        } else if (direction.second) {
             // start is in x1,y1, end is in x2,y2,
-            Eigen::Vector2d end{(pathLine.x2 + insert.ipx) * insert.sx, (pathLine.y2 + insert.ipy) * insert.sy};
-            Eigen::Vector2d start{(pathLine.x1 + insert.ipx) * insert.sx, (pathLine.y1 + insert.ipy) * insert.sy};
+            Eigen::Vector2d end{pathLine.x2 + insert.ipx, pathLine.y2 + insert.ipy};
+            Eigen::Vector2d start{pathLine.x1 + insert.ipx, pathLine.y1 + insert.ipy};
             return sampleLine(start, end);
         }
     }
@@ -114,7 +131,7 @@ void PathDxfParser::endBlock() {
 std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d& start, const Eigen::Vector2d& end) {
     std::vector<Node> samplePoints;
 
-    double length = (end - start).norm();
+    double length = std::abs((end - start).norm());
     auto splits = static_cast<unsigned int>(std::ceil(length / maxEdgeLength));
 
     Eigen::Vector2d increment = (end - start) / splits;
@@ -164,63 +181,101 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d& start, const 
     return samplePoints;
 }
 
-std::vector<Line> PathDxfParser::splitCircle(const DL_CircleData& _circle, const float _segLength) {
-    DL_ArcData _arc(_circle.cx, _circle.cy, _circle.cz, _circle.radius, 0, 360);
-    return splitArc(_arc, _segLength);
-}
 
-std::vector<Line> PathDxfParser::splitArc(const DL_ArcData& _arc, const float _segLength) {
-    std::vector<Line> segments;
+std::vector<Node> PathDxfParser::sampleArc(const DL_ArcData& arc) {
+    std::vector<Node> samplePoints;
 
-    //Take care DL_ uses Degrees
-    float angle1 = _arc.angle1 / 180 * M_PI;
-    float angle2 = _arc.angle2 / 180 * M_PI;;
+    // use radians
+    double angleStart = DEG2RAD(arc.angle2);
+    double angleEnd = DEG2RAD(arc.angle1);
 
-    if (_arc.angle1 >= _arc.angle2)
-        angle2 += 2 * M_PI;
+    // change angle sign if it si needed
+//    if (arc.angle1 >= arc.angle2) {
+//        angleEnd += 2 * M_PI;
+//    }
 
-    float arcLength = (angle2 - angle1) * _arc.radius;
-    uint32_t splits = arcLength / _segLength;
+    double arcLength = std::abs((angleEnd - angleStart) * arc.radius);
+    auto splits = static_cast<unsigned int>(std::ceil(arcLength / maxEdgeLength));
+    double angleIncrement = (arcLength / splits) / arc.radius;
 
-    float angleIncrement_radians = (arcLength / (float)splits) / _arc.radius;
-    float current_angle_radians = angle1;
-    Eigen::Vector2d current_point(_arc.cx + _arc.radius * cos(current_angle_radians),
-                                  _arc.cy + _arc.radius * sin(current_angle_radians));
+    for (unsigned int i = 0; i < splits; i++) {
+        double angle = angleEnd - i * angleIncrement;
+        Node n;
+        n.uuid = addNodeCounter;
+        n.x = arc.cx + arc.radius * cos(angle);
+        n.y = arc.cy + arc.radius * sin(angle);
+        samplePoints.push_back(n);
 
-    for (uint32_t i = 0; i < splits; i++) {
-        current_angle_radians += angleIncrement_radians;
-        Eigen::Vector2d nextPoint(_arc.cx + _arc.radius * cos(current_angle_radians),
-                                  _arc.cy + _arc.radius * sin(current_angle_radians));
-        Line l(current_point, nextPoint);
-        segments.push_back(l);
-
-        current_point = nextPoint;
+        // add successor for the previous node
+        if (i > 0) {
+            samplePoints.at(i - 1).successors.push_back(addNodeCounter);
+        }
+        addNodeCounter++;
     }
 
-    return segments;
+    if (!samplePoints.empty()) {
+        Node n;
+        n.uuid = addNodeCounter;
+        n.x = arc.cx + arc.radius * cos(angleStart);
+        n.y = arc.cy + arc.radius * sin(angleStart);
+        samplePoints.back().successors.push_back(addNodeCounter);
+        samplePoints.push_back(n);
+        addNodeCounter++;
+    } else {
+        Node nEnd;
+        nEnd.uuid = addNodeCounter;
+        nEnd.x = arc.cx + arc.radius * cos(angleEnd);
+        nEnd.y = arc.cy + arc.radius * sin(angleEnd);
+        samplePoints.push_back(nEnd);
+        addNodeCounter++;
+
+        Node nStart;
+        nStart.uuid = addNodeCounter;
+        nStart.x = arc.cx + arc.radius * cos(angleStart);
+        nStart.y = arc.cy + arc.radius * sin(angleStart);
+        nStart.successors.push_back(addNodeCounter -1);
+        samplePoints.push_back(nStart);
+        addNodeCounter++;
+    }
+
+    return samplePoints;
 }
 
-double PathDxfParser::lineLength(const DL_LineData& line) {
-    return sqrt(sqr(line.x1 - line.x2) + sqr(line.y1 - line.y2));
+bool PathDxfParser::nodePosesAreEqual(const Node& n1, const Node& n2) {
+    return pointPositionsAreEqual(n1.x, n1.y, n2.x, n2.y);
 }
 
-int PathDxfParser::getLargestLine(std::vector<DL_LineData>& lines) {
-    double largestLength = 0;
-    int largestLineIndex = -1;
-    for (unsigned int i = 0; i < lines.size(); i++) {
-        double len = lineLength(lines[i]);
-        if (len > largestLength) {
-            largestLength = len;
-            largestLineIndex = i;
+bool PathDxfParser::pointPositionsAreEqual(double x1, double y1, double x2, double y2) {
+    return NODES_INTERSECTION_TOLERANCE >= std::abs(std::abs(x1) - std::abs(x2))
+           && NODES_INTERSECTION_TOLERANCE >= std::abs(std::abs(y1) - std::abs(y2));
+}
+
+std::pair<bool, bool> PathDxfParser::detectPathDirection(const Eigen::Vector2d& p1, const Eigen::Vector2d& p2,
+                                                         const std::vector<DL_LineData>& arrowLines) {
+
+    std::pair<bool, bool> direction;
+    for (auto arrowLine: arrowLines) {
+        if (intersectPointWithLineEndpoints(p1[0], p1[1], arrowLine)) {
+            direction.first = true;
+        }
+        if (intersectPointWithLineEndpoints(p2[0], p2[1], arrowLine)) {
+            direction.second = true;
         }
     }
 
-    return largestLineIndex;
+    return direction;
 }
 
-bool PathDxfParser::nodesPoseIsEqual(const Node& n1, const Node& n2) {
-    return NODES_INTERSECTION_TOLERANCE > std::abs(std::abs(n1.x) - std::abs(n2.x))
-        && NODES_INTERSECTION_TOLERANCE > std::abs(std::abs(n1.y) - std::abs(n2.y));
+bool PathDxfParser::intersectPointWithLineEndpoints(double x, double y, const DL_LineData& line) {
+    return pointPositionsAreEqual(x, y, line.x1, line.y1) || pointPositionsAreEqual(x, y, line.x2, line.y2);
+}
+
+void PathDxfParser::assertPathDirection(const std::pair<bool, bool>& direction, const std::string& blockName) {
+    if (direction.first && direction.second) {
+        throw std::runtime_error("Detected two arrows in '" + blockName + "' block.");
+    } else if (!direction.first && !direction.second) {
+        throw std::runtime_error("No direction detected in '" + blockName + "' block.");
+    }
 }
 
 std::vector<Node> PathDxfParser::generateGraph() {
@@ -229,12 +284,12 @@ std::vector<Node> PathDxfParser::generateGraph() {
     for (auto currentSegmentIt = sampledPathNodes.begin(); currentSegmentIt < sampledPathNodes.end(); currentSegmentIt++) {
         for (auto segmentInsideIt = currentSegmentIt + 1; segmentInsideIt < sampledPathNodes.end(); segmentInsideIt++) {
             // unify end Nodes
-            if (nodesPoseIsEqual(currentSegmentIt->back(), segmentInsideIt->back())) {
+            if (nodePosesAreEqual(currentSegmentIt->back(), segmentInsideIt->back())) {
                 segmentInsideIt->erase(segmentInsideIt->end());     // remove last node in vector
                 segmentInsideIt->back().successors[0] = (currentSegmentIt->back().uuid);    // change successor
             }
             // unify first nodes
-            if (nodesPoseIsEqual(currentSegmentIt->front(), segmentInsideIt->front())) {
+            if (nodePosesAreEqual(currentSegmentIt->front(), segmentInsideIt->front())) {
                 segmentInsideIt->front().uuid = currentSegmentIt->front().uuid;
             }
         }
@@ -244,7 +299,7 @@ std::vector<Node> PathDxfParser::generateGraph() {
     // if a end and first Nodes are the same, remove first node and add successor for the end Node
     for (auto segmentEndIt = sampledPathNodes.begin(); segmentEndIt < sampledPathNodes.end(); segmentEndIt++) {
         for (auto segmentFrontIt = sampledPathNodes.begin(); segmentFrontIt < sampledPathNodes.end(); segmentFrontIt++) {
-            if (nodesPoseIsEqual(segmentEndIt->back(), segmentFrontIt->front())) {
+            if (nodePosesAreEqual(segmentEndIt->back(), segmentFrontIt->front())) {
                 segmentFrontIt->erase(segmentFrontIt->begin());                             // remove useless Node
                 segmentEndIt->back().successors.push_back(segmentFrontIt->front().uuid);    //chain segments
             }
@@ -258,4 +313,3 @@ std::vector<Node> PathDxfParser::generateGraph() {
     }
     return nodes;
 }
-

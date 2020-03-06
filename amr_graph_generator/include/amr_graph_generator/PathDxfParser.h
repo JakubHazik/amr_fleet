@@ -15,17 +15,23 @@
 #include <boost/asio/detail/shared_ptr.hpp>
 #include <memory>
 
-constexpr double NODES_INTERSECTION_TOLERANCE = 0.0002;
+constexpr double NODES_INTERSECTION_TOLERANCE = 0.000001;
 
 template<typename T>
 constexpr T sqr(T x) {
     return ((x)*(x));
 }
 
+template<typename T>
+constexpr T DEG2RAD(T x) {
+    return x * M_PI / 180;
+}
+
+
 struct Block {
     std::vector<DL_LineData> pathLines;
+    std::vector<DL_ArcData> pathArcs;
     std::vector<DL_LineData> arrowLines;
-    std::vector<DL_ArcData> arcs;
 };
 
 
@@ -57,16 +63,20 @@ private:
      * @return vector of path samples, ordered from start to end
      */
     std::vector<Node> sampleLine(const Eigen::Vector2d& start, const Eigen::Vector2d& end);
-    std::vector<Line> splitCircle(const DL_CircleData &_circle, float _segLength);
-    std::vector<Line> splitArc(const DL_ArcData&_arc, float _segLength);
+    std::vector<Node> sampleArc(const DL_ArcData& arc);
 
     std::vector<Node> convertBlockToSegments(const Block& block, const DL_InsertData& insert);
 
-    double lineLength(const DL_LineData& line);
+    std::pair<bool, bool> detectPathDirection(const Eigen::Vector2d& p1, const Eigen::Vector2d& p2,
+                                                  const std::vector<DL_LineData>& arrowLines);
 
-    int getLargestLine(std::vector<DL_LineData>& lines);
+    bool intersectPointWithLineEndpoints(double x, double y, const DL_LineData& line);
 
-    bool nodesPoseIsEqual(const Node& n1, const Node& n2);
+    void assertPathDirection(const std::pair<bool, bool>& direction, const std::string& blockName);
+
+    bool nodePosesAreEqual(const Node& n1, const Node& n2);
+
+    bool pointPositionsAreEqual(double x1, double y1, double x2, double y2);
 
     unsigned int addNodeCounter = 0;
     double maxEdgeLength;
