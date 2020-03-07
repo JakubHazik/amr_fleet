@@ -1,3 +1,2 @@
-uint32 uuid
-geometry_msgs/Point position
+amr_msgs/Point point
 uint32[] successors

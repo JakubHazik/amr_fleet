@@ -5,17 +5,18 @@
 #ifndef PROJECT_ROSWRAPPER_H
 #define PROJECT_ROSWRAPPER_H
 
-#include <ros/ros.h>
-#include <amr_msgs/Graph.h>
-#include <amr_planner/GraphSearchInterface.h>
-#include <amr_planner/GraphSearchMultiRobot.h>
-#include <std_srvs/Trigger.h>
-#include <amr_planner/PlanPath.h>
-#include <amr_planner/DataTypesAndConversions.h>
-
-#include <amr_planner/Graph.h>
 #include <memory>
 #include <vector>
+
+#include <ros/ros.h>
+#include <amr_msgs/Graph.h>
+#include <amr_msgs/PlanPathPoints.h>
+
+#include <amr_planner/GraphSearchInterface.h>
+#include <amr_planner/GraphSearchMultiRobot.h>
+#include <amr_planner/DataTypesAndConversions.h>
+#include <amr_planner/Graph.h>
+
 
 class RosWrapper {
 public:
@@ -33,7 +34,7 @@ private:
 
     void newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg);
 
-    bool planPathSrvCallback(amr_planner::PlanPathRequest& req, amr_planner::PlanPathResponse& res);
+    bool planPathSrvCallback(amr_msgs::PlanPathPoints::Request& req, amr_msgs::PlanPathPoints::Response& res);
 
 };
 

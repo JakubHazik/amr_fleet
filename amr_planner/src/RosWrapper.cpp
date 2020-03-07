@@ -23,13 +23,13 @@ void RosWrapper::newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg) {
     graph.clear();
 
     for (const amr_msgs::Node &node: graphMsg->nodes) {
-        Node nFrom(node.uuid, node.position.x, node.position.y);
+        Node nFrom(node.point.uuid, node.point.pose.position.x, node.point.pose.position.y);
         for (const auto &successorNode: node.successors) {
             auto nodesIt = std::find_if(graphMsg->nodes.begin(), graphMsg->nodes.end(),
-                    [&successorNode](const amr_msgs::Node& obj) {return obj.uuid == successorNode;});
+                    [&successorNode](const amr_msgs::Node& obj) {return obj.point.uuid == successorNode;});
             auto index = std::distance(graphMsg->nodes.begin(), nodesIt);
             auto nextNode = graphMsg->nodes[index];
-            Node nTo(nextNode.uuid, nextNode.position.x, nextNode.position.y);
+            Node nTo(nextNode.point.uuid, nextNode.point.pose.position.x, nextNode.point.pose.position.y);
             graph.addEdge(nFrom, nTo);
         }
     }
@@ -39,7 +39,7 @@ void RosWrapper::newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg) {
 }
 
 
-bool RosWrapper::planPathSrvCallback(amr_planner::PlanPathRequest& req, amr_planner::PlanPathResponse& res) {
+bool RosWrapper::planPathSrvCallback(amr_msgs::PlanPathPoints::Request& req, amr_msgs::PlanPathPoints::Response& res) {
 
     graphSearch = std::make_shared<GraphSearchMultiRobot>(graph, GraphSearchMultiRobot::SearchMethod::A_STAR);
     auto startNode = graphSearch->getNearestNode(req.startPose.position.x, req.startPose.position.y);
@@ -52,7 +52,7 @@ bool RosWrapper::planPathSrvCallback(amr_planner::PlanPathRequest& req, amr_plan
     }
     std::cout<<std::endl;
 
-    res.pathWaypoints = nodes2poses(result);
+    res.pathWaypoints = nodes2msgPoints(result);
 
     return true;
 }

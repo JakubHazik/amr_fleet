@@ -35,12 +35,19 @@ geometry_msgs::Pose node2pose(const Node& n) {
     return p;
 }
 
-std::vector<geometry_msgs::Pose> nodes2poses(const std::vector<Node>& nodes) {
-    std::vector<geometry_msgs::Pose> poses;
+amr_msgs::Point node2point(const Node& n) {
+    amr_msgs::Point point;
+    point.uuid = n.uuid;
+    point.pose = node2pose(n);
+    return point;
+}
+
+std::vector<amr_msgs::Point> nodes2msgPoints(const std::vector<Node>& nodes) {
+    std::vector<amr_msgs::Point> points;
     for (const auto& n: nodes) {
-        poses.push_back(node2pose(n));
+        points.push_back(node2point(n));
     }
-    return poses;
+    return points;
 }
 
 

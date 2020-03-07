@@ -8,6 +8,7 @@
 #include <cmath>
 #include <ostream>
 #include <vector>
+#include <amr_msgs/Point.h>
 #include <geometry_msgs/Pose.h>
 
 #define sqr(x) ((x)*(x))
@@ -42,7 +43,8 @@ struct Neighbor {
 
 
 geometry_msgs::Pose node2pose(const Node& n);
-std::vector<geometry_msgs::Pose> nodes2poses(const std::vector<Node>& nodes);
+amr_msgs::Point node2point(const Node& n);
+std::vector<amr_msgs::Point> nodes2msgPoints(const std::vector<Node>& nodes);
 
 
 #endif //PROJECT_DATATYPESANDCONVERSIONS_H
