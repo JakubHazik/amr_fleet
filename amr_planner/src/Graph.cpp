@@ -109,6 +109,17 @@ Node Graph::getNearestNode(double x, double y) {
     return minDistanceNode.second;
 }
 
+Node Graph::getNode(unsigned int uuid) {
+    vertexIt_t vi, vi_end;
+    for (boost::tie(vi, vi_end) = vertices(graph); vi != vi_end; ++vi) {
+        if (uuid == graph[*vi].uuid) {
+            return graph[*vi];
+        }
+    }
+
+    throw std::out_of_range("Graph not contain node with uuid: " + std::to_string(uuid));
+}
+
 //void Graph::printGraph() {
 //    boost::print_graph(graph, boost::get(boost::edge_weight_t(), graph));
 //}

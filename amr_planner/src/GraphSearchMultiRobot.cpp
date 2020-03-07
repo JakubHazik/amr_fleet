@@ -62,7 +62,3 @@ std::vector<Node> GraphSearchMultiRobot::getPath(const Node& nStart, const Node&
 
     return result;
 }
-
-Node GraphSearchMultiRobot::getNearestNode(double x, double y) {
-    return graph.getNearestNode(x, y);
-}

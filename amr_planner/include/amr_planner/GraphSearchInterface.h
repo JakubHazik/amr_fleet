@@ -19,6 +19,15 @@ public:
     virtual ~GraphSearchInterface() = default;
     virtual std::vector<Node> getPath(const Node& nStart, const Node& nEnd) = 0;
 
+    Node getNearestNode(double x, double y) {
+        return graph.getNearestNode(x, y);
+    }
+
+    Node getNode(unsigned int uuid) {
+        return graph.getNode(uuid);
+    }
+
+
 protected:
     Graph graph;
 };

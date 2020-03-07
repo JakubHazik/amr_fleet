@@ -127,7 +127,7 @@ private:
 
 
 
-class GraphSearchMultiRobot : private GraphSearchInterface {
+class GraphSearchMultiRobot : public GraphSearchInterface {
 public:
     enum class SearchMethod {
         A_STAR,
@@ -136,8 +136,6 @@ public:
     GraphSearchMultiRobot(const Graph& graph, GraphSearchMultiRobot::SearchMethod searchMethod);
 
     std::vector<Node> getPath(const Node& nStart, const Node& nEnd) override;
-
-    Node getNearestNode(double x, double y);
 
 private:
     SearchMethod searchMethod;

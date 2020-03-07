@@ -107,6 +107,8 @@ public:
 
     Node getNearestNode(double x, double y);
 
+    Node getNode(unsigned int uuid);
+
     void printGraph();
 
     void clear();

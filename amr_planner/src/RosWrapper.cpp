@@ -14,7 +14,8 @@
 RosWrapper::RosWrapper(ros::NodeHandle& nh) {
     // todo configure
     segSubscriber = nh.subscribe("/graph_generator/graph", 5, &RosWrapper::newGraphCb, this);
-    planPathSrv = nh.advertiseService("plan_path", &RosWrapper::planPathSrvCallback, this);
+    planPathByPointsSrv = nh.advertiseService("plan_path_by_points", &RosWrapper::planPathPointsCallback, this);
+    planPathByNodesSrv = nh.advertiseService("plan_path_by_nodes", &RosWrapper::planPathNodesCallback, this);
 }
 
 void RosWrapper::newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg) {
@@ -39,11 +40,28 @@ void RosWrapper::newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg) {
 }
 
 
-bool RosWrapper::planPathSrvCallback(amr_msgs::PlanPathPoints::Request& req, amr_msgs::PlanPathPoints::Response& res) {
+bool RosWrapper::planPathPointsCallback(amr_msgs::PlanPathPoints::Request& req, amr_msgs::PlanPathPoints::Response& res) {
 
     graphSearch = std::make_shared<GraphSearchMultiRobot>(graph, GraphSearchMultiRobot::SearchMethod::A_STAR);
     auto startNode = graphSearch->getNearestNode(req.startPose.position.x, req.startPose.position.y);
     auto endNode = graphSearch->getNearestNode(req.endPose.position.x, req.endPose.position.y);
+    auto result = graphSearch->getPath(startNode, endNode);
+
+    std::cout<<"Result path:\n";
+    for (auto n: result) {
+        std::cout<<n.uuid<<" -> ";
+    }
+    std::cout<<std::endl;
+
+    res.pathWaypoints = nodes2msgPoints(result);
+
+    return true;
+}
+
+bool RosWrapper::planPathNodesCallback(amr_msgs::PlanPathNodes::Request& req, amr_msgs::PlanPathNodes::Response& res) {
+    graphSearch = std::make_shared<GraphSearchMultiRobot>(graph, GraphSearchMultiRobot::SearchMethod::A_STAR);
+    auto startNode = graphSearch->getNode(req.startUuid);
+    auto endNode = graphSearch->getNode(req.endUuid);
     auto result = graphSearch->getPath(startNode, endNode);
 
     std::cout<<"Result path:\n";

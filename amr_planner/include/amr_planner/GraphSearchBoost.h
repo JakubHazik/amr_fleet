@@ -29,7 +29,7 @@ private:
 
 
 
-class GraphSearchBoost : private GraphSearchInterface {
+class GraphSearchBoost : public GraphSearchInterface {
 public:
     enum class SearchMethod {
         A_STAR,         // https://www.boost.org/doc/libs/1_58_0/libs/graph/doc/astar_search.html
