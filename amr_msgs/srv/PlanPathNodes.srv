@@ -1,0 +1,4 @@
+int32 startUuid
+int32 endUuid
+---
+amr_msgs/Point[] pathWaypoints

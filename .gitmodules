@@ -1,0 +1,3 @@
+[submodule "amr_planner/libMultiRobotPlanning"]
+	path = amr_planner/libMultiRobotPlanning
+	url = https://github.com/whoenig/libMultiRobotPlanning.git

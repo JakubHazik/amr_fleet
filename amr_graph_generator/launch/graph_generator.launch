@@ -1,0 +1,9 @@
+<launch>
+    <include file="$(find amr_fleet)/launch/path_planning/map_server.launch"/>
+
+    <node pkg="amr_graph_generator" type="amr_graph_generator" name="graph_generator" output="screen">
+        <rosparam command="load" file="$(find amr_graph_generator)/config/config.yaml" />
+    </node>
+
+    <node pkg="rviz" type="rviz" name="rviz" output="screen"/>
+</launch>
