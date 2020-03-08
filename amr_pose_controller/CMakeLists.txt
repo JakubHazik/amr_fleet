@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   amr_msgs
   geometry_msgs
   roscpp
+   actionlib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -147,7 +148,7 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(pose_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(pose_controller

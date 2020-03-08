@@ -3,7 +3,6 @@
 //
 
 #include <ros/ros.h>
-#include <amr_pose_controller/Controller.h>
 #include <amr_pose_controller/RosWrapper.h>
 
 int main(int argc, char **argv) {

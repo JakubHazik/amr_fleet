@@ -16,6 +16,10 @@
 
 #include <amr_msgs/Point.h>
 
+#include <actionlib/server/simple_action_server.h>
+#include <amr_msgs/PerformGoalsAction.h>
+
+typedef actionlib::SimpleActionServer<amr_msgs::PerformGoalsAction> PerformGoalAs;
 
 
 class RosWrapper {
@@ -34,20 +38,29 @@ private:
     State state = State::WAIT_FOR_GOAL;
     ros::Publisher cmdVelPub;
     ros::Subscriber robotPoseSub;
-    geometry_msgs::Pose2D robotCurrentPose;
-    geometry_msgs::Pose2D requiredGoal;
+    geometry_msgs::Pose2D currentRobotPose;
+    amr_msgs::Point currentRequiredGoal;
     double waypointZone;
     double goalZone;
 
     bool robotPoseReceived = false;
     std::unique_ptr<Controller> controller;
 
-    std::queue<geometry_msgs::Pose2D> waypoints;
+    std::queue<amr_msgs::Point> waypoints;
+
+    PerformGoalAs performGoalAs;
 
 
     void robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg);
 
     void turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg);
+
+    void acGoalCb();
+
+    void publishAsFeedback();
+
+    void publishAsResult();
+
 
     void zoneAchieved();
 

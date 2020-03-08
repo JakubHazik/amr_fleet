@@ -60,9 +60,8 @@ geometry_msgs::Twist Controller::getControllerAction(const geometry_msgs::Pose2D
 
     action.linear.x = linearAction;
 
-    ROS_INFO("Error: Angle = %f; Linear = %f",
+    ROS_DEBUG("Error: Angle = %f; Linear = %f",
             getAngleError(currentPose, requiredPose) * RAD2DEG, getDistanceError(currentPose, requiredPose));
-//    ROS_INFO("Action: Angle = %f; Linear = %f1
 
     return action;
 }
@@ -70,7 +69,7 @@ geometry_msgs::Twist Controller::getControllerAction(const geometry_msgs::Pose2D
 
 double Controller::getAngleError(const geometry_msgs::Pose2D& currentPose,
                                  const geometry_msgs::Pose2D& requiredPose) {
-    
+
     double goalAngle = atan2(requiredPose.y - currentPose.y, requiredPose.x - currentPose.x);
     double robotAngle = currentPose.theta;
     double result;

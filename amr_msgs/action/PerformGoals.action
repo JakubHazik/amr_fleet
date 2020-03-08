@@ -1,0 +1,11 @@
+# goal
+amr_msgs/Point[] waypoinst
+
+---
+# result
+
+
+---
+# feedback
+amr_msgs/Point currentGoal
+geometry_msgs/Pose2D currentPose
