@@ -7,7 +7,7 @@
 #include <amr_planner/Graph.h>
 
 int main ( int argc, char **argv ) {
-    ros::init ( argc, argv, "amr_planner" );
+    ros::init ( argc, argv, "planner" );
     ros::NodeHandle nh("~");
 
     RosWrapper planner(nh);
