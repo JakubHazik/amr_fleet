@@ -1,0 +1,14 @@
+controller:
+  linearKp: 0.7
+  rotationKp: 0.6
+  controllerFrequency: 10   #[1/s]
+  maxLinearSpeed: 1         # [m/s]
+  minLinearSpeed: 0       # [m/s]
+  maxLinearAcceleration: 0.3 # [m/s^2]
+#cmdVelTopic: "/cmd_vel"
+cmdVelTopic: "/turtle1/cmd_vel"
+#robotPoseTopic: "/pose"
+robotPoseTopic: "/turtle1/pose"
+waypointZone: 0.5           # [m]
+goalZone: 0.2               # [m]
+
