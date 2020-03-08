@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
     for (const auto& node: graph) {
         amr_msgs::Node nMsg;
         nMsg.point.uuid = node.uuid;
-        nMsg.point.pose.position.x = node.x;
-        nMsg.point.pose.position.y = node.y;
+        nMsg.point.pose.x = node.x;
+        nMsg.point.pose.y = node.y;
         nMsg.successors = node.successors;
         graphMsg.nodes.push_back(nMsg);
     }

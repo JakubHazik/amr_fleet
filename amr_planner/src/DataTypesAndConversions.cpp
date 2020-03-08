@@ -35,10 +35,17 @@ geometry_msgs::Pose node2pose(const Node& n) {
     return p;
 }
 
+geometry_msgs::Pose2D node2pose2D(const Node& n) {
+    geometry_msgs::Pose2D p;
+    p.x = n.posX;
+    p.y = n.posY;
+    return p;
+}
+
 amr_msgs::Point node2point(const Node& n) {
     amr_msgs::Point point;
     point.uuid = n.uuid;
-    point.pose = node2pose(n);
+    point.pose = node2pose2D(n);
     return point;
 }
 

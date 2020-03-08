@@ -24,13 +24,13 @@ void RosWrapper::newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg) {
     graph.clear();
 
     for (const amr_msgs::Node &node: graphMsg->nodes) {
-        Node nFrom(node.point.uuid, node.point.pose.position.x, node.point.pose.position.y);
+        Node nFrom(node.point.uuid, node.point.pose.x, node.point.pose.y);
         for (const auto &successorNode: node.successors) {
             auto nodesIt = std::find_if(graphMsg->nodes.begin(), graphMsg->nodes.end(),
                     [&successorNode](const amr_msgs::Node& obj) {return obj.point.uuid == successorNode;});
             auto index = std::distance(graphMsg->nodes.begin(), nodesIt);
             auto nextNode = graphMsg->nodes[index];
-            Node nTo(nextNode.point.uuid, nextNode.point.pose.position.x, nextNode.point.pose.position.y);
+            Node nTo(nextNode.point.uuid, nextNode.point.pose.x, nextNode.point.pose.y);
             graph.addEdge(nFrom, nTo);
         }
     }

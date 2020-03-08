@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
         geometry_msgs
         message_generation
         std_msgs
+        actionlib_msgs
         )
 
 add_message_files(
@@ -22,10 +23,16 @@ add_service_files(
         PlanPathNodes.srv
 )
 
+add_action_files(
+        FILES
+        PerformGoals.action
+)
+
 generate_messages(
         DEPENDENCIES
         geometry_msgs
         std_msgs
+        actionlib_msgs
 )
 
 catkin_package(

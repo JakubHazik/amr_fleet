@@ -43,6 +43,7 @@ struct Neighbor {
 
 
 geometry_msgs::Pose node2pose(const Node& n);
+geometry_msgs::Pose2D node2pose2D(const Node& n);
 amr_msgs::Point node2point(const Node& n);
 std::vector<amr_msgs::Point> nodes2msgPoints(const std::vector<Node>& nodes);
 
