@@ -25,33 +25,12 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh)
     nh.getParam("waypointZone", waypointZone);
     nh.getParam("goalZone", goalZone);
 
-
-    // setup AS
-
     cmdVelPub = nh.advertise<geometry_msgs::Twist>(cmdVelTopic, 10);
-//    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::robotPoseCb, this);
-    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::turtlesimPoseCb, this);
+    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::robotPoseCb, this);
+//    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::turtlesimPoseCb, this);
 
     performGoalAs.registerGoalCallback(boost::bind(&RosWrapper::acGoalCb, this));
     performGoalAs.start();
-
-
-
-//    geometry_msgs::Pose2D wp;
-//    wp.x = 1;
-//    wp.y = 1;
-//    waypoints.push(wp);
-//    wp.x = 1;
-//    wp.y = 9;
-//    waypoints.push(wp);
-//    wp.x = 9;
-//    wp.y = 9;
-//    waypoints.push(wp);
-//    wp.x = 1;
-//    wp.y = 1;
-//    waypoints.push(wp);
-
-
 
     ros::Rate rate(config.controllerFrequency);
     while(ros::ok()) {
@@ -66,7 +45,6 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh)
                         waypoints.pop();
                         state = State::PERFORMING_GOAL;
                     } else {
-//                        ROS_INFO("STOP action");
                         geometry_msgs::Twist controllerAction = controller->getStopAction();
                         cmdVelPub.publish(controllerAction);
                     }
@@ -103,7 +81,6 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh)
     }
 }
 
-
 void RosWrapper::robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg) {
     double r, p, y;
     tf::Quaternion q(
@@ -126,7 +103,6 @@ void RosWrapper::turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg) {
     robotPoseReceived = true;
 }
 
-
 void RosWrapper::acGoalCb() {
     auto goal = performGoalAs.acceptNewGoal();
 
@@ -141,7 +117,6 @@ void RosWrapper::acGoalCb() {
 
     state = State::WAIT_FOR_GOAL;
 }
-
 
 void RosWrapper::publishAsFeedback() {
     PerformGoalAs::Feedback feedback;

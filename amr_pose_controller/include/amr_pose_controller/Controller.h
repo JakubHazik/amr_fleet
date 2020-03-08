@@ -30,20 +30,15 @@ public:
     double getDistanceError(const geometry_msgs::Pose2D& currentPose, const geometry_msgs::Pose2D& requiredPose);
 
 private:
-
     double lastLinAction = 0;
     double maxLinSpeed;
     double minLinSpeed;
     double maxLinAcceleration;
     double controllerFrequency;
-
     double linearKp;
     double rotationKp;
 
-
     double getAngleError(const geometry_msgs::Pose2D& currentPose, const geometry_msgs::Pose2D& requiredPose);
-
-
 
 };
 
