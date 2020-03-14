@@ -1,8 +1,10 @@
 <launch>
-    <node pkg="turtlesim" type="turtlesim_node" name="turtle1"/>
+    <arg name="robot_id" default="r1"/>
 
-    <node pkg="amr_pose_controller" type="pose_controller" name="pose_controller" output="screen">
-        <rosparam command="load" file="$(find amr_pose_controller)/config/config.yaml" />
-    </node>
-
+    <group ns="$(arg robot_id)">
+        <node pkg="amr_pose_controller" type="pose_controller" name="pose_controller" output="screen">
+            <rosparam command="load" file="$(find amr_pose_controller)/config/config.yaml" />
+            <param name="tf_prefix" value="$(arg robot_id)"/>
+        </node>
+    </group>
 </launch>
