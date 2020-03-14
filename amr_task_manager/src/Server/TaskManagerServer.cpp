@@ -15,17 +15,34 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
     getTaskSrvServer = nh.advertiseService("get_task", &TaskManagerServer::getTaskCb, this);
     planPathSrvClient = nh.serviceClient<amr_msgs::PlanPathNodes>(planPathByNodesService);
 
+    XmlRpc::XmlRpcValue activeClients;
+    nh.getParam("/activeClients", activeClients);
+
+    if (activeClients.getType() != XmlRpc::XmlRpcValue::TypeArray || activeClients.size() == 0) {
+        throw std::runtime_error("No clients defined in clientNamespaces param array");
+    }
+
+    for (int i = 0; i < activeClients.size(); ++i) {
+        if (activeClients[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
+            throw std::runtime_error("Wrong element type of clientNamespaces param");
+        }
+
+        Client client(activeClients[i]);
+        clients.insert(std::make_pair(activeClients[i], client));
+    }
+
+    ROS_INFO("Server task manager launched successful");
 }
 
 bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::GetTask::Response& res) {
 
-    RobotsTasks::iterator it = tasks.find(req.clientId);
-    if (it == tasks.end()) {
+    RobotClients::iterator it = clients.find(req.clientId);
+    if (it == clients.end()) {
         res.error.code = amr_msgs::GetTaskErrorCodes::UNKNOWN_CLIENT_ID;
         return true;
     }
 
-    auto task = it->second.front();
+    auto task = it->second.tasks.front();
 
     switch (task.command) {
         case Task::Commnands::PLAN_PATH: {
@@ -53,6 +70,8 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
             ROS_ERROR("DO_NOTHING task is not implemented yet");
             break;
     }
+
+    it->second.tasks.pop();
 
     return true;
 }

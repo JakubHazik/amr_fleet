@@ -16,7 +16,6 @@
 #include <amr_msgs/ResetTask.h>
 
 
-
 class Task {
 public:
     enum class Commnands {
@@ -31,8 +30,18 @@ public:
     double timeout;
 };
 
+class Client {
+public:
+    explicit Client(const std::string& clientName) {
+        ros::NodeHandle nh("/");
+        resetSrvServer = nh.serviceClient<amr_msgs::ResetTask>(clientName + "/task_manager_client/reset_task");
+    }
+    std::queue<Task> tasks;
+    ros::ServiceClient resetSrvServer;
+};
 
-typedef std::map<std::string, std::queue<Task>> RobotsTasks;
+
+typedef std::map<std::string, Client> RobotClients;
 
 
 class TaskManagerServer {
@@ -44,16 +53,13 @@ public:
 private:
 
     ros::ServiceServer getTaskSrvServer;
-    ros::ServiceClient resetSrvServer;
     ros::ServiceClient planPathSrvClient;
 
-    RobotsTasks tasks;
+    RobotClients clients;
 
 
     bool getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::GetTask::Response& res);
 
-
-    void resetTask(std::string robotId);
 
 
 };
