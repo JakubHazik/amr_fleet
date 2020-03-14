@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="amr_planner" type="amr_planner" name="planner" output="screen">
+        <!--<rosparam command="load" file="$(find amr_graph_generator)/config/config.yaml" />-->
+    </node>
+</launch>
