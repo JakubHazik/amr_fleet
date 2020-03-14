@@ -39,6 +39,14 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
     RobotClients::iterator it = clients.find(req.clientId);
     if (it == clients.end()) {
         res.error.code = amr_msgs::GetTaskErrorCodes::UNKNOWN_CLIENT_ID;
+        ROS_ERROR("Unknown client ID: %s", req.clientId.c_str());
+        return true;
+    }
+
+    // check if some task exist
+    if (it->second.tasks.empty()) {
+        res.task.timeout = 5;
+        res.task.taskId.id = amr_msgs::TaskId::DO_NOTHING;
         return true;
     }
 

@@ -25,6 +25,7 @@ private:
     ros::ServiceServer resetTaskSrvServer;
     PerformWaypoints performWaypointsAc;
     ros::Timer getNewTaskTimer;
+    std::string clientId;
 
     // callbacks
     bool resetTaskServiceCb(amr_msgs::ResetTask::Request& req, amr_msgs::ResetTask::Response& res);

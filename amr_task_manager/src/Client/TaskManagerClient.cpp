@@ -6,14 +6,14 @@
 
 TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
     :   nh(nh),
-        performWaypointsAc("pose_controller/perform_goals", false) {
+        performWaypointsAc("pose_controller/perform_goals", true) {
 
     std::string getTaskService;
     nh.getParam("getTaskService", getTaskService);
+    nh.getParam("client_id", clientId);
 
     resetTaskSrvServer = nh.advertiseService("reset_task", &TaskManagerClient::resetTaskServiceCb, this);
     getTaskSrvClient = nh.serviceClient<amr_msgs::GetTask>(getTaskService);
-
 
     performWaypointsAc.waitForServer();
 
@@ -22,6 +22,15 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
         ROS_ERROR("No action server presented");
         ros::shutdown();
     }
+
+    if (!getTaskSrvClient.waitForExistence(ros::Duration(5))) {
+        ROS_ERROR("There is no GetTask service server");
+        ros::shutdown();
+    }
+
+    ROS_INFO("Client task manager is prepared");
+
+    getNewTask();
 
     ros::Rate rate(10);
     while (ros::ok()) {
@@ -39,10 +48,12 @@ bool TaskManagerClient::resetTaskServiceCb(amr_msgs::ResetTask::Request& req, am
 
 bool TaskManagerClient::getNewTask() {
     amr_msgs::GetTask taskSrv;
-    taskSrv.request.clientId = ros::this_node::getName();
+
+    taskSrv.request.clientId = clientId;
     getTaskSrvClient.call(taskSrv);
     switch (taskSrv.response.error.code) {
         case amr_msgs::GetTaskErrorCodes::OK: {
+            ROS_INFO("Received new task");
             performTask(taskSrv.response.task);
             break;
         }
@@ -78,6 +89,7 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
             performWaypointsAc.cancelAllGoals();
             // create goal
             amr_msgs::PerformGoalsGoal goal;
+            goal.waypoinst = task.waypoints;
             performWaypointsAc.sendGoal(
                     goal,
                     boost::bind(&TaskManagerClient::acWaypointsDoneCb, this, _1, _2),
@@ -118,11 +130,12 @@ void TaskManagerClient::acWaypointsDoneCb(const actionlib::SimpleClientGoalState
 }
 
 void TaskManagerClient::activeCallback() {
+//    ROS_INFO("Active callback");
 
 }
 
 void TaskManagerClient::acWaypointsFeedbackCb(const amr_msgs::PerformGoalsFeedbackConstPtr& feedback) {
-
+//    ROS_INFO("Feedback callback");
 }
 
 

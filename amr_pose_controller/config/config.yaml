@@ -1,14 +1,25 @@
+# for turtlesim
+#controller:
+#  linearKp: 0.7
+#  rotationKp: 0.6
+#  controllerFrequency: 10   #[1/s]
+#  maxLinearSpeed: 1         # [m/s]
+#  minLinearSpeed: 0       # [m/s]
+#  maxLinearAcceleration: 0.3 # [m/s^2]
+
 controller:
-  linearKp: 0.7
-  rotationKp: 0.6
+  linearKp: 0.3
+  rotationKp: 0.7
   controllerFrequency: 10   #[1/s]
-  maxLinearSpeed: 1         # [m/s]
+  maxLinearSpeed: 0.7         # [m/s]
   minLinearSpeed: 0       # [m/s]
   maxLinearAcceleration: 0.3 # [m/s^2]
+
+
 #cmdVelTopic: "/cmd_vel"
-cmdVelTopic: "cmd_vel"
+cmdVelTopic: "/cmd_vel"
 #robotPoseTopic: "/pose"
-robotPoseTopic: "amcl_pose"
-waypointZone: 0.5           # [m]
+#robotPoseTopic: "amcl_pose"
+waypointZone: 0.8           # [m]
 goalZone: 0.2               # [m]
 

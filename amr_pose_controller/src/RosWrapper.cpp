@@ -21,13 +21,15 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh)
     nh.getParam("tf_prefix", tfPrefix);
     std::string cmdVelTopic;
     nh.getParam("cmdVelTopic", cmdVelTopic);
-    std::string robotPoseTopic;
-    nh.getParam("robotPoseTopic", robotPoseTopic);
+//    std::string robotPoseTopic;
+//    nh.getParam("robotPoseTopic", robotPoseTopic);
 
     nh.getParam("waypointZone", waypointZone);
     nh.getParam("goalZone", goalZone);
 
-    cmdVelPub = nh.advertise<geometry_msgs::Twist>(cmdVelTopic, 10);
+//    usleep(1000*1000*15);
+
+    cmdVelPub = nh.advertise<geometry_msgs::Twist>(ros::this_node::getNamespace() + cmdVelTopic, 10);
 //    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::robotPoseCb, this);
 //    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::turtlesimPoseCb, this);
 
@@ -126,6 +128,7 @@ void RosWrapper::turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg) {
 }
 
 void RosWrapper::acGoalCb() {
+    ROS_INFO("New pose control goal received");
     auto goal = performGoalAs.acceptNewGoal();
 
     // clear waypoints queuq
