@@ -15,6 +15,8 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
     getTaskSrvClient = nh.serviceClient<amr_msgs::GetTask>(getTaskService);
 
 
+    performWaypointsAc.waitForServer();
+
     // wait for action server
     if (!performWaypointsAc.waitForServer(ros::Duration(5))) {
         ROS_ERROR("No action server presented");
@@ -25,14 +27,13 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
     while (ros::ok()) {
         ros::spinOnce();
 
-
         rate.sleep();
     }
 }
 
 bool TaskManagerClient::resetTaskServiceCb(amr_msgs::ResetTask::Request& req, amr_msgs::ResetTask::Response& res) {
     performWaypointsAc.cancelAllGoals();
-    callGetNewTaskServiceAfterTime(0.001);   // asap, but not in this function scope, service have to be done
+    callGetNewTaskServiceAfterTime(0.01);   // asap, but not in this function scope, service have to be done
     return true;
 }
 
