@@ -5,6 +5,7 @@
 #include <amr_pose_controller/RosWrapper.h>
 #include <geometry_msgs/Twist.h>
 #include <tf/tf.h>
+#include <tf/transform_datatypes.h>
 
 RosWrapper::RosWrapper(ros::NodeHandle& nh)
     :   performGoalAs(nh, "perform_goals", false) {
@@ -17,16 +18,19 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh)
     nh.getParam("controller/maxLinearAcceleration", config.maxLinearAcceleration);
     controller.reset(new Controller(config));
 
+    nh.getParam("tf_prefix", tfPrefix);
     std::string cmdVelTopic;
     nh.getParam("cmdVelTopic", cmdVelTopic);
-    std::string robotPoseTopic;
-    nh.getParam("robotPoseTopic", robotPoseTopic);
+//    std::string robotPoseTopic;
+//    nh.getParam("robotPoseTopic", robotPoseTopic);
 
     nh.getParam("waypointZone", waypointZone);
     nh.getParam("goalZone", goalZone);
 
-    cmdVelPub = nh.advertise<geometry_msgs::Twist>(cmdVelTopic, 10);
-    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::robotPoseCb, this);
+//    usleep(1000*1000*15);
+
+    cmdVelPub = nh.advertise<geometry_msgs::Twist>(ros::this_node::getNamespace() + cmdVelTopic, 10);
+//    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::robotPoseCb, this);
 //    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &RosWrapper::turtlesimPoseCb, this);
 
     performGoalAs.registerGoalCallback(boost::bind(&RosWrapper::acGoalCb, this));
@@ -35,7 +39,7 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh)
     ros::Rate rate(config.controllerFrequency);
     while(ros::ok()) {
         ros::spinOnce();
-
+        updateRobotPose();
         if (robotPoseReceived) {
             switch (state) {
                 case State::WAIT_FOR_GOAL:
@@ -81,6 +85,26 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh)
     }
 }
 
+void RosWrapper::updateRobotPose() {
+    tf::StampedTransform transform;
+    try{
+        if (!robotPoseReceived) {
+            poseTfListener.waitForTransform("/map", tf::resolve(tfPrefix, "base_link"), ros::Time::now(), ros::Duration(3.0));
+        }
+
+        poseTfListener.lookupTransform("/map", tf::resolve(tfPrefix, "base_link"), ros::Time(0), transform);
+        currentRobotPose.x = transform.getOrigin().x();
+        currentRobotPose.y = transform.getOrigin().y();
+        currentRobotPose.theta = tf::getYaw(transform.getRotation());
+        robotPoseReceived = true;
+//        ROS_INFO_STREAM("X: " << currentRobotPose.x << " Y: " << currentRobotPose.y << " Yaw: " << currentRobotPose.theta);
+    } catch (const tf::TransformException& ex) {
+        ROS_ERROR("%s", ex.what());
+        ros::Duration(1.0).sleep();
+    }
+}
+
+
 void RosWrapper::robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg) {
     double r, p, y;
     tf::Quaternion q(
@@ -104,6 +128,7 @@ void RosWrapper::turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg) {
 }
 
 void RosWrapper::acGoalCb() {
+    ROS_INFO("New pose control goal received");
     auto goal = performGoalAs.acceptNewGoal();
 
     // clear waypoints queuq

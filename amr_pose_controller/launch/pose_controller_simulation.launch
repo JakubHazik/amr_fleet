@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="turtlesim" type="turtlesim_node" name="turtle1"/>
+
+    <node pkg="amr_pose_controller" type="pose_controller" name="pose_controller" output="screen">
+        <rosparam command="load" file="$(find amr_pose_controller)/config/config.yaml" />
+    </node>
+
+</launch>

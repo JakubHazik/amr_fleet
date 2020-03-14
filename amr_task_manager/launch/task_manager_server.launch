@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="amr_task_manager" type="task_manager_server" name="task_manager_server" output="screen">
+        <rosparam command="load" file="$(find amr_task_manager)/config/ServerConfig.yaml" />
+    </node>
+</launch>

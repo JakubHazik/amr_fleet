@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>amr_pose_controller</name>
+  <name>amr_task_manager</name>
   <version>0.0.0</version>
-  <description>The amr_pose_controller package</description>
+  <description>The amr_task_manager package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/amr_pose_controller</url> -->
+  <!-- <url type="website">http://wiki.ros.org/amr_task_manager</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -50,19 +50,20 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>amr_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
+  <build_depend>amr_planner</build_depend>
+  <build_depend>amr_pose_controller</build_depend>
   <build_depend>roscpp</build_depend>
+  <build_depend>actionlib</build_depend>
   <build_export_depend>amr_msgs</build_export_depend>
-  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>amr_planner</build_export_depend>
+  <build_export_depend>amr_pose_controller</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
   <exec_depend>amr_msgs</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>amr_planner</exec_depend>
+  <exec_depend>amr_pose_controller</exec_depend>
   <exec_depend>roscpp</exec_depend>
-
-  <build_depend>actionlib</build_depend>
   <exec_depend>actionlib</exec_depend>
 
-  <depend>tf</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

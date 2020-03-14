@@ -15,12 +15,17 @@ add_message_files(
         Graph.msg
         Node.msg
         Point.msg
+        Task.msg
+        TaskId.msg
+        GetTaskErrorCodes.msg
 )
 
 add_service_files(
         FILES
         PlanPathPoints.srv
         PlanPathNodes.srv
+        GetTask.srv
+        ResetTask.srv
 )
 
 add_action_files(

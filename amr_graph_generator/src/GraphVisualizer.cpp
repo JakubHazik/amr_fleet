@@ -45,6 +45,7 @@ void GraphVisualizer::publishLabelHelper(geometry_msgs::Pose pose, const std::st
 }
 
 void GraphVisualizer::publish() {
+    visual_tools->deleteAllMarkers();
     drawGraph();
 }
 

@@ -1,0 +1,11 @@
+<launch>
+
+    <arg name="robot_id" default="r1"/>
+
+    <group ns="$(arg robot_id)">
+        <node pkg="amr_task_manager" type="task_manager_client" name="task_manager_client" output="screen">
+            <rosparam command="load" file="$(find amr_task_manager)/config/ClientConfig.yaml" />
+            <param name="client_id" value="$(arg robot_id)"/>
+        </node>
+    </group>
+</launch>
