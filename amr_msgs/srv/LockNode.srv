@@ -1,0 +1,5 @@
+string clientId
+amr_msgs/Node node
+---
+bool success
+string message
