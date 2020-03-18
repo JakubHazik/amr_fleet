@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="robot_id" default="r1"/>
+    <arg name="model" default="waffle"/>
+    <arg name="x_pos" default="-2.0"/>
+    <arg name="y_pos" default="-0.5"/>
+    <arg name="z_pos" default="0.0"/>
+
+
+    <!-- robot_id namespace is defined-->
+    <group ns="$(arg robot_id)">
+        <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+            <param name="publish_frequency" type="double" value="50.0" />
+            <param name="tf_prefix" value="$(arg robot_id)"/>
+        </node>
+        <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model turtlebot3_$(arg robot_id) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
+
+        <!-- only for gazebo simulation is needed, because odom topic is bublished by /gazebo - which is ignored in multimaster_sync -->
+        <!--<node pkg="topic_tools" type="relay" name="odom_ralay" args="odom sync/odom"/>-->
+    </group>
+
+
+
+
+<!--    <group ns="$(arg robot_id)">-->
+<!--        <param name="robot_description" command="$(find xacro)/xacro &#45;&#45;inorder $(find turtlebot3_description)/urdf/turtlebot3_$(arg model).urdf.xacro" />-->
+<!--        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">-->
+<!--            <param name="publish_frequency" type="double" value="50.0" />-->
+<!--            <param name="tf_prefix" value="$(arg robot_id)"/>-->
+<!--        </node>-->
+<!--        <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />-->
+
+<!--        &lt;!&ndash; only for gazebo simulation is needed, because odom topic is bublished by /gazebo - which is ignored in multimaster_sync &ndash;&gt;-->
+<!--        <node pkg="topic_tools" type="relay" name="odom_ralay" args="odom sync/odom"/>-->
+<!--    </group>-->
+</launch>

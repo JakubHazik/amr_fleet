@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- a map server must publish the map of the room <gridmal> first -->
+    <arg name="map" default="world" />
+    <arg name="custom_graph_path" default="" /> <!-- used only on dxf generated graphs with the full path name such as /home/.../cache/graph -->
+
+    <node pkg="tuw_voronoi_graph" type="tuw_voronoi_graph_node" name="graph_generator" output="screen">
+        <!--        <remap from="static_map" to="world/static_map"/>-->
+        <!--        <remap from="map" to="world/map"/>-->
+        <param name="graph_cache_path" value="$(find amr_fleet)/graphs/$(arg map)/cache/" />
+        <param name="custom_graph_path" value="$(arg custom_graph_path)" />
+        <rosparam command="load" file="$(find amr_fleet)/config/graph_generator.yaml"/>
+    </node>
+</launch>

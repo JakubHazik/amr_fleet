@@ -1,0 +1,12 @@
+voronoi_graph: true
+priority_rescheduling: true
+speed_rescheduling: false
+router_time_limit_s: 10.0
+topic_timeout_s: 10.0
+path_endpoint_optimization: true
+collision_resolver: "Backtracking"
+goal_mode: "use_voronoi_goal"
+router_type: "standard_router"
+use_segment_as_goal: false
+allow_endpoint_off_segments: true
+path_optimization_segment_no: 0

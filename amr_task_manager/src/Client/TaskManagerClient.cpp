@@ -117,6 +117,7 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
 
 void TaskManagerClient::acWaypointsDoneCb(const actionlib::SimpleClientGoalState& state,
                                           const amr_msgs::PerformGoalsResultConstPtr& result) {
+    // todo mutex for action callbacks
 
     if (state.state_ == state.SUCCEEDED) {
         ROS_INFO("Waypoints performed successfully");

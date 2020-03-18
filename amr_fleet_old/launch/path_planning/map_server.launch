@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="map" default="world2" />
+
+    <node pkg="map_server" type="map_server" name="map_server" args="$(find amr_fleet)/maps/$(arg map)/map.yaml">
+<!--      <remap from="static_map" to="world/static_map"/>-->
+<!--      <remap from="map" to="world/map"/>-->
+      <param name="frame_id" value="/map"/>
+    </node>
+</launch>
