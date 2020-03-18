@@ -42,7 +42,7 @@ struct Block {
 class PathDxfParser : public DL_CreationAdapter {
 public:
 
-    explicit PathDxfParser(const string& dxfFilepath, double edgeLength);
+    explicit PathDxfParser(const std::string& dxfFilepath, double edgeLength);
 
     std::vector<Node> generateGraph();
 

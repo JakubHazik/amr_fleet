@@ -8,7 +8,7 @@
 #include <cmath>
 
 
-PathDxfParser::PathDxfParser(const string& dxfFilepath, double maxEdgeLenght)
+PathDxfParser::PathDxfParser(const std::string& dxfFilepath, double maxEdgeLenght)
     :   maxEdgeLength(maxEdgeLenght){
     DL_Dxf dxf;
 
