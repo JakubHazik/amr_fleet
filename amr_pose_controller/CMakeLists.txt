@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
         roscpp
         actionlib
         tf
+        amr_semaphore
+        rviz_visual_tools
 )
 
 catkin_package(
@@ -23,7 +25,7 @@ include_directories(
 add_executable(pose_controller
         src/Controller.cpp
         src/PoseControllerNode.cpp
-        src/RosWrapper.cpp
+        src/PoseController.cpp
 )
 
 add_dependencies(pose_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

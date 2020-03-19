@@ -8,18 +8,21 @@
 #  maxLinearAcceleration: 0.3 # [m/s^2]
 
 controller:
-  linearKp: 0.3
-  rotationKp: 0.7
+  linearKp: 1
+  rotationKp: 0.9
   controllerFrequency: 10   #[1/s]
   maxLinearSpeed: 0.7         # [m/s]
+  maxAngularSpeed: 2         # [m/s]
   minLinearSpeed: 0       # [m/s]
-  maxLinearAcceleration: 0.3 # [m/s^2]
+  maxLinearAcceleration: 0.1 # [m/s^2]
+  maxAngularAcceleration: 0.5
+  goalDeadZone: 0.1              # [m]
 
 
+semaphoreService: "/semaphore_server/lock_node"
 #cmdVelTopic: "/cmd_vel"
 cmdVelTopic: "/cmd_vel"
 #robotPoseTopic: "/pose"
 #robotPoseTopic: "amcl_pose"
-waypointZone: 0.8           # [m]
-goalZone: 0.2               # [m]
+waypointZone: 0.3           # [m]
 

@@ -14,8 +14,11 @@ struct ControllerConfig {
     double rotationKp;
     double controllerFrequency;
     double maxLinearSpeed;
+    double maxAngularSpeed;
     double minLinearSpeed;
     double maxLinearAcceleration;
+    double maxAngularAcceleration;
+    double goalDeadZone;
 };
 
 
@@ -37,6 +40,7 @@ public:
 private:
     ControllerConfig config;
     double lastLinAction = 0;
+    double lastAngAction = 0;
     geometry_msgs::Pose2D currentPose;
     geometry_msgs::Pose2D requiredPose;
 

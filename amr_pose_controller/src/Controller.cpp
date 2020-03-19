@@ -42,35 +42,53 @@ const geometry_msgs::Pose2D& Controller::getRequiredPose() {
 }
 
 geometry_msgs::Twist Controller::getControllerAction() {
-    geometry_msgs::Twist action;
+    // check goal dead zone
+    if (isZoneAchieved(config.goalDeadZone)) {
+        return getStopAction();
+    }
 
     // angle action
-    action.angular.z = config.rotationKp * getAngleError();
+    double angularAction = config.rotationKp * getAngleError();
+    // ramp angular speed up
+    double cycleMaxAngSpeed = lastAngAction + config.maxAngularAcceleration / config.controllerFrequency;
+    if (std::abs(angularAction) > cycleMaxAngSpeed) {
+        angularAction = cycleMaxAngSpeed * signum(angularAction);
+    }
+    // angular saturation
+    if (angularAction > config.maxAngularSpeed) {
+        angularAction = config.maxAngularSpeed;
+    } else if (angularAction < -config.maxAngularSpeed) {
+        angularAction = -config.maxAngularSpeed;
+    }
 
-    //linear action
-    double linearError = getDistanceError();
-    double linearAction = linearError * config.linearKp;
+    // linear action
+    double linearAction = getDistanceError() * config.linearKp;
+    // ramp linear speed up
+    double cycleMaxLinSpeed = lastLinAction + config.maxLinearAcceleration / config.controllerFrequency;
+    if (linearAction > cycleMaxLinSpeed) {
+        linearAction = cycleMaxLinSpeed;
+    }
+    linearAction = linearAction - std::abs(angularAction) * 0.03;  // slowdown linear if angular error is huge
 
-    // saturation
+    // linear saturation
     if (linearAction > config.maxLinearSpeed) {
         linearAction = config.maxLinearSpeed;
-
-        // ramp speed up
-        if (lastLinAction < linearAction) {
-            linearAction = lastLinAction + config.maxLinearAcceleration / config.controllerFrequency;
-            if (linearAction < config.minLinearSpeed) {
-                linearAction = config.minLinearSpeed;
-            }
-        }
+    } else if (linearAction < config.minLinearSpeed) {
+        linearAction = config.minLinearSpeed;
     }
 
 //    output = output * pow(error/MAX_SPEED,0.3);
 
     lastLinAction = linearAction;
+    lastAngAction = std::abs(angularAction);
 
+    geometry_msgs::Twist action;
+    action.angular.z = angularAction;
     action.linear.x = linearAction;
 
-    ROS_DEBUG("Error: Angle = %f; Linear = %f", getAngleError() * RAD2DEG, getDistanceError());
+//    ROS_INFO("Error: Angle = %f; Linear = %f", getAngleError() * RAD2DEG, getDistanceError());
+    ROS_INFO("Action: Angle = %f; Linear= %f; Compensation = %f",
+            angularAction, linearAction, - std::abs(angularAction) * 0.05);
 
     return action;
 }
@@ -111,6 +129,7 @@ double Controller::getDistanceError() {
 }
 
 geometry_msgs::Twist Controller::getStopAction() {
+    // todo ramp speed down
     return { };
 }
 
