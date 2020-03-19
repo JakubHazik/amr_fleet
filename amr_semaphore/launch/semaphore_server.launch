@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="amr_semaphore" type="semaphore_server" name="semaphore_server" output="screen">
+    </node>
+</launch>

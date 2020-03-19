@@ -14,15 +14,11 @@ class SemaphoreClient {
 public:
     SemaphoreClient(const std::string& lockServiceName);
 
-
-
-
     bool lockNode(const amr_msgs::Point &node);
 
     std::future<bool> lockNodeAsync(const amr_msgs::Point &node);
 
-
-//    bool unlockNode(const amr_msgs::Node& node);
+    bool unlockAllNodes();
 
 private:
     std::string clientId;

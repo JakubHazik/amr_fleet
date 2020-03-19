@@ -6,6 +6,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
         amr_msgs
         roscpp
+        rviz_visual_tools
         )
 
 catkin_package(

@@ -4,33 +4,35 @@
 
 #include <amr_semaphore/server/SemaphoreServer.h>
 #include <algorithm>
+#include <future>
 
 NodesOccupancyContainer::NodesOccupancyContainer(const unsigned int occupancyLength) {
     bufferMaxLength = occupancyLength;
 }
 
 std::map<std::string, std::list<amr_msgs::Point>> NodesOccupancyContainer::getOccupancyData() {
-    return std::map<std::string, std::list<amr_msgs::Point>>();
+    return data;
 }
 
 bool NodesOccupancyContainer::lockNode(const std::string &ownerId, const amr_msgs::Point& node) {
     if (isNodeAlreadyLocked(node)) {
         return false;
     } else {
-        if (data.find(ownerId) == data.end()) {
+        auto targetOwnerIt = data.find(ownerId);
+        if (targetOwnerIt == data.end()) {
             // ownerId has not exist already, add it
             std::pair<std::string, std::list<amr_msgs::Point>> ownerArray(ownerId, {});
-            data.insert(ownerArray);
+            auto insertResult = data.insert(ownerArray);
+            targetOwnerIt = insertResult.first;
         }
 
-        auto& nodesArray = data[ownerId];
+        auto& nodesArray = targetOwnerIt->second;
         nodesArray.push_back(node);
         if (nodesArray.size() > bufferMaxLength) {
             nodesArray.pop_front();
         }
+        return true;
     }
-
-    return false;
 }
 
 bool NodesOccupancyContainer::isNodeAlreadyLocked(const amr_msgs::Point& node) {
@@ -45,66 +47,68 @@ bool NodesOccupancyContainer::isNodeAlreadyLocked(const amr_msgs::Point& node) {
     return false;
 }
 
+void NodesOccupancyContainer::unlockAllNodes(const std::string &ownerId) {
+    data[ownerId] = std::list<amr_msgs::Point>();
+}
+
 
 SemaphoreServer::SemaphoreServer(ros::NodeHandle& nh) {
 
     //todo config
-    nodesOccupancy = std::make_shared<NodesOccupancyContainer>(2);
+    nodesOccupancy = std::make_shared<NodesOccupancyContainer>(3);
 
     lockNodeSrv = nh.advertiseService("lock_node", &SemaphoreServer::lockNodeCb, this);
+
+    // prepare visualizer
+    visual_tools.reset(new rvt::RvizVisualTools("map", "/amr_occupied_nodes"));
+    visual_tools->loadMarkerPub(false, true);  // create publisher before waiting
+    // clear messages
+    visual_tools->deleteAllMarkers();
+    visual_tools->enableBatchPublishing();
 }
 
 bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res) {
-//    if (req.lock) {
-        // lock node
+    if (req.unlockAll) {
+        nodesOccupancy->unlockAllNodes(req.clientId);
+        res.success = true;
+        return true;
+    }
 
-        if (nodesOccupancy->lockNode(req.clientId, req.point)) {
-            // successfully locked
-            res.success = true;
+    if (nodesOccupancy->lockNode(req.clientId, req.point)) {
+        // successfully locked
+        res.success = true;
 
-        } else {
-            // not locked
+        // update visualization
+        std::async(std::launch::async, &SemaphoreServer::visualizeNodesOccupancy, this);
+    } else {
+        // not locked
+        res.message = "Node is already locked";
+        res.success = false;
+    }
 
-            res.message = "Node is already locked";
-            res.success = false;
+    return true;
+}
 
+void SemaphoreServer::visualizeNodesOccupancy() {
+    visual_tools->deleteAllMarkers();
+
+    std_msgs::ColorRGBA color = visual_tools->getColorScale(0);
+    geometry_msgs::Vector3 scale = visual_tools->getScale(rvt::LARGE);
+
+    for (const auto& ownerNodes: nodesOccupancy->getOccupancyData()) {
+        for (const auto& nodes: ownerNodes.second) {
+            geometry_msgs::Point point;
+            point.x = nodes.pose.x;
+            point.y = nodes.pose.y;
+
+            visual_tools->publishSphere(point, rvt::colors::GREEN, rvt::scales::XLARGE);
+            geometry_msgs::Pose pose;
+            pose.position = point;
+            pose.position.x += 0.1;
+            visual_tools->publishText(pose, ownerNodes.first, rvt::WHITE, rvt::XXLARGE, false);
         }
+    }
 
-    return true;
-
-
-//        auto lockIt = lockedNodes.find(req.node.point.uuid);
-//        if (lockIt == lockedNodes.end()) {
-//            // node is not locked, we can lock it
-//            std::pair<unsigned int, std::string> nodeLock(req.node.point.uuid, req.clientId);
-//            lockedNodes.insert(nodeLock);
-//            res.success = true;
-//            return true;
-//        } else {
-//            // node is already locked
-//            res.message = "Node is already locked by " + lockIt->second;
-//            res.success = false;
-//            return true;
-//        }
-
-
-//    } else {
-//        // unlock node
-//        auto lockIt = lockedNodes.find(req.node.point.uuid);
-//        if (lockIt == lockedNodes.end()) {
-//            // node is missing in locked array
-//            res.message = "Can not unlock the node: " + std::to_string(req.node.point.uuid)
-//                          + ", because node has not been locked, yet [Client: " + req.clientId + "]";
-//            res.success = false;
-//            return true;
-//        } else {
-//            // we can unlock node normally
-//            lockedNodes.erase(lockIt);
-//            res.success = true;
-//            return true;
-//        }
-//    }
-
-    return true;
+    visual_tools->trigger();
 }
 
