@@ -29,7 +29,7 @@ public:
 
 private:
     enum class State {
-        WAIT_FOR_GOAL,
+        GET_NEW_GOAL,
         PERFORMING_GOAL,
     };
 
@@ -40,12 +40,11 @@ private:
     tf::TransformListener poseTfListener;
 
     // poses
-    geometry_msgs::Pose2D currentRobotPose;
     amr_msgs::Point currentRequiredGoal;
 
     // inernal variables
     std::string tfPrefix;
-    State state = State::WAIT_FOR_GOAL;
+    State state = State::GET_NEW_GOAL;
     std::unique_ptr<Controller> controller;
     std::queue<amr_msgs::Point> waypoints;
     double waypointZone;
@@ -54,9 +53,9 @@ private:
 
     void updateRobotPose();
 
-    void robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg);
-
-    void turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg);
+//    void robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg);
+//
+//    void turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg);
 
     void acGoalCb();
 

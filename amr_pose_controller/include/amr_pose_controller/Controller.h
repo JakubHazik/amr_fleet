@@ -21,24 +21,28 @@ struct ControllerConfig {
 
 class Controller {
 public:
-    Controller(const ControllerConfig& config);
+    explicit Controller(const ControllerConfig& _config);
 
-    geometry_msgs::Twist getControllerAction(const geometry_msgs::Pose2D& currentPose, const geometry_msgs::Pose2D& requiredPose);
+    void setCurrentPose(const geometry_msgs::Pose2D& _currentPose);
+    void setRequiredPose(const geometry_msgs::Pose2D& _requiredPose);
+    const geometry_msgs::Pose2D& getCurrentPose();
+    const geometry_msgs::Pose2D& getRequiredPose();
+
+    geometry_msgs::Twist getControllerAction();
 
     geometry_msgs::Twist getStopAction();
 
-    double getDistanceError(const geometry_msgs::Pose2D& currentPose, const geometry_msgs::Pose2D& requiredPose);
+    bool isZoneAchieved(double zoneDistance);
 
 private:
+    ControllerConfig config;
     double lastLinAction = 0;
-    double maxLinSpeed;
-    double minLinSpeed;
-    double maxLinAcceleration;
-    double controllerFrequency;
-    double linearKp;
-    double rotationKp;
+    geometry_msgs::Pose2D currentPose;
+    geometry_msgs::Pose2D requiredPose;
 
-    double getAngleError(const geometry_msgs::Pose2D& currentPose, const geometry_msgs::Pose2D& requiredPose);
+    double getAngleError();
+
+    double getDistanceError();
 
 };
 

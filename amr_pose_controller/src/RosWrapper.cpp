@@ -42,34 +42,34 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh)
         updateRobotPose();
         if (robotPoseReceived) {
             switch (state) {
-                case State::WAIT_FOR_GOAL:
-                    if (!waypoints.empty()) {
-                        ROS_INFO("Select first waypoint");
+                case State::GET_NEW_GOAL:
+                    if (waypoints.empty()) {
+                        // stop robot
+                        cmdVelPub.publish(controller->getStopAction());
+                    } else {
+                        // set new required goal
                         currentRequiredGoal = waypoints.front();
+                        controller->setRequiredPose(currentRequiredGoal.pose);
                         waypoints.pop();
                         state = State::PERFORMING_GOAL;
-                    } else {
-                        geometry_msgs::Twist controllerAction = controller->getStopAction();
-                        cmdVelPub.publish(controllerAction);
                     }
                     break;
                 case State::PERFORMING_GOAL:
                     // detect last goal zone
-                    if (waypoints.empty() && goalZone > controller->getDistanceError(currentRobotPose, currentRequiredGoal.pose)) {
+                    if (waypoints.empty() && controller->isZoneAchieved(goalZone)) {
                         ROS_INFO("Last goal zone achieved");
-                        state = State::WAIT_FOR_GOAL;
+                        state = State::GET_NEW_GOAL;
                         publishAsResult();
                         break;
                     }
 
-                    geometry_msgs::Twist controllerAction = controller->getControllerAction(currentRobotPose, currentRequiredGoal.pose);
-                    cmdVelPub.publish(controllerAction);
+                    cmdVelPub.publish(controller->getControllerAction());
                     publishAsFeedback();
 
                     // detect waypoint zone
-                    if (!waypoints.empty() && waypointZone > controller->getDistanceError(currentRobotPose, currentRequiredGoal.pose)) {
+                    if (!waypoints.empty() && controller->isZoneAchieved(waypointZone)) {
                         ROS_INFO("Waypoint zone achieved");
-                        state = State::WAIT_FOR_GOAL;
+                        state = State::GET_NEW_GOAL;
                         break;
                     }
 
@@ -93,9 +93,12 @@ void RosWrapper::updateRobotPose() {
         }
 
         poseTfListener.lookupTransform("/map", tf::resolve(tfPrefix, "base_link"), ros::Time(0), transform);
+        geometry_msgs::Pose2D currentRobotPose;
         currentRobotPose.x = transform.getOrigin().x();
         currentRobotPose.y = transform.getOrigin().y();
         currentRobotPose.theta = tf::getYaw(transform.getRotation());
+
+        controller->setCurrentPose(currentRobotPose);
         robotPoseReceived = true;
 //        ROS_INFO_STREAM("X: " << currentRobotPose.x << " Y: " << currentRobotPose.y << " Yaw: " << currentRobotPose.theta);
     } catch (const tf::TransformException& ex) {
@@ -104,28 +107,28 @@ void RosWrapper::updateRobotPose() {
     }
 }
 
-
-void RosWrapper::robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg) {
-    double r, p, y;
-    tf::Quaternion q(
-            poseMsg->orientation.x,
-            poseMsg->orientation.y,
-            poseMsg->orientation.z,
-            poseMsg->orientation.w);
-    tf::Matrix3x3(q).getRPY(r, p, y);
-
-    currentRobotPose.x = poseMsg->position.x;
-    currentRobotPose.y = poseMsg->position.y;
-    currentRobotPose.theta = y;
-    robotPoseReceived = true;
-}
-
-void RosWrapper::turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg) {
-    currentRobotPose.theta = poseMsg->theta;
-    currentRobotPose.x = poseMsg->x;
-    currentRobotPose.y = poseMsg->y;
-    robotPoseReceived = true;
-}
+//
+//void RosWrapper::robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg) {
+//    double r, p, y;
+//    tf::Quaternion q(
+//            poseMsg->orientation.x,
+//            poseMsg->orientation.y,
+//            poseMsg->orientation.z,
+//            poseMsg->orientation.w);
+//    tf::Matrix3x3(q).getRPY(r, p, y);
+//
+//    currentRobotPose.x = poseMsg->position.x;
+//    currentRobotPose.y = poseMsg->position.y;
+//    currentRobotPose.theta = y;
+//    robotPoseReceived = true;
+//}
+//
+//void RosWrapper::turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg) {
+//    currentRobotPose.theta = poseMsg->theta;
+//    currentRobotPose.x = poseMsg->x;
+//    currentRobotPose.y = poseMsg->y;
+//    robotPoseReceived = true;
+//}
 
 void RosWrapper::acGoalCb() {
     ROS_INFO("New pose control goal received");
@@ -140,13 +143,13 @@ void RosWrapper::acGoalCb() {
         waypoints.push(point);
     }
 
-    state = State::WAIT_FOR_GOAL;
+    state = State::GET_NEW_GOAL;
 }
 
 void RosWrapper::publishAsFeedback() {
     PerformGoalAs::Feedback feedback;
     feedback.currentGoal = currentRequiredGoal;
-    feedback.currentPose = currentRobotPose;
+    feedback.currentPose = controller->getCurrentPose();
 
     performGoalAs.publishFeedback(feedback);
 }

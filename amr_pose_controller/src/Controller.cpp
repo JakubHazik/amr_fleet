@@ -21,35 +21,45 @@ constexpr T sqr(T x) {
 }
 
 
-Controller::Controller(const ControllerConfig& config) {
-    maxLinSpeed = config.maxLinearSpeed;
-    minLinSpeed = config.minLinearSpeed;
-    maxLinAcceleration = config.maxLinearAcceleration;
-    controllerFrequency = config.controllerFrequency;
-    rotationKp = config.rotationKp;
-    linearKp = config.linearKp;
+Controller::Controller(const ControllerConfig& _config) {
+    this->config = _config;
 }
 
-geometry_msgs::Twist Controller::getControllerAction(const geometry_msgs::Pose2D& currentPose,
-                                                     const geometry_msgs::Pose2D& requiredPose) {
+void Controller::setCurrentPose(const geometry_msgs::Pose2D& _currentPose) {
+    this->currentPose = _currentPose;
+}
+
+void Controller::setRequiredPose(const geometry_msgs::Pose2D& _requiredPose) {
+    this->requiredPose = _requiredPose;
+}
+
+const geometry_msgs::Pose2D& Controller::getCurrentPose() {
+    return this->currentPose;
+}
+
+const geometry_msgs::Pose2D& Controller::getRequiredPose() {
+    return this->requiredPose;
+}
+
+geometry_msgs::Twist Controller::getControllerAction() {
     geometry_msgs::Twist action;
 
     // angle action
-    action.angular.z = rotationKp * getAngleError(currentPose, requiredPose);
+    action.angular.z = config.rotationKp * getAngleError();
 
     //linear action
-    double linearError = getDistanceError(currentPose, requiredPose);
-    double linearAction = linearError * linearKp;
+    double linearError = getDistanceError();
+    double linearAction = linearError * config.linearKp;
 
     // saturation
-    if (linearAction > maxLinSpeed) {
-        linearAction = maxLinSpeed;
+    if (linearAction > config.maxLinearSpeed) {
+        linearAction = config.maxLinearSpeed;
 
         // ramp speed up
         if (lastLinAction < linearAction) {
-            linearAction = lastLinAction + maxLinAcceleration / controllerFrequency;
-            if (linearAction < minLinSpeed) {
-                linearAction = minLinSpeed;
+            linearAction = lastLinAction + config.maxLinearAcceleration / config.controllerFrequency;
+            if (linearAction < config.minLinearSpeed) {
+                linearAction = config.minLinearSpeed;
             }
         }
     }
@@ -60,15 +70,13 @@ geometry_msgs::Twist Controller::getControllerAction(const geometry_msgs::Pose2D
 
     action.linear.x = linearAction;
 
-    ROS_DEBUG("Error: Angle = %f; Linear = %f",
-            getAngleError(currentPose, requiredPose) * RAD2DEG, getDistanceError(currentPose, requiredPose));
+    ROS_DEBUG("Error: Angle = %f; Linear = %f", getAngleError() * RAD2DEG, getDistanceError());
 
     return action;
 }
 
 
-double Controller::getAngleError(const geometry_msgs::Pose2D& currentPose,
-                                 const geometry_msgs::Pose2D& requiredPose) {
+double Controller::getAngleError() {
 
     double goalAngle = atan2(requiredPose.y - currentPose.y, requiredPose.x - currentPose.x);
     double robotAngle = currentPose.theta;
@@ -97,8 +105,7 @@ double Controller::getAngleError(const geometry_msgs::Pose2D& currentPose,
 }
 
 
-double Controller::getDistanceError(const geometry_msgs::Pose2D& currentPose,
-                                    const geometry_msgs::Pose2D& requiredPose) {
+double Controller::getDistanceError() {
 
     return sqrt(sqr(currentPose.x - requiredPose.x) + sqr(currentPose.y - requiredPose.y));
 }
@@ -106,3 +113,8 @@ double Controller::getDistanceError(const geometry_msgs::Pose2D& currentPose,
 geometry_msgs::Twist Controller::getStopAction() {
     return { };
 }
+
+bool Controller::isZoneAchieved(double zoneDistance) {
+    return zoneDistance > getDistanceError();
+}
+
