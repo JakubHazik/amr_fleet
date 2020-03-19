@@ -6,7 +6,44 @@
 #define PROJECT_SEMAPHORESERVER_H
 
 #include <ros/ros.h>
-#include <amr_msgs/LockNode.h>
+#include <amr_msgs/LockPoint.h>
+#include <amr_msgs/Point.h>
+
+#include <queue>
+#include <deque>
+#include <set>
+#include <list>
+#include <memory>
+
+//template <typename T, unsigned int MaxLen, typename Container=std::deque<T>>
+//class FixedQueue : public std::queue<T, Container> {
+//public:
+//    void push(const T& value) {
+//        if (this->size() == MaxLen) {
+//            this->c.pop_front();
+//        }
+//        std::queue<T, Container>::push(value);
+//    }
+//};
+
+class NodesOccupancyContainer {
+public:
+    NodesOccupancyContainer(unsigned int occupancyLength);
+
+    bool lockNode(const std::string& ownerId, const amr_msgs::Point& node);
+
+    bool isNodeAlreadyLocked(const amr_msgs::Point& node);
+
+    std::map<std::string, std::list<amr_msgs::Point>> getOccupancyData();
+
+private:
+    std::map<std::string, std::list<amr_msgs::Point>> data;
+    unsigned int bufferMaxLength;
+
+
+};
+
+
 
 class SemaphoreServer {
 
@@ -16,7 +53,10 @@ public:
 private:
     ros::ServiceServer lockNodeSrv;
 
-    bool lockNodeCb(amr_msgs::LockNode::Request& req, amr_msgs::LockNode::Response& res);
+    std::shared_ptr<NodesOccupancyContainer> nodesOccupancy;
+//    std::map<unsigned int, std::string> lockedNodes;  // <nodeId, clientId>
+
+    bool lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res);
 
 };
 

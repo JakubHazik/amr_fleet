@@ -5,8 +5,30 @@
 #ifndef PROJECT_SEMAPHORECLIENT_H
 #define PROJECT_SEMAPHORECLIENT_H
 
+#include <string>
+#include <ros/ros.h>
+#include <amr_msgs/Point.h>
+#include <future>
 
 class SemaphoreClient {
+public:
+    SemaphoreClient(const std::string& lockServiceName);
+
+
+
+
+    bool lockNode(const amr_msgs::Point &node);
+
+    std::future<bool> lockNodeAsync(const amr_msgs::Point &node);
+
+
+//    bool unlockNode(const amr_msgs::Node& node);
+
+private:
+    std::string clientId;
+    ros::ServiceClient lockNodeSrv;
+
+
 
 };
 

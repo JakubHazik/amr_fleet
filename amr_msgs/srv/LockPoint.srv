@@ -1,5 +1,5 @@
 string clientId
-amr_msgs/Node node
+amr_msgs/Point point
 ---
 bool success
 string message

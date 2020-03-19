@@ -5,13 +5,12 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
         amr_msgs
-        amr_pose_controller
         roscpp
         )
 
 catkin_package(
-        #  INCLUDE_DIRS include
-        #  LIBRARIES amr_semaphore
+        INCLUDE_DIRS include
+        LIBRARIES semaphore_client
         #  CATKIN_DEPENDS amr_msgs amr_pose_controller roscpp
         #  DEPENDS system_lib
 )
@@ -33,9 +32,9 @@ target_link_libraries(semaphore_server
         )
 
 # Client
-add_executable(semaphore_client
+add_library(semaphore_client
         src/client/SemaphoreClient.cpp
-        src/client/SemaphoreClientNode.cpp
+#        src/client/SemaphoreClientNode.cpp
         )
 add_dependencies(semaphore_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
