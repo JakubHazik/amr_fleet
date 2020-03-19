@@ -45,9 +45,10 @@ int main(int argc, char **argv) {
     ROS_INFO("Graph has been generated and published.");
 
     GraphVisualizer visualizer(graph);
+    visualizer.publish();
     ros::Rate r(1.0/graphVisualizationRate);
     while (ros::ok()) {
-        visualizer.publish();
+
         r.sleep();
     }
 

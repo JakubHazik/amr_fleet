@@ -13,7 +13,7 @@ GraphVisualizer::GraphVisualizer(const std::vector<Node>& graph) {
 
     // todo configurable
     visual_tools.reset(new rvt::RvizVisualTools("map", "/amr_rviz_tools"));
-    visual_tools->loadMarkerPub();  // create publisher before waiting
+    visual_tools->loadMarkerPub(false, true);  // create publisher before waiting
 
     // Clear messages
     visual_tools->deleteAllMarkers();
