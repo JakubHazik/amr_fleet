@@ -87,8 +87,8 @@ geometry_msgs::Twist Controller::getControllerAction() {
     action.linear.x = linearAction;
 
 //    ROS_INFO("Error: Angle = %f; Linear = %f", getAngleError() * RAD2DEG, getDistanceError());
-    ROS_INFO("Action: Angle = %f; Linear= %f; Compensation = %f",
-            angularAction, linearAction, - std::abs(angularAction) * 0.05);
+//    ROS_INFO("Action: Angle = %f; Linear= %f; Compensation = %f",
+//            angularAction, linearAction, - std::abs(angularAction) * 0.05);
 
     return action;
 }

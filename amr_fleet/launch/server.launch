@@ -18,7 +18,10 @@
     <!-- Task manager -->
     <include file="$(find amr_task_manager)/launch/task_manager_server.launch"/>
 
+    <!-- Semaphore server -->
+    <include file="$(find amr_semaphore)/launch/semaphore_server.launch"/>
+
     <!-- Rviz -->
-    <node pkg="rviz" type="rviz" name="rviz" output="screen"/>
+    <include file="$(find amr_fleet)/launch/rviz.launch"/>
 
 </launch>
