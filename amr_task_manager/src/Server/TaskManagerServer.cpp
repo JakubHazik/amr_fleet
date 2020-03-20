@@ -57,6 +57,10 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
     clients.at("r1").tasks.push(t1);
     clients.at("r1").tasks.push(t2);
 
+    t1.path.first.point.uuid = 54;
+    clients.at("r2").tasks.push(t1);
+    clients.at("r2").tasks.push(t2);
+
     ROS_INFO("Server task manager launched successful");
 }
 

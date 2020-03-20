@@ -108,6 +108,7 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
         }
         case amr_msgs::TaskId::DO_NOTHING: {
             callGetNewTaskServiceAfterTime(task.timeout);
+            ROS_INFO("Wait %f seconds", task.timeout);
             break;
         }
         default:
