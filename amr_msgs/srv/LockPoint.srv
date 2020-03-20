@@ -1,0 +1,6 @@
+string clientId
+amr_msgs/Point point
+bool unlockAll
+---
+bool success
+string message

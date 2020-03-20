@@ -1,1 +1,1 @@
-activeClients: ["r1"]
+activeClients: ["r1", "r2"]   # it will be used as namespaces for robots

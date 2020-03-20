@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- spaw r1 robot -->
+    <include file="$(find amr_fleet)/launch/client.launch">
+        <arg name="robot_id" value="r1"/>
+        <arg name="x_pos" value="-2.0"/>
+        <arg name="y_pos" value="-0.5"/>
+        <arg name="z_pos" value="0.0"/>
+        <arg name="a_pos" value="0.0"/>
+    </include>
+
+    <!-- spaw r2 robot -->
+    <include file="$(find amr_fleet)/launch/client.launch">
+        <arg name="robot_id" value="r2"/>
+        <arg name="x_pos" value="-2.0"/>
+        <arg name="y_pos" value="0.5"/>
+        <arg name="z_pos" value="0.0"/>
+        <arg name="a_pos" value="0.0"/>
+    </include>
+
+</launch>

@@ -1,0 +1,8 @@
+<launch>
+  <!-- turtlebot3_teleop_key already has its own built in velocity smoother -->
+  <arg name="robot_id" default="r1"/>
+  <group ns="$(arg robot_id)">
+    <node pkg="turtlebot3_teleop" type="turtlebot3_teleop_key" name="turtlebot3_teleop_keyboard"  output="screen">
+    </node>
+  </group>
+</launch>

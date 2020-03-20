@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="map"             default="world"/>
+
+
+    <include file="$(find turtlebot3_gazebo)/launch/turtlebot3_world.launch"/>
+
+    <!--<include file="$(find gazebo_ros)/launch/empty_world.launch">-->
+        <!--<arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_$(arg map).world"/>-->
+        <!--<arg name="paused" value="false"/>-->
+        <!--<arg name="use_sim_time" value="true"/>-->
+        <!--&lt;!&ndash;<arg name="gui" value="false"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<arg name="headless" value="true"/>&ndash;&gt;-->
+        <!--<arg name="debug" value="false"/>-->
+    <!--</include>-->
+</launch>

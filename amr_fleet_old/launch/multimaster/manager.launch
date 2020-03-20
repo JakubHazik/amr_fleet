@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="fkie_node_manager" type="node_manager" name="node_manager"/>
+    <include file="$(find amr_fleet)/launch/multimaster.launch"/>
+</launch>

@@ -31,6 +31,36 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
         clients.insert(std::make_pair(activeClients[i], client));
     }
 
+
+    int r1Start, r1End;
+    nh.getParam("r1Start", r1Start);
+    nh.getParam("r1End", r1End);
+
+    Task t1;
+    t1.command = Task::Commnands::PLAN_PATH;
+    t1.path.first.point.uuid = r1Start;
+    t1.path.second.point.uuid = r1End;
+    Task t2;
+    t2.command = Task::Commnands::PLAN_PATH;
+    t2.path.first.point.uuid = r1End;
+    t2.path.second.point.uuid = r1Start;
+    clients.at("r1").tasks.push(t1);
+    clients.at("r1").tasks.push(t2);
+    clients.at("r1").tasks.push(t1);
+    clients.at("r1").tasks.push(t2);
+    clients.at("r1").tasks.push(t1);
+    clients.at("r1").tasks.push(t2);
+    clients.at("r1").tasks.push(t1);
+    clients.at("r1").tasks.push(t2);
+    clients.at("r1").tasks.push(t1);
+    clients.at("r1").tasks.push(t2);
+    clients.at("r1").tasks.push(t1);
+    clients.at("r1").tasks.push(t2);
+
+    t1.path.first.point.uuid = 54;
+    clients.at("r2").tasks.push(t1);
+    clients.at("r2").tasks.push(t2);
+
     ROS_INFO("Server task manager launched successful");
 }
 

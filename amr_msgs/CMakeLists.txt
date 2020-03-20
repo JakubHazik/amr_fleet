@@ -26,6 +26,7 @@ add_service_files(
         PlanPathNodes.srv
         GetTask.srv
         ResetTask.srv
+        LockPoint.srv
 )
 
 add_action_files(

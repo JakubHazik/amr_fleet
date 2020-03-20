@@ -41,6 +41,7 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
 }
 
 bool TaskManagerClient::resetTaskServiceCb(amr_msgs::ResetTask::Request& req, amr_msgs::ResetTask::Response& res) {
+    ROS_INFO("Reset task received");
     performWaypointsAc.cancelAllGoals();
     callGetNewTaskServiceAfterTime(0.01);   // asap, but not in this function scope, service have to be done
     return true;
@@ -107,6 +108,7 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
         }
         case amr_msgs::TaskId::DO_NOTHING: {
             callGetNewTaskServiceAfterTime(task.timeout);
+            ROS_INFO("Wait %f seconds", task.timeout);
             break;
         }
         default:
@@ -117,6 +119,7 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
 
 void TaskManagerClient::acWaypointsDoneCb(const actionlib::SimpleClientGoalState& state,
                                           const amr_msgs::PerformGoalsResultConstPtr& result) {
+    // todo mutex for action callbacks
 
     if (state.state_ == state.SUCCEEDED) {
         ROS_INFO("Waypoints performed successfully");

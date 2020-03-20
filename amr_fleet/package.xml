@@ -49,6 +49,8 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>map_server</depend>
+  <depend>amcl</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

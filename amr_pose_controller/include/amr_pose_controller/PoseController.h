@@ -2,8 +2,8 @@
 // Created by jakub on 7.3.2020.
 //
 
-#ifndef PROJECT_ROSWRAPPER_H
-#define PROJECT_ROSWRAPPER_H
+#ifndef PROJECT_POSECONTROLLER_H
+#define PROJECT_POSECONTROLLER_H
 
 #include <memory>
 #include <queue>
@@ -18,18 +18,26 @@
 #include <turtlesim/Pose.h>
 #include <amr_msgs/Point.h>
 #include <amr_msgs/PerformGoalsAction.h>
+#include <amr_semaphore/client/SemaphoreClient.h>
 
+#include <memory>
+#include <future>
+
+#include <rviz_visual_tools/rviz_visual_tools.h>
+
+namespace rvt = rviz_visual_tools;
 
 typedef actionlib::SimpleActionServer<amr_msgs::PerformGoalsAction> PerformGoalAs;
 
 
-class RosWrapper {
+class PoseController {
 public:
-    RosWrapper(ros::NodeHandle& nh);
+    PoseController(ros::NodeHandle& nh);
 
 private:
     enum class State {
-        WAIT_FOR_GOAL,
+        INIT_STATE,
+        GET_NEW_GOAL,
         PERFORMING_GOAL,
     };
 
@@ -40,30 +48,33 @@ private:
     tf::TransformListener poseTfListener;
 
     // poses
-    geometry_msgs::Pose2D currentRobotPose;
     amr_msgs::Point currentRequiredGoal;
 
     // inernal variables
     std::string tfPrefix;
-    State state = State::WAIT_FOR_GOAL;
+    State state = State::INIT_STATE;
     std::unique_ptr<Controller> controller;
     std::queue<amr_msgs::Point> waypoints;
     double waypointZone;
-    double goalZone;
     bool robotPoseReceived = false;
+    std::shared_ptr<SemaphoreClient> semaphoreClient;
+    std::future<bool> nodeLocked;
+    rvt::RvizVisualToolsPtr visual_tools;
 
     void updateRobotPose();
 
-    void robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg);
-
-    void turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg);
+//    void robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg);
+//
+//    void turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg);
 
     void acGoalCb();
 
     void publishAsFeedback();
 
     void publishAsResult();
+
+    void visualizeCurrentGoal();
 };
 
 
-#endif //PROJECT_ROSWRAPPER_H
+#endif //PROJECT_POSECONTROLLER_H
