@@ -89,6 +89,10 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
     return true;
 }
 
+rvt::colors getColorHash(const std::string& ownerId) {
+    return static_cast<rvt::colors>(std::hash<std::string>{}(ownerId) % 18);
+}
+
 void SemaphoreServer::visualizeNodesOccupancy() {
     visual_tools->deleteAllMarkers();
 
@@ -101,7 +105,7 @@ void SemaphoreServer::visualizeNodesOccupancy() {
             point.x = nodes.pose.x;
             point.y = nodes.pose.y;
 
-            visual_tools->publishSphere(point, rvt::colors::GREEN, rvt::scales::XLARGE);
+            visual_tools->publishSphere(point, getColorHash(ownerNodes.first), rvt::scales::XLARGE);
             geometry_msgs::Pose pose;
             pose.position = point;
             pose.position.x += 0.1;
