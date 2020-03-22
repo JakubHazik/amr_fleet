@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>amr_monitor</name>
+  <name>amr_gui</name>
   <version>0.0.0</version>
-  <description>The amr_monitor package</description>
+  <description>The amr_ui package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/amr_monitor</url> -->
+  <!-- <url type="website">http://wiki.ros.org/amr_ui</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -49,24 +49,13 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>amr_monitor</build_depend>
   <build_depend>roscpp</build_depend>
-     <exec_depend>roscpp</exec_depend>
-  <build_depend>amr_msgs</build_depend>
-  <build_depend>amr_pose_controller</build_depend>
-  <build_depend>amr_task_manager</build_depend>
-  <build_depend>rviz_visual_tools</build_depend>
-  <build_export_depend>amr_msgs</build_export_depend>
-  <build_export_depend>amr_pose_controller</build_export_depend>
-  <build_export_depend>amr_task_manager</build_export_depend>
-  <build_export_depend>rviz_visual_tools</build_export_depend>
-  <exec_depend>amr_msgs</exec_depend>
-  <exec_depend>amr_pose_controller</exec_depend>
-  <exec_depend>amr_task_manager</exec_depend>
-  <exec_depend>rviz_visual_tools</exec_depend>
+  <build_export_depend>amr_monitor</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <exec_depend>amr_monitor</exec_depend>
+  <exec_depend>roscpp</exec_depend>
 
-  <depend>geometry_msgs</depend>
-  <depend>rqt_gui</depend>
-  <depend>rqt_gui_cpp</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
