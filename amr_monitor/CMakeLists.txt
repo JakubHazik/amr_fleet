@@ -46,14 +46,17 @@ target_link_libraries(monitor_client
 # ==============================
 set (rqt_example_cpp_SRCS
         src/qt_widget/MonitorWidget.cpp
+        src/qt_widget/ClientMonitorWidget.cpp
         )
 
 set(rqt_example_cpp_HDRS
         include/amr_monitor/qt_widget/MonitorWidget.h
+        include/amr_monitor/qt_widget/ClientMonitorWidget.h
         )
 
 set(rqt_example_cpp_UIS
         src/qt_widget/MonitorWidget.ui
+        src/qt_widget/ClientMonitorWidget.ui
         )
 
 qt5_wrap_cpp(rqt_example_cpp_MOCS ${rqt_example_cpp_HDRS})

@@ -7,7 +7,9 @@
 
 #include <QWidget>
 #include <QtWidgets>
-
+#include <ros/ros.h>
+#include <amr_msgs/ClientInfo.h>
+#include <mutex>
 
 namespace Ui {
     class MonitorWidget;
@@ -20,10 +22,24 @@ class MonitorWidget : public QWidget {
     public:
         explicit MonitorWidget(QWidget *parent = nullptr);
 
-    private slots:
+        void updateWidget();
+
+    private Q_SLOTS:
+        void updateClientSlot(amr_msgs::ClientInfo clientInfo);
+
+    Q_SIGNALS:
+        void updateClientSignal(amr_msgs::ClientInfo clientInfo);
 
     private:
         Ui::MonitorWidget *ui;
+
+        ros::Subscriber clientsInfoSub;
+        std::map<std::string, amr_msgs::ClientInfoPtr> clientInfoData;
+        std::mutex clientInfoMtx;
+        void clientInfoCb(const amr_msgs::ClientInfo::Ptr& clientInfoMsg);
+
+
+
     };
 
 }
