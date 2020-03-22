@@ -65,8 +65,6 @@
   <exec_depend>rviz_visual_tools</exec_depend>
 
   <depend>geometry_msgs</depend>
-  <depend>rqt_gui</depend>
-  <depend>rqt_gui_cpp</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

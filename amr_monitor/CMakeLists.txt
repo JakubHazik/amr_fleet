@@ -14,30 +14,21 @@ find_package(catkin REQUIRED COMPONENTS
         amr_task_manager
         rviz_visual_tools
         geometry_msgs
-
-        rqt_gui
-        rqt_gui_cpp
         )
-#find_package(Qt5Widgets REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Gui Core Widgets)
-
+find_package(Qt5Widgets REQUIRED)
 
 catkin_package(
         INCLUDE_DIRS include
         LIBRARIES amr_monitor_widget
-        CATKIN_DEPENDS roscpp rqt_gui_cpp
+        CATKIN_DEPENDS roscpp amr_msgs
         #  DEPENDS system_lib
 )
 
-message(FATAL ${CMAKE_CURRENT_BINARY_DIR})
 include_directories(
         include
-        ${CMAKE_CURRENT_BINARY_DIR}/..
         ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}
         ${catkin_INCLUDE_DIRS}
         )
-
 
 add_executable(monitor_client
         src/client/MonitoringNode.cpp
@@ -50,21 +41,22 @@ target_link_libraries(monitor_client
         ${catkin_LIBRARIES}
         )
 
+# ==============================
 # widget
-
+# ==============================
 set (rqt_example_cpp_SRCS
-        src/MonitorWidget.cpp
+        src/qt_widget/MonitorWidget.cpp
         )
 
 set(rqt_example_cpp_HDRS
-        include/amr_monitor/MonitorWidget.h
+        include/amr_monitor/qt_widget/MonitorWidget.h
         )
 
 set(rqt_example_cpp_UIS
-        src/MonitorWidget.ui
+        src/qt_widget/MonitorWidget.ui
         )
 
-#qt5_wrap_cpp(rqt_example_cpp_MOCS ${rqt_example_cpp_HDRS})
+qt5_wrap_cpp(rqt_example_cpp_MOCS ${rqt_example_cpp_HDRS})
 qt5_wrap_ui(rqt_example_cpp_UIS_H ${rqt_example_cpp_UIS})
 
 add_library(amr_monitor_widget

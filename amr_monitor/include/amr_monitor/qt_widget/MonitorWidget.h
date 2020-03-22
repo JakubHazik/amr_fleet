@@ -9,20 +9,21 @@
 #include <QtWidgets>
 
 
-
+namespace Ui {
+    class MonitorWidget;
+}
 
 namespace amr_gui{
 class MonitorWidget : public QWidget {
         Q_OBJECT
+
     public:
         explicit MonitorWidget(QWidget *parent = nullptr);
 
     private slots:
 
     private:
-        void setupActions();
-
-
+        Ui::MonitorWidget *ui;
     };
 
 }

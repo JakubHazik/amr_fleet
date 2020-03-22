@@ -3,13 +3,13 @@
 //
 
 #include <amr_gui/MainWindow.h>
-
-//#include <amr_monitor/MoinitorWidget.h>
+#include <ui_MainWindow.h>
 
 MainWindow::MainWindow(int argc, char **argv, QWidget *parent)
-    : QMainWindow(parent) {
+    :   QMainWindow(parent),
+        ui(new Ui::MainWindowDesign){
 
-    ui.setupUi(this);
+    ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()

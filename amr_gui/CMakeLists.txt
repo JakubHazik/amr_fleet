@@ -4,7 +4,7 @@ project(amr_gui)
 add_compile_options(-std=c++11)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC OFF)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -27,8 +27,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-
-
 set (rqt_example_cpp_SRCS
         src/MainWindow.cpp
         src/main.cpp
@@ -49,8 +47,6 @@ add_executable(amr_gui
         ${rqt_example_cpp_SRCS}
         ${rqt_example_cpp_MOCS}
         ${rqt_example_cpp_UIS_H}
-
-        ../amr_monitor/include/amr_monitor/MonitorWidget.h
         )
 
 target_link_libraries(amr_gui

@@ -7,10 +7,9 @@
 
 #include <QMainWindow>
 #include <QWidget>
-#include "ui_MainWindow.h"
 
 namespace Ui {
-    class MainWindow;
+    class MainWindowDesign;
 }
 
 class MainWindow : public QMainWindow {
@@ -24,8 +23,7 @@ protected:
 private slots:
 
 private:
-
-    Ui::MainWindowDesign ui;
+    Ui::MainWindowDesign *ui;
 };
 
 #endif //SRC_MAINWINDOW_H
