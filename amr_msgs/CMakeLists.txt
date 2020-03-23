@@ -18,6 +18,8 @@ add_message_files(
         Task.msg
         TaskId.msg
         GetTaskErrorCodes.msg
+        ClientInfo.msg
+        HardwareStatus.msg
 )
 
 add_service_files(

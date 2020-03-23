@@ -1,0 +1,6 @@
+string clientId
+amr_msgs/Point robotCurrentGoal
+geometry_msgs/PoseWithCovarianceStamped poseWithCovariance
+amr_msgs/HardwareStatus hardwareStatus
+
+

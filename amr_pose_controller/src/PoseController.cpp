@@ -34,8 +34,10 @@ PoseController::PoseController(ros::NodeHandle& nh)
 //    usleep(1000*1000*15);
 
     cmdVelPub = nh.advertise<geometry_msgs::Twist>(ros::this_node::getNamespace() + cmdVelTopic, 10);
+    currentGoalPub = nh.advertise<amr_msgs::Point>("current_goal", 10);
 //    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &PoseController::robotPoseCb, this);
 //    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &PoseController::turtlesimPoseCb, this);
+
 
     performGoalAs.registerGoalCallback(boost::bind(&PoseController::acGoalCb, this));
     performGoalAs.start();
@@ -77,6 +79,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
                             currentRequiredGoal.uuid = -1;
                             currentRequiredGoal.pose = controller->getCurrentPose();
                             controller->setRequiredPose(currentRequiredGoal.pose);
+                            currentGoalPub.publish(currentRequiredGoal);
                             state = State::GET_NEW_GOAL;
                         }
                         // else: node lock will be performed again (nodeLocked will be no valid)
@@ -102,6 +105,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
                         // set new required goal
                         currentRequiredGoal = waypoints.front();
                         controller->setRequiredPose(currentRequiredGoal.pose);
+                        currentGoalPub.publish(currentRequiredGoal);
                         waypoints.pop();
                         // lock next node
                         if (!waypoints.empty()) {
@@ -118,6 +122,10 @@ PoseController::PoseController(ros::NodeHandle& nh)
                     if (waypoints.empty() && controller->isZoneAchieved(config.goalDeadZone)) {
                         ROS_INFO("Last goal zone achieved");
                         publishAsResult();
+                        currentRequiredGoal.uuid = -1;
+                        currentRequiredGoal.pose = controller->getCurrentPose();
+                        controller->setRequiredPose(currentRequiredGoal.pose);
+                        currentGoalPub.publish(currentRequiredGoal);
                         state = State::GET_NEW_GOAL;
                         break;
                     }
@@ -140,7 +148,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
             ROS_WARN("No robot position received longer that %f [s].", 1 / config.controllerFrequency);
         }
 
-        visualizeCurrentGoal();
+        visualizeAndPublishCurrentGoal();
         rate.sleep();
     }
 }
@@ -219,7 +227,7 @@ void PoseController::publishAsResult() {
     performGoalAs.setSucceeded(result);
 }
 
-void PoseController::visualizeCurrentGoal() {
+void PoseController::visualizeAndPublishCurrentGoal() {
     visual_tools->deleteAllMarkers();
 
     auto currentPose = controller->getCurrentPose();

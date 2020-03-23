@@ -33,4 +33,9 @@
         <arg name="robot_id" value="$(arg robot_id)"/>
     </include>
 
+    <!-- Client pose control -->
+    <include file="$(find amr_monitor)/launch/monitor_client.launch">
+        <arg name="robot_id" value="$(arg robot_id)"/>
+    </include>
+
 </launch>

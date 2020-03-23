@@ -43,6 +43,7 @@ private:
 
     // interfaces
     ros::Publisher cmdVelPub;
+    ros::Publisher currentGoalPub;
     ros::Subscriber robotPoseSub;
     PerformGoalAs performGoalAs;
     tf::TransformListener poseTfListener;
@@ -73,7 +74,7 @@ private:
 
     void publishAsResult();
 
-    void visualizeCurrentGoal();
+    void visualizeAndPublishCurrentGoal();
 };
 
 
