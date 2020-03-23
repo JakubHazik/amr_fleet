@@ -1,4 +1,4 @@
-//
+//amr_gui
 // Created by jakub on 22. 3. 2020.
 //
 
@@ -15,6 +15,7 @@ namespace amr_gui {
             ui(new Ui::MonitorWidget){
 
         ui->setupUi(this);
+        qRegisterMetaType<amr_msgs::ClientInfo >("ClientInfo");
 
         ros::NodeHandle nh("/");
         clientsInfoSub = nh.subscribe("/client_info", 5, &MonitorWidget::clientInfoCb, this);
@@ -23,12 +24,13 @@ namespace amr_gui {
     }
 
     void MonitorWidget::clientInfoCb(const amr_msgs::ClientInfo::Ptr& clientInfoMsg) {
-        std::lock_guard<std::mutex> lock(clientInfoMtx);
-        clientInfoData[clientInfoMsg->clientId] = clientInfoMsg;
+//        std::lock_guard<std::mutex> lock(clientInfoMtx);
+        ROS_INFO("Client msg received");
+        emit updateClientSignal(*clientInfoMsg);
     }
 
     void MonitorWidget::updateWidget() {
-        for (const auto &msg: clientInfoData) {
+        for (const auto &msg: clientMonitorWidgets) {
 
 
 //            ui->poseX->setNum(msg.second->poseWithCovariance.pose.pose.position.x);
@@ -37,7 +39,20 @@ namespace amr_gui {
     }
 
     void MonitorWidget::updateClientSlot(amr_msgs::ClientInfo clientInfo) {
+        auto clientWidget = clientMonitorWidgets.find(clientInfo.clientId);
+        if (clientWidget == clientMonitorWidgets.end()) {
+            // create new tab widget
+            auto* clientMonitorWidget = new ClientMonitorWidget;
+            clientMonitorWidget->setObjectName(clientInfo.clientId.c_str());
+            ui->tabWidget->addTab(clientMonitorWidget, clientInfo.clientId.c_str());
 
+            // insert new tab widget to map
+            std::pair<std::string, amr_gui::ClientMonitorWidget*> pair(clientInfo.clientId, clientMonitorWidget);
+            auto insertResult = clientMonitorWidgets.insert(pair);
+            clientWidget = insertResult.first;
+        }
+
+        clientWidget->second->updateClientInfo(clientInfo);
     }
 
 

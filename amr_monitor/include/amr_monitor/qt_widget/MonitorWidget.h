@@ -10,13 +10,38 @@
 #include <ros/ros.h>
 #include <amr_msgs/ClientInfo.h>
 #include <mutex>
+#include <amr_monitor/qt_widget/ClientMonitorWidget.h>
+
+
+#include <QObject>
+#include <QMetaType>
+
+
+
+//class QClientInfo {
+//public:
+//
+//    QClientInfo() = default;
+//    ~QClientInfo() = default;
+//
+//    amr_msgs::ClientInfo clientInfo;
+//};
+Q_DECLARE_METATYPE(amr_msgs::ClientInfo);
+
+
+
 
 namespace Ui {
     class MonitorWidget;
 }
 
 namespace amr_gui{
-class MonitorWidget : public QWidget {
+
+
+
+
+
+    class MonitorWidget : public QWidget {
         Q_OBJECT
 
     public:
@@ -34,7 +59,7 @@ class MonitorWidget : public QWidget {
         Ui::MonitorWidget *ui;
 
         ros::Subscriber clientsInfoSub;
-        std::map<std::string, amr_msgs::ClientInfoPtr> clientInfoData;
+        std::map<std::string, amr_gui::ClientMonitorWidget*> clientMonitorWidgets;
         std::mutex clientInfoMtx;
         void clientInfoCb(const amr_msgs::ClientInfo::Ptr& clientInfoMsg);
 

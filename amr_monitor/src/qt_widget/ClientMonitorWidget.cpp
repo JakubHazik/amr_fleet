@@ -19,7 +19,9 @@ namespace amr_gui {
 
 
     void ClientMonitorWidget::updateClientInfo(const amr_msgs::ClientInfo& clientInfo) {
-
+//        ROS_INFO("update client");
+        ui->poseX->setNum(clientInfo.poseWithCovariance.pose.pose.position.x);
+        ui->poseY->setNum(clientInfo.poseWithCovariance.pose.pose.position.y);
     }
 
 }
