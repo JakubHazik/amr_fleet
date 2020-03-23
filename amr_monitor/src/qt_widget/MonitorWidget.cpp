@@ -6,36 +6,24 @@
 #include <ui_MonitorWidget.h>
 
 
-
-
 namespace amr_gui {
 
     MonitorWidget::MonitorWidget(QWidget *parent)
         :   QWidget(parent),
             ui(new Ui::MonitorWidget){
 
+        // qt setup
         ui->setupUi(this);
         qRegisterMetaType<amr_msgs::ClientInfo >("ClientInfo");
+        connect(this, SIGNAL(updateClientSignal(amr_msgs::ClientInfo)), this, SLOT(updateClientSlot(amr_msgs::ClientInfo)));
 
+        // ros setup
         ros::NodeHandle nh("/");
         clientsInfoSub = nh.subscribe("/client_info", 5, &MonitorWidget::clientInfoCb, this);
-
-        connect(this, SIGNAL(updateClientSignal(amr_msgs::ClientInfo)), this, SLOT(updateClientSlot(amr_msgs::ClientInfo)));
     }
 
     void MonitorWidget::clientInfoCb(const amr_msgs::ClientInfo::Ptr& clientInfoMsg) {
-//        std::lock_guard<std::mutex> lock(clientInfoMtx);
-        ROS_INFO("Client msg received");
         emit updateClientSignal(*clientInfoMsg);
-    }
-
-    void MonitorWidget::updateWidget() {
-        for (const auto &msg: clientMonitorWidgets) {
-
-
-//            ui->poseX->setNum(msg.second->poseWithCovariance.pose.pose.position.x);
-//            ui->poseY->setNum(msg.second->poseWithCovariance.pose.pose.position.y);
-        }
     }
 
     void MonitorWidget::updateClientSlot(amr_msgs::ClientInfo clientInfo) {

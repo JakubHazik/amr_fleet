@@ -10,8 +10,6 @@ MainWindow::MainWindow(int argc, char **argv, QWidget *parent)
         ui(new Ui::MainWindowDesign) {
 
     ui->setupUi(this);
-
-    ui->monitorWidget->updateWidget();
 }
 
 MainWindow::~MainWindow() {
