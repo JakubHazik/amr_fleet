@@ -62,7 +62,7 @@
   <customwidget>
    <class>amr_gui::MonitorWidget</class>
    <extends>QWidget</extends>
-   <header>amr_monitor/qt_widget/MonitorWidget.h</header>
+   <header>amr_gui/monitoring/MonitorWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

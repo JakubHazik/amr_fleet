@@ -2,7 +2,7 @@
 // Created by jakub on 22. 3. 2020.
 //
 
-#include <amr_monitor/qt_widget/ClientMonitorWidget.h>
+#include <amr_gui/monitoring/ClientMonitorWidget.h>
 #include <ui_ClientMonitorWidget.h>
 
 #include <tf/transform_datatypes.h>

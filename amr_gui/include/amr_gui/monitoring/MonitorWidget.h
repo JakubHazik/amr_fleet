@@ -7,7 +7,7 @@
 
 #include <ros/ros.h>
 #include <amr_msgs/ClientInfo.h>
-#include <amr_monitor/qt_widget/ClientMonitorWidget.h>
+#include <amr_gui/monitoring/ClientMonitorWidget.h>
 
 #include <QWidget>
 #include <QMetaType>

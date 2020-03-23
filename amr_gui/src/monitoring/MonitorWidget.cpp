@@ -2,7 +2,7 @@
 // Created by jakub on 22. 3. 2020.
 //
 
-#include <amr_monitor/qt_widget/MonitorWidget.h>
+#include "../../include/amr_gui/monitoring/MonitorWidget.h"
 #include <ui_MonitorWidget.h>
 
 

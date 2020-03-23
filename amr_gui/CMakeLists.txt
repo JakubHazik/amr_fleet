@@ -28,16 +28,22 @@ include_directories(
 )
 
 set (rqt_example_cpp_SRCS
-        src/MainWindow.cpp
         src/main.cpp
+        src/MainWindow.cpp
+        src/monitoring/ClientMonitorWidget.cpp
+        src/monitoring/MonitorWidget.cpp
         )
 
 set(rqt_example_cpp_HDRS
         include/amr_gui/MainWindow.h
+        include/amr_gui/monitoring/ClientMonitorWidget.h
+        include/amr_gui/monitoring/MonitorWidget.h
         )
 
 set(rqt_example_cpp_UIS
         ui/MainWindow.ui
+        ui/monitoring/ClientMonitorWidget.ui
+        ui/monitoring/MonitorWidget.ui
         )
 
 qt5_wrap_cpp(rqt_example_cpp_MOCS ${rqt_example_cpp_HDRS})

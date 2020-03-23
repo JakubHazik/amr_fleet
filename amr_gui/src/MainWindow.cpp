@@ -13,5 +13,5 @@ MainWindow::MainWindow(int argc, char **argv, QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
-//    delete ui;
+    delete ui;
 }
