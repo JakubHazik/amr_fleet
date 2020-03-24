@@ -16,6 +16,7 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh) {
     segSubscriber = nh.subscribe("/graph_generator/graph", 5, &RosWrapper::newGraphCb, this);
     planPathByPointsSrv = nh.advertiseService("plan_path_by_points", &RosWrapper::planPathPointsCallback, this);
     planPathByNodesSrv = nh.advertiseService("plan_path_by_nodes", &RosWrapper::planPathNodesCallback, this);
+    setNodePropertiesSrv = nh.advertiseService("set_node_properties", &RosWrapper::setNodePropertiesCallback, this);
 }
 
 void RosWrapper::newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg) {
@@ -72,5 +73,20 @@ bool RosWrapper::planPathNodesCallback(amr_msgs::PlanPathNodes::Request& req, am
 
     res.pathWaypoints = nodes2msgPoints(result);
 
+    return true;
+}
+
+bool RosWrapper::setNodePropertiesCallback(amr_msgs::SetNodeProperties::Request& req,
+                                           amr_msgs::SetNodeProperties::Response& res) {
+
+    try {
+        graph.setNodeReachability(req.point.uuid, req.reachability);
+    } catch (const std::out_of_range& ex) {
+        res.success = false;
+        res.message = ex.what();
+        return true;
+    }
+
+    res.success = true;
     return true;
 }

@@ -29,6 +29,7 @@ add_service_files(
         GetTask.srv
         ResetTask.srv
         LockPoint.srv
+        SetNodeProperties.srv
 )
 
 add_action_files(

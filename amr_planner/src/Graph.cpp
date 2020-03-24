@@ -109,15 +109,23 @@ Node Graph::getNearestNode(double x, double y) {
     return minDistanceNode.second;
 }
 
-Node Graph::getNode(unsigned int uuid) {
+vertexIt_t Graph::getNodeIt(unsigned int uuid) {
     vertexIt_t vi, vi_end;
     for (boost::tie(vi, vi_end) = vertices(graph); vi != vi_end; ++vi) {
         if (uuid == graph[*vi].uuid) {
-            return graph[*vi];
+            return vi;
         }
     }
 
     throw std::out_of_range("Graph not contain node with uuid: " + std::to_string(uuid));
+}
+
+Node Graph::getNode(unsigned int uuid) {
+    return graph[*getNodeIt(uuid)];
+}
+
+void Graph::setNodeReachability(unsigned int uuid, bool isReachable) {
+    graph[*getNodeIt(uuid)].isReachable = isReachable;
 }
 
 //void Graph::printGraph() {

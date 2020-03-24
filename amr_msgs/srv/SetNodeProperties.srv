@@ -1,0 +1,5 @@
+amr_msgs/Point point
+bool reachability
+---
+bool success
+string message

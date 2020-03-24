@@ -16,6 +16,7 @@
 using libMultiRobotPlanning::AStar;
 using libMultiRobotPlanning::Neighbor;
 using libMultiRobotPlanning::PlanResult;
+namespace mrp = libMultiRobotPlanning;
 
 //struct State {
 //    State(int x, int y) : x(x), y(y) {}
@@ -92,13 +93,15 @@ public:
         return s == m_goal;
     }
 
-    void getNeighbors(const State& s, std::vector<Neighbor<State, Action, double> >& neighbors) {
+    void getNeighbors(const State& s, std::vector<mrp::Neighbor<State, Action, double> >& neighbors) {
         neighbors.clear();
 
         auto n = graph.getNeighbors(s);
 
         for (auto i : n) {
-            neighbors.emplace_back(Neighbor<State, Action, double>(i.node, Action::Next, i.weight));
+            if (i.node.isReachable) {
+                neighbors.emplace_back(mrp::Neighbor<State, Action, double>(i.node, Action::Next, i.weight));
+            }
         }
     }
 

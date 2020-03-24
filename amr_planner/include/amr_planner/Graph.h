@@ -113,9 +113,13 @@ public:
 
     void clear();
 
+    void setNodeReachability(unsigned int uuid, bool isReachable);
+
 private:
 
     graph_t graph;
+
+    vertexIt_t getNodeIt(unsigned int uuid);
 
 
 //    bool findEdge(const Node& n1, const Node& n2, edge_t& foundNodesEdge);
