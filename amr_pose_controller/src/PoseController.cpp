@@ -120,7 +120,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
 
                     // detect last goal zone
                     if (waypoints.empty() && controller->isZoneAchieved(config.goalDeadZone)) {
-                        ROS_INFO("Last goal zone achieved");
+//                        ROS_INFO("Last goal zone achieved");
                         publishAsResult();
                         currentRequiredGoal.uuid = -1;
                         currentRequiredGoal.pose = controller->getCurrentPose();
@@ -132,7 +132,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
 
                     // detect waypoint zone
                     if (!waypoints.empty() && controller->isZoneAchieved(waypointZone)) {
-                        ROS_INFO("Waypoint zone achieved");
+//                        ROS_INFO("Waypoint zone achieved");
                         state = State::GET_NEW_GOAL;
                         break;
                     }

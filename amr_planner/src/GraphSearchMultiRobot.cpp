@@ -31,14 +31,14 @@ std::vector<Node> GraphSearchMultiRobot::getPath(const Node& nStart, const Node&
     if (success) {
         std::cout << "Planning successful! Total cost: " << solution.cost
                   << std::endl;
-        for (size_t i = 0; i < solution.actions.size(); ++i) {
-            std::cout << solution.states[i].second << ": " << solution.states[i].first
-//                      << "->" << solution.actions[i].first
-//                      << "(cost: " << solution.actions[i].second << ")"
-                      << std::endl;
-        }
-        std::cout << solution.states.back().second << ": "
-                  << solution.states.back().first << std::endl;
+//        for (size_t i = 0; i < solution.actions.size(); ++i) {
+//            std::cout << solution.states[i].second << ": " << solution.states[i].first
+////                      << "->" << solution.actions[i].first
+////                      << "(cost: " << solution.actions[i].second << ")"
+//                      << std::endl;
+//        }
+//        std::cout << solution.states.back().second << ": "
+//                  << solution.states.back().first << std::endl;
 
         out << "schedule:" << std::endl;
         out << "  agent1:" << std::endl;
