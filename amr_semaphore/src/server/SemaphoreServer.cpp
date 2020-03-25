@@ -35,6 +35,23 @@ bool NodesOccupancyContainer::lockNode(const std::string &ownerId, const amr_msg
     }
 }
 
+bool NodesOccupancyContainer::unlockNode(const std::string &ownerId, const amr_msgs::Point &node) {
+    auto targetOwnerIt = data.find(ownerId);
+    if (targetOwnerIt == data.end()) {
+        return false; // owner does not exist
+    }
+
+    auto& nodesArray = targetOwnerIt->second;
+    for (const auto& lockedNode: nodesArray) {
+        if (lockedNode.uuid == node.uuid) {
+            nodesArray.remove(lockedNode);
+            return true;
+        }
+    }
+
+    return false;   // node is not locked
+}
+
 bool NodesOccupancyContainer::isNodeAlreadyLocked(const amr_msgs::Point& node) {
     for (const auto& ownerNodes : data) {
         for (const auto& nodesIt : ownerNodes.second) {
@@ -74,17 +91,28 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
         return true;
     }
 
-    if (nodesOccupancy->lockNode(req.clientId, req.point)) {
-        // successfully locked
-        res.success = true;
-
-        // update visualization
-        std::async(std::launch::async, &SemaphoreServer::visualizeNodesOccupancy, this);
-    } else {
-        // not locked
-        res.message = "Node is already locked";
-        res.success = false;
+    if (req.lock) {     // lock node
+        if (nodesOccupancy->lockNode(req.clientId, req.point)) {
+            // successfully locked
+            res.success = true;
+        } else {
+            // not locked
+            res.message = "Node is already locked";
+            res.success = false;
+        }
+    } else {            // unlock node
+        if (nodesOccupancy->unlockNode(req.clientId, req.point)) {
+            // successfully unlocked
+            res.success = true;
+        } else {
+            // node has not been unlocked
+            res.message = "Target node has not been locked yet or client ID is wrong.";
+            res.success = true;
+        }
     }
+
+    // update visualization
+    std::async(std::launch::async, &SemaphoreServer::visualizeNodesOccupancy, this);
 
     return true;
 }

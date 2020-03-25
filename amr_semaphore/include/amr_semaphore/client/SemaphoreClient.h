@@ -12,9 +12,13 @@
 
 class SemaphoreClient {
 public:
+    //Todo add argument for the robot length
     SemaphoreClient(const std::string& lockServiceName);
 
+    // TODO instead of bool use pair<bool, message>
     bool lockNode(const amr_msgs::Point &node);
+
+    bool unlockNode(const amr_msgs::Point &node);
 
     std::future<bool> lockNodeAsync(const amr_msgs::Point &node);
 

@@ -1,5 +1,6 @@
 string clientId
 amr_msgs/Point point
+bool lock
 bool unlockAll
 ---
 bool success
