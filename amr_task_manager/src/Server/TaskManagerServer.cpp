@@ -89,6 +89,11 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
             srv.request.endUuid = task.path.second.point.uuid;
 
             if (planPathSrvClient.call(srv)) {
+                if (srv.response.pathWaypoints.empty()) {
+                    res.error.code = amr_msgs::GetTaskErrorCodes::PLANNING_FAILED;
+                    return true;
+                }
+
                 res.task.waypoints = srv.response.pathWaypoints;
                 res.task.taskId.id = amr_msgs::TaskId::PERFORM_WAYPOINTS;
                 res.error.code = amr_msgs::GetTaskErrorCodes::OK;
