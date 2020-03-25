@@ -21,6 +21,9 @@
     <!-- Semaphore server -->
     <include file="$(find amr_semaphore)/launch/semaphore_server.launch"/>
 
+    <!-- Fleet control gui -->
+    <include file="$(find amr_gui)/launch/gui.launch"/>
+
     <!-- Rviz -->
     <include file="$(find amr_fleet)/launch/rviz.launch"/>
 

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<launch>
+    <node pkg="amr_gui" type="gui" name="gui">
+    </node>
+</launch>
