@@ -42,9 +42,9 @@ bool NodesOccupancyContainer::unlockNode(const std::string &ownerId, const amr_m
     }
 
     auto& nodesArray = targetOwnerIt->second;
-    for (const auto& lockedNode: nodesArray) {
-        if (lockedNode.uuid == node.uuid) {
-            nodesArray.remove(lockedNode);
+    for (auto lockedNodeIt = nodesArray.begin(); lockedNodeIt != nodesArray.end(); lockedNodeIt++) {
+        if (lockedNodeIt->uuid == node.uuid) {
+            nodesArray.erase(lockedNodeIt);
             return true;
         }
     }
