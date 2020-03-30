@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1190</width>
-    <height>1043</height>
+    <width>704</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,6 +20,16 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Control</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="amr_gui::ControlWidget" name="controlWidget" native="true"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab">
        <property name="autoFillBackground">
         <bool>false</bool>
@@ -33,16 +43,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Tab 2</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QWidget" name="widget_2" native="true"/>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -52,7 +52,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1190</width>
+     <width>704</width>
      <height>22</height>
     </rect>
    </property>
@@ -63,6 +63,11 @@
    <class>amr_gui::MonitorWidget</class>
    <extends>QWidget</extends>
    <header>amr_gui/monitoring/MonitorWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>amr_gui::ControlWidget</class>
+   <extends>QWidget</extends>
+   <header>amr_gui/control/ControlWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

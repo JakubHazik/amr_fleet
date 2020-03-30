@@ -20,32 +20,33 @@ bool SemaphoreClient::lockNode(const amr_msgs::Point &node) {
     amr_msgs::LockPoint srv;
     srv.request.clientId = clientId;
     srv.request.point = node;
+    srv.request.lock = true;
 
     lockNodeSrv.call(srv);
 
     if (srv.response.success) {
         return true;
     } else {
-        ROS_WARN("Unable to lock node: %s", srv.response.message.c_str());
+//        ROS_WARN("Unable to lock node: %s", srv.response.message.c_str());
         return false;
     }
 }
 
-//bool SemaphoreClient::unlockNode(const amr_msgs::Node &node) {
-//    amr_msgs::LockNode srv;
-//    srv.request.clientId = clientId;
-//    srv.request.node = node;
-//    srv.request.lock = false;
-//
-//    lockNodeSrv.call(srv);
-//
-//    if (srv.response.success) {
-//        return true;
-//    } else {
-//        ROS_WARN("%s", srv.response.message.c_str());
-//        return false;
-//    }
-//}
+bool SemaphoreClient::unlockNode(const amr_msgs::Point& node) {
+    amr_msgs::LockPoint srv;
+    srv.request.clientId = clientId;
+    srv.request.point = node;
+    srv.request.lock = false;
+
+    lockNodeSrv.call(srv);
+
+    if (srv.response.success) {
+        return true;
+    } else {
+        ROS_WARN("%s", srv.response.message.c_str());
+        return false;
+    }
+}
 
 std::future<bool> SemaphoreClient::lockNodeAsync(const amr_msgs::Point &node) {
     return std::async(std::launch::async, &SemaphoreClient::lockNode, this, node);

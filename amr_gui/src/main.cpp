@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <amr_gui/MainWindow.h>
 #include <ros/ros.h>
+#include <csignal>
 
 int main(int argc, char **argv) {
 
@@ -18,5 +19,7 @@ int main(int argc, char **argv) {
     ros::AsyncSpinner spinner(1);
     spinner.start();
 
-    return app.exec();
+    signal(SIGINT, SIG_DFL);    // listen interrupt signal from console
+
+    return QApplication::exec();
 }

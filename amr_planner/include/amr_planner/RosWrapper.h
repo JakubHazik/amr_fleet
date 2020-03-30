@@ -12,6 +12,7 @@
 #include <amr_msgs/Graph.h>
 #include <amr_msgs/PlanPathPoints.h>
 #include <amr_msgs/PlanPathNodes.h>
+#include <amr_msgs/SetNodeProperties.h>
 
 #include <amr_planner/GraphSearchInterface.h>
 #include <amr_planner/DataTypesAndConversions.h>
@@ -29,6 +30,7 @@ private:
     ros::Subscriber segSubscriber;
     ros::ServiceServer planPathByPointsSrv;
     ros::ServiceServer planPathByNodesSrv;
+    ros::ServiceServer setNodePropertiesSrv;
 
     Graph graph;
     std::shared_ptr<GraphSearchInterface> graphSearch;
@@ -38,6 +40,8 @@ private:
     bool planPathPointsCallback(amr_msgs::PlanPathPoints::Request& req, amr_msgs::PlanPathPoints::Response& res);
 
     bool planPathNodesCallback(amr_msgs::PlanPathNodes::Request& req, amr_msgs::PlanPathNodes::Response& res);
+
+    bool setNodePropertiesCallback(amr_msgs::SetNodeProperties::Request& req, amr_msgs::SetNodeProperties::Response& res);
 
 };
 

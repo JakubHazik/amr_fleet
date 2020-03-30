@@ -38,6 +38,8 @@ public:
 
     bool lockNode(const std::string& ownerId, const amr_msgs::Point& node);
 
+    bool unlockNode(const std::string& ownerId, const amr_msgs::Point& node);
+
     void unlockAllNodes(const std::string& ownerId);
 
     std::map<std::string, std::list<amr_msgs::Point>> getOccupancyData();

@@ -18,6 +18,7 @@ public:
     int uuid;
     double posX;
     double posY;
+    bool isReachable = true;
 
     Node() = default;
 

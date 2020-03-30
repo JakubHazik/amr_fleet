@@ -27,7 +27,6 @@ include_directories(
 
 add_executable(amr_planner
         src/AmrPlannerNode.cpp
-        src/PlannerCore.cpp
         src/RosWrapper.cpp
         src/Graph.cpp
         src/GraphSearchBoost.cpp

@@ -1,7 +1,5 @@
-string clientId
 amr_msgs/Point point
-bool lock
-bool unlockAll
+bool reachability
 ---
 bool success
 string message
