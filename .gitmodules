@@ -1,3 +1,9 @@
 [submodule "amr_planner/libMultiRobotPlanning"]
 	path = amr_planner/libMultiRobotPlanning
 	url = https://github.com/whoenig/libMultiRobotPlanning.git
+[submodule "simulation/kobuki_desktop"]
+	path = simulation/kobuki_desktop
+	url = https://github.com/yujinrobot/kobuki_desktop.git
+[submodule "simulation/kobuki_with_lidar"]
+	path = simulation/kobuki_with_lidar
+	url = https://github.com/JakubHazik/kobuki_with_lidar.git
