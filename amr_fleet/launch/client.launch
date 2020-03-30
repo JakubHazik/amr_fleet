@@ -8,7 +8,7 @@
     <arg name="a_pos" default="0.0"/>
 
     <!-- spaw robot: robot_description + state publisher -->
-    <include file="$(find amr_fleet)/launch/simulation/spawn_simulation_robot.launch">
+    <include file="$(find amr_fleet)/launch/simulation/spawn_kobuki_robot.launch">
         <arg name="robot_id" value="$(arg robot_id)"/>
         <arg name="x_pos" value="$(arg x_pos)"/>
         <arg name="y_pos" value="$(arg y_pos)"/>

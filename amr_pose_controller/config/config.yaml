@@ -21,7 +21,8 @@ controller:
 
 semaphoreService: "/semaphore_server/lock_node"
 #cmdVelTopic: "/cmd_vel"
-cmdVelTopic: "/cmd_vel"
+#cmdVelTopic: "/cmd_vel"
+cmdVelTopic: "/mobile_base/commands/velocity"
 #robotPoseTopic: "/pose"
 #robotPoseTopic: "amcl_pose"
 waypointZone: 0.3           # [m]

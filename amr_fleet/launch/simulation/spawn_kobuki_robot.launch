@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="robot_id" default="r1"/>
+    <arg name="model" default="waffle"/>
+    <arg name="x_pos" default="-2.0"/>
+    <arg name="y_pos" default="-0.5"/>
+    <arg name="z_pos" default="0.0"/>
+
+<!--    <remap from="$(arg robot_id)/mobile_base/commands/velocity" to="$(arg robot_id)/cmd_vel"/>-->
+
+    <group ns="$(arg robot_id)">
+        <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find kobuki_description)/urdf/kobuki_standalone.urdf.xacro'"/>
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+            <param name="publish_frequency" type="double" value="50.0"/>
+            <param name="tf_prefix" value="$(arg robot_id)"/>
+        </node>
+        <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model kobuki_$(arg robot_id) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description">
+<!--            <remap from="commands/velocity" to="cmd_vel"/>-->
+        </node>
+<!--        <node pkg="gazebo_ros" type="spawn_model" name="spawn_$(arg robot_id)" args="-x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -unpause -urdf -param robot_description -model kobuki_$(arg robot_id)"/>-->
+    </group>
+
+</launch>
