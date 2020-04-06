@@ -107,16 +107,14 @@ double Controller::getAngleError() {
 
     if (robotAngle > 0) {
         result = -1 * (std::abs(goalAngle) + std::abs(robotAngle));
+        if (result < -M_PI) {
+            result = 2 * M_PI + result;
+        }
     } else {
         result = std::abs(goalAngle) + std::abs(robotAngle);
-    }
-
-    if (result > M_PI) {
-        result = -2 * M_PI + std::abs(robotAngle) + std::abs(goalAngle);
-    }
-
-    if (result < -M_PI) {
-        result = 2 * M_PI - std::abs(robotAngle) - std::abs(goalAngle);
+        if (result > M_PI) {
+            result = -2 * M_PI + result;
+        }
     }
 
     return result;
