@@ -1,7 +1,7 @@
 string clientId
 amr_msgs/Task task
-bool performPreviousTaskAgain
-bool cancel     # true if you want to abort this current task and continue in previous
+bool resumePreviousTask
+bool cancelCustomTask     # true if you want to abort this current task and continue in previous
 ---
 bool success
 string message

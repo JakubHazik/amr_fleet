@@ -18,7 +18,6 @@
 
 class Client {
 public:
-    Client() = default;
     explicit Client(const std::string& clientName)
         :   clientName(clientName) {
         ros::NodeHandle nh("/");
@@ -50,22 +49,29 @@ public:
 
     std::pair<bool, std::string> resetCurrentTask() {
         amr_msgs::ResetTask srv;
+
+        if (!resetTaskSrv.waitForExistence(ros::Duration(5))) {
+            ROS_ERROR("Reset service: %s is not available", resetTaskSrv.getService().c_str());
+        }
+
         resetTaskSrv.call(srv);
         if (!srv.response.success) {
-            ROS_ERROR("Client %s reset task: %s", clientName.c_str(), srv.response.message.c_str());
+            ROS_ERROR("Client %s reset task unsuccessful: %s", clientName.c_str(), srv.response.message.c_str());
         }
         return {srv.response.success, srv.response.message};
     }
 
-    amr_msgs::Task currentPerformingTask;
+
 private:
     ros::ServiceClient resetTaskSrv;
     std::string clientName;
     std::list<amr_msgs::Task> tasks;
+
+    amr_msgs::Task currentPerformingTask;
 };
 
 
-typedef std::map<std::string, Client> RobotClients;
+typedef std::map<std::string, std::shared_ptr<Client>> RobotClients;
 
 
 class TaskManagerServer {
@@ -73,7 +79,7 @@ public:
     TaskManagerServer(ros::NodeHandle& nh);
 private:
     ros::ServiceServer getTaskSrvServer;
-    ros::ServiceServer pauseClientTask;
+    ros::ServiceServer doCustomTaskServer;
     ros::ServiceClient planPathSrvClient;
 
     RobotClients clients;
@@ -81,7 +87,7 @@ private:
     bool getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::GetTask::Response& res);
     bool doCustomTaskAsapCb(amr_msgs::DoCustomTaskAsap::Request& req, amr_msgs::DoCustomTaskAsap::Response& res);
 
-    Client getClient(const std::string& id);
+    std::shared_ptr<Client> getClient(const std::string& clientId);
 };
 
 

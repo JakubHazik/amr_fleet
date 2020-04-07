@@ -14,7 +14,7 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
     nh.getParam("planPathByNodesService", planPathByNodesService);
 
     getTaskSrvServer = nh.advertiseService("get_task", &TaskManagerServer::getTaskCb, this);
-    pauseClientTask = nh.advertiseService("do_custom_task", &TaskManagerServer::doCustomTaskAsapCb, this);
+    doCustomTaskServer = nh.advertiseService("do_custom_task", &TaskManagerServer::doCustomTaskAsapCb, this);
     planPathSrvClient = nh.serviceClient<amr_msgs::PlanPathNodes>(planPathByNodesService);
 
     XmlRpc::XmlRpcValue activeClients;
@@ -29,7 +29,7 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
             throw std::runtime_error("Wrong element type of clientNamespaces param");
         }
 
-        Client client(activeClients[i]);
+        auto client = std::make_shared<Client>(activeClients[i]);
         clients.insert(std::make_pair(activeClients[i], client));
     }
 
@@ -53,22 +53,22 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
     t2.waypoints[0].uuid = r1End;
     t2.waypoints[1].uuid = r1Start;
 
-    clients.at("r1").addNewTask(t1);
-    clients.at("r1").addNewTask(t2);
-    clients.at("r1").addNewTask(t1);
-    clients.at("r1").addNewTask(t2);
-    clients.at("r1").addNewTask(t1);
-    clients.at("r1").addNewTask(t2);
-    clients.at("r1").addNewTask(t1);
-    clients.at("r1").addNewTask(t2);
-    clients.at("r1").addNewTask(t1);
-    clients.at("r1").addNewTask(t2);
-    clients.at("r1").addNewTask(t1);
-    clients.at("r1").addNewTask(t2);
+    clients.at("r1")->addNewTask(t1);
+    clients.at("r1")->addNewTask(t2);
+    clients.at("r1")->addNewTask(t1);
+    clients.at("r1")->addNewTask(t2);
+    clients.at("r1")->addNewTask(t1);
+    clients.at("r1")->addNewTask(t2);
+    clients.at("r1")->addNewTask(t1);
+    clients.at("r1")->addNewTask(t2);
+    clients.at("r1")->addNewTask(t1);
+    clients.at("r1")->addNewTask(t2);
+    clients.at("r1")->addNewTask(t1);
+    clients.at("r1")->addNewTask(t2);
 
     t1.waypoints[0].uuid = 54;
-    clients.at("r2").addNewTask(t1);
-    clients.at("r2").addNewTask(t2);
+    clients.at("r2")->addNewTask(t1);
+    clients.at("r2")->addNewTask(t2);
 
 
 
@@ -98,23 +98,16 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
 }
 
 bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::GetTask::Response& res) {
-
-    Client client;
-    try {
-        client = getClient(req.clientId);
-    } catch (const std::out_of_range& ex) {
-        res.error.code = amr_msgs::GetTaskErrorCodes::UNKNOWN_CLIENT_ID;
-        return true;
-    }
+    auto client = getClient(req.clientId);
 
     // check if some task exist
-    if (!client.isNewTaskAvailable()) {
+    if (!client->isNewTaskAvailable()) {
         res.task.timeout = 5;
         res.task.taskId.id = amr_msgs::TaskId::DO_NOTHING;
         return true;
     }
 
-    auto task = client.getNewTask();
+    auto task = client->getNewTask();
 
     switch (task.taskId.id) {
         case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
@@ -137,6 +130,10 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
             }
             break;
         }
+        case amr_msgs::TaskId::TELEOPERATION:
+            res.task = task;
+            res.error.code = amr_msgs::GetTaskErrorCodes::OK;
+            break;
         case amr_msgs::TaskId::WAIT_FOR_USER_ACK:
             ROS_ERROR("WAIT_FOR_USER_ACK task is not implemented yet");
             break;
@@ -152,17 +149,21 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
 
 bool TaskManagerServer::doCustomTaskAsapCb(amr_msgs::DoCustomTaskAsap::Request &req,
                                            amr_msgs::DoCustomTaskAsap::Response &res) {
-    if (!req.cancel) {
+    if (!req.cancelCustomTask) {
+        // add custom task
         auto client = getClient(req.clientId);
-        client.doCustomTaskAsap(req.task, req.performPreviousTaskAgain);
+        client->doCustomTaskAsap(req.task, req.resumePreviousTask);
+        res.success = true;
     } else {
+        // abort custom task which is now done
         auto client = getClient(req.clientId);
-        client.resetCurrentTask();
+        client->resetCurrentTask();
+        res.success = true;
     }
-    return false;
+    return true;
 }
 
-Client TaskManagerServer::getClient(const std::string &clientId) {
+std::shared_ptr<Client> TaskManagerServer::getClient(const std::string &clientId) {
     RobotClients::iterator it = clients.find(clientId);
     if (it == clients.end()) {
         ROS_ERROR("Unknown client ID: %s", clientId.c_str());
