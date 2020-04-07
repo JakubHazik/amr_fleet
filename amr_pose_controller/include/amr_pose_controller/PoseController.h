@@ -74,6 +74,7 @@ private:
 //    void turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg);
 
     void acGoalCb();
+    void acCancelCb();
 
     void publishAsFeedback();
 

@@ -42,6 +42,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
 
 
     performGoalAs.registerGoalCallback(boost::bind(&PoseController::acGoalCb, this));
+    performGoalAs.registerPreemptCallback(boost::bind(&PoseController::acCancelCb, this));
     performGoalAs.start();
 
     // init semaphore client
@@ -60,13 +61,6 @@ PoseController::PoseController(ros::NodeHandle& nh)
     while(ros::ok()) {
         ros::spinOnce();
         updateRobotPose();
-
-        if (performGoalAs.isPreemptRequested()) {
-            ROS_INFO("Action performing goals: cancel received");
-            waypoints = std::queue<amr_msgs::Point>();  //clear waypoints queue
-            state = State::GET_NEW_GOAL;
-            performGoalAs.setPreempted();
-        }
 
         if (robotPoseReceived) {
             switch (state) {
@@ -147,6 +141,8 @@ PoseController::PoseController(ros::NodeHandle& nh)
                     }
 
                     break;
+                case State::NO_POSE_CONTROL:
+                    break;
             }
 
             robotPoseReceived = false;
@@ -223,6 +219,11 @@ void PoseController::acGoalCb() {
     state = State::GET_NEW_GOAL;
 }
 
+void PoseController::acCancelCb() {
+    waypoints = std::queue<amr_msgs::Point>();  //clear waypoints queue
+    state = State::GET_NEW_GOAL;
+}
+
 void PoseController::publishAsFeedback() {
     PerformGoalAs::Feedback feedback;
     feedback.currentGoal = currentRequiredGoal;
@@ -253,6 +254,7 @@ void PoseController::visualizeAndPublishCurrentGoal() {
 
 bool PoseController::poseControlSwitchCb(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
     if (req.data) {
+        // enable pose control
         if (state != State::NO_POSE_CONTROL) {
             ROS_ERROR("Pose is already controlled.");
             res.success = false;
@@ -260,6 +262,7 @@ bool PoseController::poseControlSwitchCb(std_srvs::SetBool::Request &req, std_sr
         }
         state = State::GET_NEW_GOAL;
     } else {
+        // disable pose control
         if (state == State::PERFORMING_GOAL) {
             ROS_ERROR("Unable to disable pose control now, cancel goal first.");
             res.success = false;
