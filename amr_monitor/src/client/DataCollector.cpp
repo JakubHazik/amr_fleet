@@ -9,6 +9,7 @@ DataCollector::DataCollector() {
     ros::NodeHandle nh;
     robotPoseSub = nh.subscribe("amcl_pose", 5, &DataCollector::robotPoseCb, this);
     robotCurrentGoalSub = nh.subscribe("pose_controller/current_goal", 5, &DataCollector::robotCurrentGoalCb, this);
+    currentTaskSub= nh.subscribe("task_manager_client/current_task", 5, &DataCollector::currentTaskCb, this);
     clientStatusPub = nh.advertise<amr_msgs::ClientInfo>("/client_info", 5, true);
 
     clientInfo.clientId = ros::this_node::getNamespace();
@@ -27,6 +28,11 @@ void DataCollector::robotPoseCb(const geometry_msgs::PoseWithCovarianceStampedCo
 
 void DataCollector::robotCurrentGoalCb(const amr_msgs::PointConstPtr &point) {
     clientInfo.robotCurrentGoal = *point;
+}
+
+void DataCollector::currentTaskCb(const amr_msgs::TaskConstPtr &task) {
+    clientInfo.currentTask = *task;
+    clientInfo.currentTask.waypoints = {};  // send task without waypoints
 }
 
 

@@ -24,6 +24,7 @@ private:
     ros::ServiceClient getTaskSrvClient;
     ros::ServiceClient enablePoseControlClient;
     ros::ServiceServer resetTaskSrvServer;
+    ros::Publisher currentTaskPub;
     PerformWaypoints performWaypointsAc;
     ros::Timer getNewTaskTimer;
     std::string clientId;

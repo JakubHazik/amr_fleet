@@ -1,5 +1,6 @@
 uint32 id
 
+uint32 NO_TASK = 0
 uint32 PERFORM_WAYPOINTS = 1
 uint32 WAIT_FOR_USER_ACK = 2
 uint32 CHARGE_BATTERY = 3

@@ -27,6 +27,7 @@ namespace amr_gui {
     private:
         Ui::ClientMonitorWidget *ui;
 
+        std::map<unsigned int, QString> taskNames;
     };
 }
 

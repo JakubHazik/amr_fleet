@@ -9,6 +9,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <amr_msgs/Point.h>
 #include <amr_msgs/ClientInfo.h>
+#include <amr_msgs/Task.h>
 
 
 class DataCollector {
@@ -19,12 +20,14 @@ private:
 
     ros::Subscriber robotPoseSub;
     ros::Subscriber robotCurrentGoalSub;
+    ros::Subscriber currentTaskSub;
     ros::Publisher clientStatusPub;
 
     amr_msgs::ClientInfo clientInfo;
 
     void robotPoseCb(const geometry_msgs::PoseWithCovarianceStampedConstPtr& pose);
     void robotCurrentGoalCb(const amr_msgs::PointConstPtr& point);
+    void currentTaskCb(const amr_msgs::TaskConstPtr& task);
 
 };
 

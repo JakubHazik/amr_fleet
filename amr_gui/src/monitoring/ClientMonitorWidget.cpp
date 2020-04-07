@@ -15,6 +15,15 @@ namespace amr_gui {
 
         ui->setupUi(this);
 
+        taskNames = {
+            {amr_msgs::TaskId::NO_TASK, "No task"},
+            {amr_msgs::TaskId::DO_NOTHING, "Do nothing"},
+            {amr_msgs::TaskId::PERFORM_WAYPOINTS, "Perform waypoints"},
+            {amr_msgs::TaskId::CHARGE_BATTERY, "Charge battery"},
+            {amr_msgs::TaskId::WAIT_FOR_USER_ACK, "Wait for user ack"},
+            {amr_msgs::TaskId::TELEOPERATION, "Teleoperation"},
+        };
+
     }
 
     void ClientMonitorWidget::updateClientInfo(const amr_msgs::ClientInfo& clientInfo) {
@@ -28,6 +37,10 @@ namespace amr_gui {
         ui->goalY->setNum(clientInfo.robotCurrentGoal.pose.y);
         ui->goalTheta->setNum(clientInfo.robotCurrentGoal.pose.theta);
         ui->goalUuid->setNum(static_cast<int>(clientInfo.robotCurrentGoal.uuid));
+
+        // set current task
+        ui->taskId->setText(taskNames.at(clientInfo.currentTask.taskId.id));
+        ui->taskTimeout->setNum(clientInfo.currentTask.timeout);
 
         // set hardware fields
         ui->batteryVoltage->setNum(clientInfo.hardwareStatus.batteryVoltage);

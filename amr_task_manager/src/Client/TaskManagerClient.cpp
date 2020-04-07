@@ -16,6 +16,7 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
     resetTaskSrvServer = nh.advertiseService("reset_task", &TaskManagerClient::resetTaskServiceCb, this);
     getTaskSrvClient = nh.serviceClient<amr_msgs::GetTask>(getTaskService);
     enablePoseControlClient = nh.serviceClient<std_srvs::SetBool>(ros::this_node::getNamespace() + "/pose_controller/enable_pose_control");
+    currentTaskPub = nh.advertise<amr_msgs::Task>("current_task", 10, true);
 
     performWaypointsAc.waitForServer();
 
@@ -69,6 +70,7 @@ bool TaskManagerClient::getNewTask() {
 
     taskSrv.request.clientId = clientId;
     getTaskSrvClient.call(taskSrv);
+    currentTaskPub.publish(taskSrv.response.task);
     switch (taskSrv.response.error.code) {
         case amr_msgs::GetTaskErrorCodes::OK: {
             ROS_INFO("Received new task");
