@@ -35,7 +35,7 @@ JoyPad::JoyPad(QWidget *parent) : QWidget(parent),
 * @brief JoyPad::x
 * @return
 */
-float JoyPad::x() const {
+double JoyPad::x() const {
     return m_x;
 }
 
@@ -43,7 +43,7 @@ float JoyPad::x() const {
 * @brief JoyPad::y
 * @return
 */
-float JoyPad::y() const {
+double JoyPad::y() const {
     return m_y;
 }
 
@@ -51,8 +51,8 @@ float JoyPad::y() const {
 * @brief JoyPad::setX
 * @param value of x axis from -1 to 1
 */
-void JoyPad::setX(float value) {
-    m_x = constrain(value, -1.f, 1.f);
+void JoyPad::setX(double value) {
+    m_x = constrain(value, -1.0, 1.0);
 
     qreal radius = (m_bounds.width() - m_knopBounds.width()) / 2;
     m_knopBounds.moveCenter(QPointF(m_bounds.center().x() + m_x * radius, m_knopBounds.center().y()));
@@ -65,8 +65,8 @@ void JoyPad::setX(float value) {
 * @brief JoyPad::setY
 * @param value of y axis from -1 to 1
 */
-void JoyPad::setY(float value) {
-    m_y = constrain(value, -1.f, 1.f);
+void JoyPad::setY(double value) {
+    m_y = constrain(value, -1.0, 1.0);
 
     qreal radius = (m_bounds.width() - m_knopBounds.width()) / 2;
     m_knopBounds.moveCenter(QPointF(m_knopBounds.center().x(), m_bounds.center().y() - m_y * radius));

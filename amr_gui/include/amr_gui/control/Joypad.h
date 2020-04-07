@@ -7,24 +7,33 @@ class QParallelAnimationGroup;
 
 namespace amr_gui {
 
+/**
+ *  How to use:
+
+    In parent widget write:
+    connect(ui->widget, &JoyPad::xChanged, this, [this](float x){
+        qDebug() << "x: " << x << " y: " << ui->widget->y();
+    });
+
+ */
 class JoyPad : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(float x READ x WRITE setX NOTIFY xChanged)
-    Q_PROPERTY(float y READ y WRITE setY NOTIFY yChanged)
+    Q_PROPERTY(double x READ x WRITE setX NOTIFY xChanged)
+    Q_PROPERTY(double y READ y WRITE setY NOTIFY yChanged)
 public:
     explicit JoyPad(QWidget *parent = Q_NULLPTR);
 
-    float x() const;
-    float y() const;
+    double x() const;
+    double y() const;
 
 Q_SIGNALS:
-    void xChanged(float value);
-    void yChanged(float value);
+    void xChanged(double value);
+    void yChanged(double value);
 
 public Q_SLOTS:
-    void setX(float value);
-    void setY(float value);
+    void setX(double value);
+    void setY(double value);
 
     // Add or remove the knob return animations in x or y- direction.
     void removeXAnimation();
@@ -45,8 +54,8 @@ private:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
 
-    float m_x;
-    float m_y;
+    double m_x;
+    double m_y;
 
     QParallelAnimationGroup *m_returnAnimation;
     QPropertyAnimation *m_xAnimation;
