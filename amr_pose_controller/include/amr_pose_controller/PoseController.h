@@ -19,6 +19,7 @@
 #include <amr_msgs/Point.h>
 #include <amr_msgs/PerformGoalsAction.h>
 #include <amr_semaphore/client/SemaphoreClient.h>
+#include <std_srvs/SetBool.h>
 
 #include <memory>
 #include <future>
@@ -39,9 +40,11 @@ private:
         INIT_STATE,
         GET_NEW_GOAL,
         PERFORMING_GOAL,
+        NO_POSE_CONTROL,
     };
 
     // interfaces
+    ros::ServiceServer poseControlSwitchSrv;
     ros::Publisher cmdVelPub;
     ros::Publisher currentGoalPub;
     ros::Subscriber robotPoseSub;
@@ -62,6 +65,8 @@ private:
     std::future<bool> nodeLocked;
     rvt::RvizVisualToolsPtr visual_tools;
 
+    bool poseControlSwitchCb(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
+
     void updateRobotPose();
 
 //    void robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg);
@@ -69,6 +74,7 @@ private:
 //    void turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg);
 
     void acGoalCb();
+    void acCancelCb();
 
     void publishAsFeedback();
 

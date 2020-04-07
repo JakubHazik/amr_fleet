@@ -3,6 +3,7 @@
 //
 
 #include <amr_task_manager/Client/TaskManagerClient.h>
+#include <std_srvs/SetBool.h>
 
 TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
     :   nh(nh),
@@ -14,6 +15,7 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
 
     resetTaskSrvServer = nh.advertiseService("reset_task", &TaskManagerClient::resetTaskServiceCb, this);
     getTaskSrvClient = nh.serviceClient<amr_msgs::GetTask>(getTaskService);
+    enablePoseControlClient = nh.serviceClient<std_srvs::SetBool>(ros::this_node::getNamespace() + "/pose_controller/enable_pose_control");
 
     performWaypointsAc.waitForServer();
 
@@ -42,8 +44,23 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
 
 bool TaskManagerClient::resetTaskServiceCb(amr_msgs::ResetTask::Request& req, amr_msgs::ResetTask::Response& res) {
     ROS_INFO("Reset task received");
-    performWaypointsAc.cancelAllGoals();
+
+    switch (currentTask.taskId.id) {
+        case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
+            performWaypointsAc.cancelAllGoals();
+            break;
+        }
+        case amr_msgs::TaskId::TELEOPERATION: {
+            std_srvs::SetBool srv;
+            srv.request.data = true;
+            enablePoseControlClient.call(srv);
+            //todo check success
+            break;
+        }
+    }
+
     callGetNewTaskServiceAfterTime(0.01);   // asap, but not in this function scope, service have to be done
+    res.success = true;
     return true;
 }
 
@@ -85,6 +102,8 @@ void TaskManagerClient::callGetNewTaskServiceAfterTime(double time) {
 }
 
 bool TaskManagerClient::performTask(amr_msgs::Task& task) {
+    ROS_INFO("New task id: %d", task.taskId.id);
+
     switch (task.taskId.id) {
         case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
             performWaypointsAc.cancelAllGoals();
@@ -96,6 +115,13 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
                     boost::bind(&TaskManagerClient::acWaypointsDoneCb, this, _1, _2),
                     boost::bind(&TaskManagerClient::activeCallback, this),
                     boost::bind(&TaskManagerClient::acWaypointsFeedbackCb, this, _1));
+            break;
+        }
+        case amr_msgs::TaskId::TELEOPERATION: {
+            std_srvs::SetBool srv;
+            srv.request.data = false;
+            enablePoseControlClient.call(srv);
+            //todo check success
             break;
         }
         case amr_msgs::TaskId::WAIT_FOR_USER_ACK: {
@@ -112,8 +138,10 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
             break;
         }
         default:
+            ROS_ERROR("Unknown error code");
             throw std::runtime_error("Unknown error code");
     }
+    currentTask = task;
     return false;
 }
 

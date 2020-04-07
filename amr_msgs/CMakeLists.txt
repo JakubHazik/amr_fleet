@@ -30,6 +30,7 @@ add_service_files(
         ResetTask.srv
         LockPoint.srv
         SetNodeProperties.srv
+        DoCustomTaskAsap.srv
 )
 
 add_action_files(

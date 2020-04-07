@@ -33,6 +33,8 @@ PoseController::PoseController(ros::NodeHandle& nh)
 
 //    usleep(1000*1000*15);
 
+    poseControlSwitchSrv = nh.advertiseService("enable_pose_control", &PoseController::poseControlSwitchCb, this);
+
     cmdVelPub = nh.advertise<geometry_msgs::Twist>(ros::this_node::getNamespace() + cmdVelTopic, 10);
     currentGoalPub = nh.advertise<amr_msgs::Point>("current_goal", 10);
 //    robotPoseSub = nh.subscribe(robotPoseTopic, 10, &PoseController::robotPoseCb, this);
@@ -40,6 +42,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
 
 
     performGoalAs.registerGoalCallback(boost::bind(&PoseController::acGoalCb, this));
+    performGoalAs.registerPreemptCallback(boost::bind(&PoseController::acCancelCb, this));
     performGoalAs.start();
 
     // init semaphore client
@@ -138,6 +141,8 @@ PoseController::PoseController(ros::NodeHandle& nh)
                     }
 
                     break;
+                case State::NO_POSE_CONTROL:
+                    break;
             }
 
             robotPoseReceived = false;
@@ -202,7 +207,7 @@ void PoseController::acGoalCb() {
     ROS_INFO("New pose control goal received");
     auto goal = performGoalAs.acceptNewGoal();
 
-    // clear waypoints queuq
+    // clear waypoints queue
     std::queue<amr_msgs::Point> empty;
     waypoints.swap(empty);
 
@@ -211,6 +216,11 @@ void PoseController::acGoalCb() {
         waypoints.push(point);
     }
 
+    state = State::GET_NEW_GOAL;
+}
+
+void PoseController::acCancelCb() {
+    waypoints = std::queue<amr_msgs::Point>();  //clear waypoints queue
     state = State::GET_NEW_GOAL;
 }
 
@@ -230,12 +240,36 @@ void PoseController::publishAsResult() {
 void PoseController::visualizeAndPublishCurrentGoal() {
     visual_tools->deleteAllMarkers();
 
-    auto currentPose = controller->getCurrentPose();
-    geometry_msgs::Point p1, p2;
-    p1.x = currentPose.x;
-    p1.y = currentPose.y;
-    p2.x = currentRequiredGoal.pose.x;
-    p2.y = currentRequiredGoal.pose.y;
-    visual_tools->publishArrow(p1, p2, rvt::colors::GREEN, rvt::scales::LARGE);
-    visual_tools->trigger();
+    if (state == State::PERFORMING_GOAL) {
+        auto currentPose = controller->getCurrentPose();
+        geometry_msgs::Point p1, p2;
+        p1.x = currentPose.x;
+        p1.y = currentPose.y;
+        p2.x = currentRequiredGoal.pose.x;
+        p2.y = currentRequiredGoal.pose.y;
+        visual_tools->publishArrow(p1, p2, rvt::colors::GREEN, rvt::scales::LARGE);
+        visual_tools->trigger();
+    }
+}
+
+bool PoseController::poseControlSwitchCb(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
+    if (req.data) {
+        // enable pose control
+        if (state != State::NO_POSE_CONTROL) {
+            ROS_ERROR("Pose is already controlled.");
+            res.success = false;
+            return true;
+        }
+        state = State::GET_NEW_GOAL;
+    } else {
+        // disable pose control
+        if (state == State::PERFORMING_GOAL) {
+            ROS_ERROR("Unable to disable pose control now, cancel goal first.");
+            res.success = false;
+            return true;
+        }
+        state = State::NO_POSE_CONTROL;
+    }
+    res.success = true;
+    return true;
 }

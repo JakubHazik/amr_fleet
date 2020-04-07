@@ -22,10 +22,12 @@ public:
 private:
     ros::NodeHandle nh;
     ros::ServiceClient getTaskSrvClient;
+    ros::ServiceClient enablePoseControlClient;
     ros::ServiceServer resetTaskSrvServer;
     PerformWaypoints performWaypointsAc;
     ros::Timer getNewTaskTimer;
     std::string clientId;
+    amr_msgs::Task currentTask;
 
     // callbacks
     bool resetTaskServiceCb(amr_msgs::ResetTask::Request& req, amr_msgs::ResetTask::Response& res);

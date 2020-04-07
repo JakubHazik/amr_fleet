@@ -35,6 +35,7 @@ set(rqt_example_cpp_SRCS
         src/monitoring/MonitorWidget.cpp
         src/control/ControlWidget.cpp
         src/control/ControlInterface.cpp
+        src/control/Joypad.cpp
         )
 
 set(rqt_example_cpp_HDRS
@@ -43,6 +44,7 @@ set(rqt_example_cpp_HDRS
         include/amr_gui/monitoring/MonitorWidget.h
         include/amr_gui/control/ControlWidget.h
         include/amr_gui/control/ControlInterface.h
+        include/amr_gui/control/Joypad.h
         )
 
 set(rqt_example_cpp_UIS

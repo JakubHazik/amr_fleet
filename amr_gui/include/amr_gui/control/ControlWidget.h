@@ -21,8 +21,10 @@ namespace amr_gui{
     public:
         explicit ControlWidget(QWidget *parent = nullptr);
     private Q_SLOTS:
-        void applyCommandBtnSlot();
-        void setReachabilitySlot();
+        void on_applyCommandBtn_clicked();
+        void on_reachabilitySetBtn_clicked();
+        void on_startTeleopBtn_clicked();
+        void on_stopTeleopBtn_clicked();
 //
 //        Q_SIGNALS:
 //                void updateClientSignal(amr_msgs::ClientInfo clientInfo);
