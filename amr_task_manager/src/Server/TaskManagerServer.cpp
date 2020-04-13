@@ -10,6 +10,8 @@
 
 TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
 
+    parseTasks("/home/jakub/amr_ws/src/amr_fleet/amr_task_manager/config/tasks_config.yaml");
+
     std::string planPathByNodesService;
     nh.getParam("planPathByNodesService", planPathByNodesService);
 
@@ -17,58 +19,58 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
     doCustomTaskServer = nh.advertiseService("do_custom_task", &TaskManagerServer::doCustomTaskAsapCb, this);
     planPathSrvClient = nh.serviceClient<amr_msgs::PlanPathNodes>(planPathByNodesService);
 
-    XmlRpc::XmlRpcValue activeClients;
-    nh.getParam("/activeClients", activeClients);
-
-    if (activeClients.getType() != XmlRpc::XmlRpcValue::TypeArray || activeClients.size() == 0) {
-        throw std::runtime_error("No clients defined in clientNamespaces param array");
-    }
-
-    for (int i = 0; i < activeClients.size(); ++i) {
-        if (activeClients[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
-            throw std::runtime_error("Wrong element type of clientNamespaces param");
-        }
-
-        auto client = std::make_shared<Client>(activeClients[i]);
-        clients.insert(std::make_pair(activeClients[i], client));
-    }
-
-
-    int r1Start, r1End;
-    nh.getParam("r1Start", r1Start);
-    nh.getParam("r1End", r1End);
+//    XmlRpc::XmlRpcValue activeClients;
+//    nh.getParam("/activeClients", activeClients);
+//
+//    if (activeClients.getType() != XmlRpc::XmlRpcValue::TypeArray || activeClients.size() == 0) {
+//        throw std::runtime_error("No clients defined in clientNamespaces param array");
+//    }
+//
+//    for (int i = 0; i < activeClients.size(); ++i) {
+//        if (activeClients[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
+//            throw std::runtime_error("Wrong element type of clientNamespaces param");
+//        }
+//
+//        auto client = std::make_shared<Client>(activeClients[i]);
+//        clients.insert(std::make_pair(activeClients[i], client));
+//    }
 
 
+//    int r1Start, r1End;
+//    nh.getParam("r1Start", r1Start);
+//    nh.getParam("r1End", r1End);
 
-    amr_msgs::Task t1;
-    t1.taskId.id = amr_msgs::TaskId::PERFORM_WAYPOINTS;
-    t1.waypoints.push_back({});
-    t1.waypoints.push_back({});
-    t1.waypoints[0].uuid = r1Start;
-    t1.waypoints[1].uuid = r1End;
-    amr_msgs::Task t2;
-    t2.taskId.id = amr_msgs::TaskId::PERFORM_WAYPOINTS;
-    t2.waypoints.push_back({});
-    t2.waypoints.push_back({});
-    t2.waypoints[0].uuid = r1End;
-    t2.waypoints[1].uuid = r1Start;
 
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-
-    t1.waypoints[0].uuid = 54;
-    clients.at("r2")->addNewTask(t1);
-    clients.at("r2")->addNewTask(t2);
+//
+//    amr_msgs::Task t1;
+//    t1.taskId.id = amr_msgs::TaskId::PERFORM_WAYPOINTS;
+//    t1.waypoints.push_back({});
+//    t1.waypoints.push_back({});
+//    t1.waypoints[0].uuid = r1Start;
+//    t1.waypoints[1].uuid = r1End;
+//    amr_msgs::Task t2;
+//    t2.taskId.id = amr_msgs::TaskId::PERFORM_WAYPOINTS;
+//    t2.waypoints.push_back({});
+//    t2.waypoints.push_back({});
+//    t2.waypoints[0].uuid = r1End;
+//    t2.waypoints[1].uuid = r1Start;
+//
+//    clients.at("r1")->addNewTask(t1);
+//    clients.at("r1")->addNewTask(t2);
+//    clients.at("r1")->addNewTask(t1);
+//    clients.at("r1")->addNewTask(t2);
+//    clients.at("r1")->addNewTask(t1);
+//    clients.at("r1")->addNewTask(t2);
+//    clients.at("r1")->addNewTask(t1);
+//    clients.at("r1")->addNewTask(t2);
+//    clients.at("r1")->addNewTask(t1);
+//    clients.at("r1")->addNewTask(t2);
+//    clients.at("r1")->addNewTask(t1);
+//    clients.at("r1")->addNewTask(t2);
+//
+//    t1.waypoints[0].uuid = 54;
+//    clients.at("r2")->addNewTask(t1);
+//    clients.at("r2")->addNewTask(t2);
 
 
 
@@ -172,3 +174,55 @@ std::shared_ptr<Client> TaskManagerServer::getClient(const std::string &clientId
     return it->second;
 }
 
+void TaskManagerServer::clientInfoCb(const amr_msgs::ClientInfoConstPtr &msg) {
+    auto client = getClient(msg->clientId);
+    client->clientCurrentPose = msg->poseWithCovariance.pose.pose;
+}
+
+void TaskManagerServer::parseTasks(const std::string &configFile) {
+    YAML::Node config = YAML::LoadFile(configFile);
+
+    YAML::Node clientsSeq = config["clients"];
+    for (YAML::iterator it = clientsSeq.begin(); it != clientsSeq.end(); ++it) {
+//        YAML::Node client = *it;
+//        std::cout << client << std::endl << "======client" << std::endl;
+
+        for (const auto &clientData : *it) {
+//            std::cout << kv.first.as<std::string>() << "\n";    // r1
+            std::string clientId = clientData.first.as<std::string>();
+            YAML::Node tasksSeq = clientData.second;  // tasks seq
+
+            auto client = std::make_shared<Client>(clientId);
+            clients.insert(std::make_pair(clientId, client));
+
+            for (YAML::iterator taskIt = tasksSeq.begin(); taskIt != tasksSeq.end(); ++taskIt) {
+                auto task = parseTask(*taskIt);
+                client->addNewTask(task);
+            }
+        }
+    }
+}
+
+amr_msgs::Task TaskManagerServer::parseTask(const YAML::Node &taskNode) {
+    int taskId = taskNode["task"]["taskId"].as<int>();
+//    std::cout<< taskId<<std::endl;
+
+    switch (taskId) {
+        case 1: {
+            amr_msgs::Task task;
+            task.taskId.id = taskId;
+            amr_msgs::Point point;
+            point.uuid = taskNode["task"]["goalId"].as<int>();
+            task.waypoints.push_back(point);
+            return task;
+        }
+        case 4: {
+            amr_msgs::Task task;
+            task.taskId.id = taskId;
+            task.timeout = taskNode["task"]["timeout"].as<int>();
+            return task;
+        }
+        default: throw std::runtime_error("Unknown task ID, please check your task configuration file");
+    }
+
+}

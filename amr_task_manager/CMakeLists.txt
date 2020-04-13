@@ -11,11 +11,13 @@ find_package(catkin REQUIRED COMPONENTS
         actionlib
         )
 
+find_package(yaml-cpp REQUIRED)
+
 catkin_package(
         #  INCLUDE_DIRS include
         #  LIBRARIES amr_task_manager
         #  CATKIN_DEPENDS amr_msgs amr_planner amr_pose_controller roscpp
-        #  DEPENDS system_lib
+          DEPENDS yaml-cpp
 )
 
 include_directories(
@@ -33,6 +35,7 @@ add_dependencies(task_manager_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 
 target_link_libraries(task_manager_server
         ${catkin_LIBRARIES}
+        ${YAML_CPP_LIBRARIES}
 )
 
 

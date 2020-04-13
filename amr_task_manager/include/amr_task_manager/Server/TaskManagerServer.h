@@ -7,6 +7,7 @@
 
 #include <map>
 #include <queue>
+#include <yaml-cpp/yaml.h>
 
 #include <ros/ros.h>
 #include <amr_msgs/Task.h>
@@ -14,6 +15,7 @@
 #include <amr_msgs/GetTask.h>
 #include <amr_msgs/ResetTask.h>
 #include <amr_msgs/DoCustomTaskAsap.h>
+#include <amr_msgs/ClientInfo.h>
 
 
 class Client {
@@ -61,12 +63,11 @@ public:
         return {srv.response.success, srv.response.message};
     }
 
-
+    geometry_msgs::Pose clientCurrentPose;
 private:
     ros::ServiceClient resetTaskSrv;
     std::string clientName;
     std::list<amr_msgs::Task> tasks;
-
     amr_msgs::Task currentPerformingTask;
 };
 
@@ -81,13 +82,21 @@ private:
     ros::ServiceServer getTaskSrvServer;
     ros::ServiceServer doCustomTaskServer;
     ros::ServiceClient planPathSrvClient;
+    ros::Subscriber clientInfoSub;
 
     RobotClients clients;
 
     bool getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::GetTask::Response& res);
     bool doCustomTaskAsapCb(amr_msgs::DoCustomTaskAsap::Request& req, amr_msgs::DoCustomTaskAsap::Response& res);
 
+    void clientInfoCb(const amr_msgs::ClientInfoConstPtr& msg);
+
     std::shared_ptr<Client> getClient(const std::string& clientId);
+
+    void parseTasks(const std::string& configFile);
+
+    amr_msgs::Task parseTask(const YAML::Node& taskNode);
+
 };
 
 
