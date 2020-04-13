@@ -7,14 +7,26 @@
     <x>0</x>
     <y>0</y>
     <width>852</width>
-    <height>644</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="1">
+   <item row="2" column="0">
+    <widget class="QTextEdit" name="commandOutput">
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Output console&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;------------------------&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="styleSheet">
       <string notr="true">QGroupBox {
@@ -81,53 +93,7 @@ QGroupBox::title {
      </layout>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="styleSheet">
-      <string notr="true">QGroupBox {
-    font: bold;
-    border: 1px solid silver;
-    border-radius: 6px;
-    margin-top: 6px;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 7px;
-    padding: 0px 5px 0px 5px;
-}</string>
-     </property>
-     <property name="title">
-      <string>CLI</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="3" column="1">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>120</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="commandInput"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="applyCommandBtn">
-        <property name="text">
-         <string>Apply command</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="1">
+   <item row="2" column="1">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="styleSheet">
       <string notr="true">QGroupBox {
@@ -174,7 +140,7 @@ QGroupBox::title {
       <item row="2" column="1">
        <widget class="QLineEdit" name="teleopClientId"/>
       </item>
-      <item row="4" column="1">
+      <item row="5" column="1">
        <widget class="amr_gui::JoyPad" name="widgetJoy" native="true">
         <property name="enabled">
          <bool>false</bool>
@@ -187,19 +153,120 @@ QGroupBox::title {
         </property>
        </widget>
       </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="reachabilityCheckbox_3">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Resume aborted task:</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QTextEdit" name="commandOutput">
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Output console&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;------------------------&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   <item row="0" column="1">
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="styleSheet">
+      <string notr="true">QGroupBox {
+    font: bold;
+    border: 1px solid silver;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 7px;
+    padding: 0px 5px 0px 5px;
+}</string>
      </property>
+     <property name="title">
+      <string>Hard stop</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_7">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Client id:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <spacer name="verticalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="hardStopClient"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="hardStopBtn">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="0" rowspan="2">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="styleSheet">
+      <string notr="true">QGroupBox {
+    font: bold;
+    border: 1px solid silver;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 7px;
+    padding: 0px 5px 0px 5px;
+}</string>
+     </property>
+     <property name="title">
+      <string>CLI</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="commandInput"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="applyCommandBtn">
+        <property name="text">
+         <string>Apply command</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>120</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>
