@@ -8,6 +8,7 @@
 #include <map>
 #include <queue>
 #include <yaml-cpp/yaml.h>
+#include <tf/transform_datatypes.h>
 
 #include <ros/ros.h>
 #include <amr_msgs/Task.h>
@@ -63,11 +64,34 @@ public:
         return {srv.response.success, srv.response.message};
     }
 
-    geometry_msgs::Pose clientCurrentPose;
+    void setClientInfo(const amr_msgs::ClientInfo& clientInfo) {
+        amr_msgs::Point pose;
+        pose.pose.x = clientInfo.poseWithCovariance.pose.pose.position.x;
+        pose.pose.y = clientInfo.poseWithCovariance.pose.pose.position.y;
+        pose.pose.theta = tf::getYaw(clientInfo.poseWithCovariance.pose.pose.orientation);
+        clientCurrentPose = pose;
+        clientInfoReceived = true;
+    }
+
+    bool isClientReady() {
+        return clientInfoReceived;
+    }
+
+    bool getCurrentPose(amr_msgs::Point& currentPose) {
+        if (clientInfoReceived) {
+            currentPose = clientCurrentPose;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 private:
     ros::ServiceClient resetTaskSrv;
     std::string clientName;
     std::list<amr_msgs::Task> tasks;
+    amr_msgs::Point clientCurrentPose;
+    bool clientInfoReceived = false;
     amr_msgs::Task currentPerformingTask;
 };
 

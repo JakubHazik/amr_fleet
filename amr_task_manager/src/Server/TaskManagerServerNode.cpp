@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
     TaskManagerServer manager(nh);
 
-    ros::spin();
+//    ros::spin();
 
     return 0;
 }

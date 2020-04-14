@@ -10,10 +10,13 @@ clients:
     - r1:
         - task:
             taskId: 1
-            goalId: 30
+            goalId: 64
+#        - task:
+#            taskId: 4
+#            timeout: 0
         - task:
-            taskId: 4
-            timeout: 5
+            taskId: 1
+            goalId: 4
     - r2:
         - task:
             taskId: 1
