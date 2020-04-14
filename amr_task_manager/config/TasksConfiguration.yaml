@@ -1,0 +1,27 @@
+# Task IDs:
+#uint32 NO_TASK = 0
+#uint32 PERFORM_WAYPOINTS = 1
+#uint32 WAIT_FOR_USER_ACK = 2
+#uint32 CHARGE_BATTERY = 3
+#uint32 DO_NOTHING = 4
+#uint32 TELEOPERATION = 5
+
+clients:
+    - r1:
+        - task:
+            taskId: 1
+            goalId: 64
+#        - task:
+#            taskId: 4
+#            timeout: 0
+        - task:
+            taskId: 1
+            goalId: 4
+    - r2:
+        - task:
+            taskId: 1
+            goalId: 30
+        - task:
+            taskId: 4
+            timeout: 5
+

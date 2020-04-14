@@ -4,7 +4,7 @@
     <group ns="$(arg robot_id)">
         <node pkg="amr_monitor" type="monitor_client" name="monitor_client" output="screen">
     <!--        <rosparam command="load" file="$(find amr_graph_generator)/config/config.yaml" />-->
-<!--            <param name="tf_prefix" value="$(arg robot_id)"/>-->
+            <param name="tf_prefix" value="$(arg robot_id)"/>
         </node>
     </group>
 </launch>

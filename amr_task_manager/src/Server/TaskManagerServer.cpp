@@ -4,97 +4,34 @@
 
 #include <amr_task_manager/Server/TaskManagerServer.h>
 #include <amr_msgs/GetTaskErrorCodes.h>
-#include <amr_msgs/PlanPathNodes.h>
+#include <amr_msgs/PlanPath.h>
+#include <ros/package.h>
+#include <boost/filesystem.hpp>
 
-//TODO tasky presunu budu predstavovati iba goaly, start bude zohladneny tak ze budeme vediet kde sa robot momentalne nahcadza
+TaskManagerServer::TaskManagerServer() {
+    ros::NodeHandle nh("~");
 
-TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
+    // read tasks
+    boost::filesystem::path packagePath(ros::package::getPath("amr_task_manager"));
+    std::string tasksConfigFile;
+    nh.getParam("tasksConfigurationFile", tasksConfigFile);
+    boost::filesystem::path packageRelativePath(tasksConfigFile);
+    auto fullPath = packagePath / packageRelativePath;
+    parseTasks(fullPath.string());
 
-    std::string planPathByNodesService;
-    nh.getParam("planPathByNodesService", planPathByNodesService);
+    std::string planPathService;
+    nh.getParam("planPathService", planPathService);
 
+    clientInfoSub = nh.subscribe("/client_info", 10, &TaskManagerServer::clientInfoCb, this);
     getTaskSrvServer = nh.advertiseService("get_task", &TaskManagerServer::getTaskCb, this);
     doCustomTaskServer = nh.advertiseService("do_custom_task", &TaskManagerServer::doCustomTaskAsapCb, this);
-    planPathSrvClient = nh.serviceClient<amr_msgs::PlanPathNodes>(planPathByNodesService);
-
-    XmlRpc::XmlRpcValue activeClients;
-    nh.getParam("/activeClients", activeClients);
-
-    if (activeClients.getType() != XmlRpc::XmlRpcValue::TypeArray || activeClients.size() == 0) {
-        throw std::runtime_error("No clients defined in clientNamespaces param array");
-    }
-
-    for (int i = 0; i < activeClients.size(); ++i) {
-        if (activeClients[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
-            throw std::runtime_error("Wrong element type of clientNamespaces param");
-        }
-
-        auto client = std::make_shared<Client>(activeClients[i]);
-        clients.insert(std::make_pair(activeClients[i], client));
-    }
-
-
-    int r1Start, r1End;
-    nh.getParam("r1Start", r1Start);
-    nh.getParam("r1End", r1End);
-
-
-
-    amr_msgs::Task t1;
-    t1.taskId.id = amr_msgs::TaskId::PERFORM_WAYPOINTS;
-    t1.waypoints.push_back({});
-    t1.waypoints.push_back({});
-    t1.waypoints[0].uuid = r1Start;
-    t1.waypoints[1].uuid = r1End;
-    amr_msgs::Task t2;
-    t2.taskId.id = amr_msgs::TaskId::PERFORM_WAYPOINTS;
-    t2.waypoints.push_back({});
-    t2.waypoints.push_back({});
-    t2.waypoints[0].uuid = r1End;
-    t2.waypoints[1].uuid = r1Start;
-
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-    clients.at("r1")->addNewTask(t1);
-    clients.at("r1")->addNewTask(t2);
-
-    t1.waypoints[0].uuid = 54;
-    clients.at("r2")->addNewTask(t1);
-    clients.at("r2")->addNewTask(t2);
-
-
-
-
-//
-//    Task wait;
-//    wait.command = Task::Commnands::DO_NOTHING;
-//    wait.timeout = 20;
-//
-//    Task t1;
-//    t1.command = Task::Commnands::PLAN_PATH;
-//    Task t2;
-//    t2.command = Task::Commnands::PLAN_PATH;
-//
-//    t1.path.first.point.uuid = 29;
-//    t1.path.second.point.uuid = 63;
-//    t2.path.first.point.uuid = 1;
-//    t2.path.second.point.uuid = 63;
-//
-////    clients.at("r1").tasks.push(wait);
-////    clients.at("r2").tasks.push(wait);
-//
-//    clients.at("r1").tasks.push(t1);
-//    clients.at("r2").tasks.push(t2);
+    planPathSrvClient = nh.serviceClient<amr_msgs::PlanPath>(planPathService);
 
     ROS_INFO("Server task manager launched successful");
+
+    ros::AsyncSpinner spinner(4); // Use 4 threads
+    spinner.start();
+    ros::waitForShutdown();
 }
 
 bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::GetTask::Response& res) {
@@ -107,13 +44,17 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
         return true;
     }
 
+    client->waitForNewClientInfo();
     auto task = client->getNewTask();
 
     switch (task.taskId.id) {
         case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
-            amr_msgs::PlanPathNodes srv;
-            srv.request.startUuid = task.waypoints[0].uuid;
-            srv.request.endUuid = task.waypoints[1].uuid;
+            amr_msgs::PlanPath srv;
+            amr_msgs::Point startPoint;
+            startPoint = client->getCurrentPose();
+            startPoint.uuid = 0;
+            srv.request.startPoint = startPoint;
+            srv.request.endPoint.uuid = task.waypoints[0].uuid;
 
             if (planPathSrvClient.call(srv)) {
                 if (srv.response.pathWaypoints.empty()) {
@@ -141,8 +82,9 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
             ROS_ERROR("CHARGE_BATTERY task is not implemented yet");
             break;
         case amr_msgs::TaskId::DO_NOTHING:
-            ROS_ERROR("DO_NOTHING task is not implemented yet");
-            break;
+            res.task.timeout = task.timeout;
+            res.task.taskId.id = task.taskId.id;
+            return true;
     }
     return true;
 }
@@ -163,7 +105,7 @@ bool TaskManagerServer::doCustomTaskAsapCb(amr_msgs::DoCustomTaskAsap::Request &
     return true;
 }
 
-std::shared_ptr<Client> TaskManagerServer::getClient(const std::string &clientId) {
+std::shared_ptr<ClientRepresentation> TaskManagerServer::getClient(const std::string &clientId) {
     RobotClients::iterator it = clients.find(clientId);
     if (it == clients.end()) {
         ROS_ERROR("Unknown client ID: %s", clientId.c_str());
@@ -172,3 +114,49 @@ std::shared_ptr<Client> TaskManagerServer::getClient(const std::string &clientId
     return it->second;
 }
 
+void TaskManagerServer::clientInfoCb(const amr_msgs::ClientInfoConstPtr& msg) {
+    auto client = getClient(msg->clientId);
+    client->setClientInfo(*msg);
+}
+
+void TaskManagerServer::parseTasks(const std::string &configFile) {
+    YAML::Node config = YAML::LoadFile(configFile);
+
+    YAML::Node clientsSeq = config["clients"];
+    for (YAML::iterator it = clientsSeq.begin(); it != clientsSeq.end(); ++it) {
+        for (const auto &clientData : *it) {
+            std::string clientId = clientData.first.as<std::string>();
+            YAML::Node tasksSeq = clientData.second;  // tasks seq
+
+            auto client = std::make_shared<ClientRepresentation>(clientId);
+            clients.insert(std::make_pair(clientId, client));
+
+            for (YAML::iterator taskIt = tasksSeq.begin(); taskIt != tasksSeq.end(); ++taskIt) {
+                auto task = parseTask(*taskIt);
+                client->addNewTask(task);
+            }
+        }
+    }
+}
+
+amr_msgs::Task TaskManagerServer::parseTask(const YAML::Node &taskNode) {
+    int taskId = taskNode["task"]["taskId"].as<int>();
+
+    switch (taskId) {
+        case 1: {
+            amr_msgs::Task task;
+            task.taskId.id = taskId;
+            amr_msgs::Point point;
+            point.uuid = taskNode["task"]["goalId"].as<int>();
+            task.waypoints.push_back(point);
+            return task;
+        }
+        case 4: {
+            amr_msgs::Task task;
+            task.taskId.id = taskId;
+            task.timeout = taskNode["task"]["timeout"].as<int>();
+            return task;
+        }
+        default: throw std::runtime_error("Unknown task ID, please check your task configuration file");
+    }
+}

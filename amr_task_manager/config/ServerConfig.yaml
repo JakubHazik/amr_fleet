@@ -1,3 +1,5 @@
-planPathByNodesService: "/planner/plan_path_by_nodes"
-r1Start: 48 #30
-r1End: 31 #21
+tasksConfigurationFile: "config/TasksConfiguration.yaml"
+planPathService: "/planner/plan_path"
+
+
+
