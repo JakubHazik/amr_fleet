@@ -7,6 +7,7 @@
 
 #include <map>
 #include <queue>
+#include <future>
 #include <yaml-cpp/yaml.h>
 #include <tf/transform_datatypes.h>
 
@@ -71,10 +72,17 @@ public:
         pose.pose.theta = tf::getYaw(clientInfo.poseWithCovariance.pose.pose.orientation);
         clientCurrentPose = pose;
         clientInfoReceived = true;
+
+        if (newClientInfo) {
+            newClientInfo->set_value();
+        }
     }
 
-    bool isClientReady() {
-        return clientInfoReceived;
+    void waitForNewClientInfo() {
+        newClientInfo = std::make_shared<std::promise<void>>();
+        auto fut = newClientInfo->get_future();
+        fut.wait();
+        newClientInfo.reset();
     }
 
     bool getCurrentPose(amr_msgs::Point& currentPose) {
@@ -93,6 +101,7 @@ private:
     amr_msgs::Point clientCurrentPose;
     bool clientInfoReceived = false;
     amr_msgs::Task currentPerformingTask;
+    std::shared_ptr<std::promise<void>> newClientInfo;
 };
 
 
@@ -107,6 +116,7 @@ private:
     ros::ServiceServer doCustomTaskServer;
     ros::ServiceClient planPathSrvClient;
     ros::Subscriber clientInfoSub;
+
 
     RobotClients clients;
 

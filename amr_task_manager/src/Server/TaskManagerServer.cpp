@@ -7,8 +7,6 @@
 #include <amr_msgs/PlanPath.h>
 
 
-//TODO tasky presunu budu predstavovati iba goaly, start bude zohladneny tak ze budeme vediet kde sa robot momentalne nahcadza
-
 TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
 
     //todo configure
@@ -22,14 +20,12 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
     doCustomTaskServer = nh.advertiseService("do_custom_task", &TaskManagerServer::doCustomTaskAsapCb, this);
     planPathSrvClient = nh.serviceClient<amr_msgs::PlanPath>(planPathService);
 
-    ROS_INFO("Server task manager launched successful");
 
-//    ros::AsyncSpinner()
+    ROS_INFO("Server task manager launched successful");
 
     ros::AsyncSpinner spinner(4); // Use 4 threads
     spinner.start();
     ros::waitForShutdown();
-
 }
 
 bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::GetTask::Response& res) {
@@ -42,14 +38,7 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
         return true;
     }
 
-    if (!client->isClientReady()) {
-        // send empty task
-        ROS_WARN("No client info received for client: %s yet, send empty task.", req.clientId.c_str());
-        res.task.timeout = 1;
-        res.task.taskId.id = amr_msgs::TaskId::DO_NOTHING;
-        return true;
-    }
-
+    client->waitForNewClientInfo();
 
     auto task = client->getNewTask();
 
