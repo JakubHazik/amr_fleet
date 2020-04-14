@@ -12,11 +12,13 @@ ClientRepresentation::ClientRepresentation(const std::string &clientName)
 }
 
 void ClientRepresentation::doCustomTaskAsap(const amr_msgs::Task &task, bool resumePreviousTask) {
+    tasksContainerMtx.lock();
     if (resumePreviousTask) {
         tasks.push_front(currentPerformingTask);
     }
 
     tasks.push_front(task);
+    tasksContainerMtx.unlock();
     resetCurrentTask();
 }
 
@@ -25,10 +27,12 @@ bool ClientRepresentation::isNewTaskAvailable() {
 }
 
 void ClientRepresentation::addNewTask(const amr_msgs::Task &task) {
+    std::lock_guard<std::mutex> lck(tasksContainerMtx);
     tasks.push_back(task);
 }
 
 amr_msgs::Task ClientRepresentation::getNewTask() {
+    std::lock_guard<std::mutex> lck(tasksContainerMtx);
     currentPerformingTask = tasks.front();
     tasks.pop_front();
     return currentPerformingTask;
@@ -53,7 +57,9 @@ void ClientRepresentation::setClientInfo(const amr_msgs::ClientInfo &clientInfo)
     pose.pose.x = clientInfo.poseWithCovariance.pose.pose.position.x;
     pose.pose.y = clientInfo.poseWithCovariance.pose.pose.position.y;
     pose.pose.theta = tf::getYaw(clientInfo.poseWithCovariance.pose.pose.orientation);
+    clientInfoMtx.lock();
     clientCurrentPose = pose;
+    clientInfoMtx.unlock();
 
     if (newClientInfo) {
         newClientInfo->set_value();
@@ -68,5 +74,6 @@ void ClientRepresentation::waitForNewClientInfo() {
 }
 
 amr_msgs::Point ClientRepresentation::getCurrentPose() {
+    std::lock_guard<std::mutex> lck(clientInfoMtx);
     return clientCurrentPose;
 }

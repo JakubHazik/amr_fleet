@@ -8,7 +8,6 @@
 
 
 TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
-
     //todo configure
     parseTasks("/home/jakub/amr_ws/src/amr_fleet/amr_task_manager/config/tasks_config.yaml");
 
@@ -22,7 +21,6 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
 
     ROS_INFO("Server task manager launched successful");
 
-    //todo thread safe
     ros::AsyncSpinner spinner(4); // Use 4 threads
     spinner.start();
     ros::waitForShutdown();

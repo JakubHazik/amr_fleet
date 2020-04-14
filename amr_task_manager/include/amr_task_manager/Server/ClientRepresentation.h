@@ -6,8 +6,9 @@
 #define SRC_CLIENTREPRESENTATION_H
 
 #include <ros/ros.h>
-#include <queue>
+#include <list>
 #include <future>
+#include <mutex>
 #include <amr_msgs/ResetTask.h>
 #include <amr_msgs/DoCustomTaskAsap.h>
 #include <amr_msgs/ClientInfo.h>
@@ -40,6 +41,9 @@ private:
     amr_msgs::Point clientCurrentPose;
     amr_msgs::Task currentPerformingTask;
     std::shared_ptr<std::promise<void>> newClientInfo;
+
+    std::mutex tasksContainerMtx;
+    std::mutex clientInfoMtx;
 };
 
 
