@@ -10,6 +10,8 @@
 #include <amr_msgs/Point.h>
 #include <amr_msgs/ClientInfo.h>
 #include <amr_msgs/Task.h>
+#include <tf/tf.h>
+#include <tf/transform_listener.h>
 
 
 class DataCollector {
@@ -22,11 +24,14 @@ private:
     ros::Subscriber robotCurrentGoalSub;
     ros::Subscriber currentTaskSub;
     ros::Publisher clientStatusPub;
+    tf::TransformListener poseTfListener;
+    std::string tfPrefix;
 
     amr_msgs::ClientInfo clientInfo;
 
     bool robotCurrentPoseReceived = false;
 
+    bool readRobotPoseTf();
     void robotPoseCb(const geometry_msgs::PoseWithCovarianceStampedConstPtr& pose);
     void robotCurrentGoalCb(const amr_msgs::PointConstPtr& point);
     void currentTaskCb(const amr_msgs::TaskConstPtr& task);
