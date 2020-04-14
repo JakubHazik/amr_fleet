@@ -9,9 +9,11 @@ find_package(catkin REQUIRED COMPONENTS
         amr_pose_controller
         roscpp
         actionlib
+        roslib
         )
 
 find_package(yaml-cpp REQUIRED)
+find_package(Boost COMPONENTS filesystem REQUIRED)
 
 catkin_package(
         #  INCLUDE_DIRS include
@@ -37,6 +39,7 @@ add_dependencies(task_manager_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 target_link_libraries(task_manager_server
         ${catkin_LIBRARIES}
         ${YAML_CPP_LIBRARIES}
+        ${Boost_LIBRARIES}
 )
 
 

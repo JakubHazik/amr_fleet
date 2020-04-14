@@ -5,11 +5,19 @@
 #include <amr_task_manager/Server/TaskManagerServer.h>
 #include <amr_msgs/GetTaskErrorCodes.h>
 #include <amr_msgs/PlanPath.h>
+#include <ros/package.h>
+#include <boost/filesystem.hpp>
 
+TaskManagerServer::TaskManagerServer() {
+    ros::NodeHandle nh("~");
 
-TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
-    //todo configure
-    parseTasks("/home/jakub/amr_ws/src/amr_fleet/amr_task_manager/config/tasks_config.yaml");
+    // read tasks
+    boost::filesystem::path packagePath(ros::package::getPath("amr_task_manager"));
+    std::string tasksConfigFile;
+    nh.getParam("tasksConfigurationFile", tasksConfigFile);
+    boost::filesystem::path packageRelativePath(tasksConfigFile);
+    auto fullPath = packagePath / packageRelativePath;
+    parseTasks(fullPath.string());
 
     std::string planPathService;
     nh.getParam("planPathService", planPathService);

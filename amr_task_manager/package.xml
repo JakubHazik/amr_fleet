@@ -65,6 +65,7 @@
   <exec_depend>actionlib</exec_depend>
 
   <depend>yaml-cpp</depend>
+  <depend>roslib</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

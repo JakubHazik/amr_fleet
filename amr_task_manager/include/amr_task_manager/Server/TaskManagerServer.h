@@ -23,7 +23,7 @@ typedef std::map<std::string, std::shared_ptr<ClientRepresentation>> RobotClient
 
 class TaskManagerServer {
 public:
-    TaskManagerServer(ros::NodeHandle& nh);
+    TaskManagerServer();
 private:
     ros::ServiceServer getTaskSrvServer;
     ros::ServiceServer doCustomTaskServer;
