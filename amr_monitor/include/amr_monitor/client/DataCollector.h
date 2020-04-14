@@ -25,6 +25,8 @@ private:
 
     amr_msgs::ClientInfo clientInfo;
 
+    bool robotCurrentPoseReceived = false;
+
     void robotPoseCb(const geometry_msgs::PoseWithCovarianceStampedConstPtr& pose);
     void robotCurrentGoalCb(const amr_msgs::PointConstPtr& point);
     void currentTaskCb(const amr_msgs::TaskConstPtr& task);

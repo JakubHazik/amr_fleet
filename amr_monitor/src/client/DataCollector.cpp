@@ -14,16 +14,24 @@ DataCollector::DataCollector() {
 
     clientInfo.clientId = ros::this_node::getNamespace();
 
+    // remove slash from client namespace
+    if (!clientInfo.clientId.empty() && clientInfo.clientId[0] == '/') {
+        clientInfo.clientId.erase(0, 1);
+    }
+
     ros::Rate r(1);
     while (ros::ok()) {
         ros::spinOnce();
-        clientStatusPub.publish(clientInfo);
+        if (robotCurrentPoseReceived) {
+            clientStatusPub.publish(clientInfo);
+        }
         r.sleep();
     }
 }
 
 void DataCollector::robotPoseCb(const geometry_msgs::PoseWithCovarianceStampedConstPtr &pose) {
     clientInfo.poseWithCovariance = *pose;
+    robotCurrentPoseReceived = true;
 }
 
 void DataCollector::robotCurrentGoalCb(const amr_msgs::PointConstPtr &point) {
