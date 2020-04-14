@@ -1,0 +1,4 @@
+amr_msgs/Point startPoint
+amr_msgs/Point endPoint
+---
+amr_msgs/Point[] pathWaypoints

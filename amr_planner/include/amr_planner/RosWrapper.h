@@ -10,7 +10,7 @@
 
 #include <ros/ros.h>
 #include <amr_msgs/Graph.h>
-#include <amr_msgs/PlanPathPoints.h>
+#include <amr_msgs/PlanPath.h>
 #include <amr_msgs/PlanPathNodes.h>
 #include <amr_msgs/SetNodeProperties.h>
 
@@ -37,7 +37,7 @@ private:
 
     void newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg);
 
-    bool planPathPointsCallback(amr_msgs::PlanPathPoints::Request& req, amr_msgs::PlanPathPoints::Response& res);
+    bool planPathCallback(amr_msgs::PlanPath::Request& req, amr_msgs::PlanPath::Response& res);
 
     bool planPathNodesCallback(amr_msgs::PlanPathNodes::Request& req, amr_msgs::PlanPathNodes::Response& res);
 

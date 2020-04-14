@@ -78,7 +78,7 @@ private:
 
     bool pointPositionsAreEqual(double x1, double y1, double x2, double y2);
 
-    unsigned int addNodeCounter = 0;
+    unsigned int addNodeCounter = 1;    // nodes uuid-s will start from 1, uuid=0 is not valid node
     double maxEdgeLength;
 
     std::string currentBlockName;

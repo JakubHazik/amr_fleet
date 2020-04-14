@@ -24,7 +24,7 @@ add_message_files(
 
 add_service_files(
         FILES
-        PlanPathPoints.srv
+        PlanPath.srv
         PlanPathNodes.srv
         GetTask.srv
         ResetTask.srv
