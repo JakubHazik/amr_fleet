@@ -6,10 +6,7 @@
 #define PROJECT_TASKMANAGERSERVER_H
 
 #include <map>
-#include <queue>
-#include <future>
 #include <yaml-cpp/yaml.h>
-#include <tf/transform_datatypes.h>
 
 #include <ros/ros.h>
 #include <amr_msgs/Task.h>
@@ -19,93 +16,9 @@
 #include <amr_msgs/DoCustomTaskAsap.h>
 #include <amr_msgs/ClientInfo.h>
 
+#include <amr_task_manager/Server/ClientRepresentation.h>
 
-class Client {
-public:
-    explicit Client(const std::string& clientName)
-        :   clientName(clientName) {
-        ros::NodeHandle nh("/");
-        resetTaskSrv = nh.serviceClient<amr_msgs::ResetTask>(clientName + "/task_manager_client/reset_task");
-    }
-
-    void doCustomTaskAsap(const amr_msgs::Task& task, bool resumePreviousTask) {
-        if (resumePreviousTask) {
-            tasks.push_front(currentPerformingTask);
-        }
-
-        tasks.push_front(task);
-        resetCurrentTask();
-    }
-
-    bool isNewTaskAvailable() {
-        return !tasks.empty();
-    }
-
-    void addNewTask(const amr_msgs::Task& task) {
-        tasks.push_back(task);
-    }
-
-    amr_msgs::Task getNewTask() {
-        currentPerformingTask = tasks.front();
-        tasks.pop_front();
-        return currentPerformingTask;
-    }
-
-    std::pair<bool, std::string> resetCurrentTask() {
-        amr_msgs::ResetTask srv;
-
-        if (!resetTaskSrv.waitForExistence(ros::Duration(5))) {
-            ROS_ERROR("Reset service: %s is not available", resetTaskSrv.getService().c_str());
-        }
-
-        resetTaskSrv.call(srv);
-        if (!srv.response.success) {
-            ROS_ERROR("Client %s reset task unsuccessful: %s", clientName.c_str(), srv.response.message.c_str());
-        }
-        return {srv.response.success, srv.response.message};
-    }
-
-    void setClientInfo(const amr_msgs::ClientInfo& clientInfo) {
-        amr_msgs::Point pose;
-        pose.pose.x = clientInfo.poseWithCovariance.pose.pose.position.x;
-        pose.pose.y = clientInfo.poseWithCovariance.pose.pose.position.y;
-        pose.pose.theta = tf::getYaw(clientInfo.poseWithCovariance.pose.pose.orientation);
-        clientCurrentPose = pose;
-        clientInfoReceived = true;
-
-        if (newClientInfo) {
-            newClientInfo->set_value();
-        }
-    }
-
-    void waitForNewClientInfo() {
-        newClientInfo = std::make_shared<std::promise<void>>();
-        auto fut = newClientInfo->get_future();
-        fut.wait();
-        newClientInfo.reset();
-    }
-
-    bool getCurrentPose(amr_msgs::Point& currentPose) {
-        if (clientInfoReceived) {
-            currentPose = clientCurrentPose;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-private:
-    ros::ServiceClient resetTaskSrv;
-    std::string clientName;
-    std::list<amr_msgs::Task> tasks;
-    amr_msgs::Point clientCurrentPose;
-    bool clientInfoReceived = false;
-    amr_msgs::Task currentPerformingTask;
-    std::shared_ptr<std::promise<void>> newClientInfo;
-};
-
-
-typedef std::map<std::string, std::shared_ptr<Client>> RobotClients;
+typedef std::map<std::string, std::shared_ptr<ClientRepresentation>> RobotClients;
 
 
 class TaskManagerServer {
@@ -125,7 +38,7 @@ private:
 
     void clientInfoCb(const amr_msgs::ClientInfoConstPtr& msg);
 
-    std::shared_ptr<Client> getClient(const std::string& clientId);
+    std::shared_ptr<ClientRepresentation> getClient(const std::string& clientId);
 
     void parseTasks(const std::string& configFile);
 

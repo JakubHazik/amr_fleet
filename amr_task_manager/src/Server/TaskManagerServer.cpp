@@ -15,14 +15,14 @@ TaskManagerServer::TaskManagerServer(ros::NodeHandle& nh) {
     std::string planPathService;
     nh.getParam("planPathService", planPathService);
 
-    clientInfoSub = nh.subscribe("/client_info", 5, &TaskManagerServer::clientInfoCb, this);
+    clientInfoSub = nh.subscribe("/client_info", 10, &TaskManagerServer::clientInfoCb, this);
     getTaskSrvServer = nh.advertiseService("get_task", &TaskManagerServer::getTaskCb, this);
     doCustomTaskServer = nh.advertiseService("do_custom_task", &TaskManagerServer::doCustomTaskAsapCb, this);
     planPathSrvClient = nh.serviceClient<amr_msgs::PlanPath>(planPathService);
 
-
     ROS_INFO("Server task manager launched successful");
 
+    //todo thread safe
     ros::AsyncSpinner spinner(4); // Use 4 threads
     spinner.start();
     ros::waitForShutdown();
@@ -39,14 +39,13 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
     }
 
     client->waitForNewClientInfo();
-
     auto task = client->getNewTask();
 
     switch (task.taskId.id) {
         case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
             amr_msgs::PlanPath srv;
             amr_msgs::Point startPoint;
-            client->getCurrentPose(startPoint);
+            startPoint = client->getCurrentPose();
             startPoint.uuid = 0;
             srv.request.startPoint = startPoint;
             srv.request.endPoint.uuid = task.waypoints[0].uuid;
@@ -100,7 +99,7 @@ bool TaskManagerServer::doCustomTaskAsapCb(amr_msgs::DoCustomTaskAsap::Request &
     return true;
 }
 
-std::shared_ptr<Client> TaskManagerServer::getClient(const std::string &clientId) {
+std::shared_ptr<ClientRepresentation> TaskManagerServer::getClient(const std::string &clientId) {
     RobotClients::iterator it = clients.find(clientId);
     if (it == clients.end()) {
         ROS_ERROR("Unknown client ID: %s", clientId.c_str());
@@ -119,15 +118,11 @@ void TaskManagerServer::parseTasks(const std::string &configFile) {
 
     YAML::Node clientsSeq = config["clients"];
     for (YAML::iterator it = clientsSeq.begin(); it != clientsSeq.end(); ++it) {
-//        YAML::Node client = *it;
-//        std::cout << client << std::endl << "======client" << std::endl;
-
         for (const auto &clientData : *it) {
-//            std::cout << kv.first.as<std::string>() << "\n";    // r1
             std::string clientId = clientData.first.as<std::string>();
             YAML::Node tasksSeq = clientData.second;  // tasks seq
 
-            auto client = std::make_shared<Client>(clientId);
+            auto client = std::make_shared<ClientRepresentation>(clientId);
             clients.insert(std::make_pair(clientId, client));
 
             for (YAML::iterator taskIt = tasksSeq.begin(); taskIt != tasksSeq.end(); ++taskIt) {
@@ -140,7 +135,6 @@ void TaskManagerServer::parseTasks(const std::string &configFile) {
 
 amr_msgs::Task TaskManagerServer::parseTask(const YAML::Node &taskNode) {
     int taskId = taskNode["task"]["taskId"].as<int>();
-//    std::cout<< taskId<<std::endl;
 
     switch (taskId) {
         case 1: {
@@ -159,5 +153,4 @@ amr_msgs::Task TaskManagerServer::parseTask(const YAML::Node &taskNode) {
         }
         default: throw std::runtime_error("Unknown task ID, please check your task configuration file");
     }
-
 }

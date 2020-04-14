@@ -29,6 +29,7 @@ include_directories(
 add_executable(task_manager_server
         src/Server/TaskManagerServer.cpp
         src/Server/TaskManagerServerNode.cpp
+        src/Server/ClientRepresentation.cpp
 )
 
 add_dependencies(task_manager_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -42,7 +43,8 @@ target_link_libraries(task_manager_server
 # Client node
 add_executable(task_manager_client
         src/Client/TaskManagerClientNode.cpp
-        src/Client/TaskManagerClient.cpp)
+        src/Client/TaskManagerClient.cpp
+)
 
 add_dependencies(task_manager_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
