@@ -19,10 +19,11 @@ public:
     double posX;
     double posY;
     bool isReachable = true;
+    bool isBidirectional = false;
 
     Node() = default;
 
-    Node(int uuid, double x, double y);
+    Node(int uuid, double x, double y, bool bidirectional);
 
     static double distance(const Node& n1, const Node& n2);
 

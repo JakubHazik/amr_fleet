@@ -106,7 +106,7 @@ public:
 
     bool findVertex(const Node& node, vertex_t& foundNodeIt);
 
-    std::vector<Neighbor> getNeighbors(const Node& currentNode);
+    std::pair<std::vector<Node>, std::vector<double>> getNeighbors(const Node& currentNode);
 
     Node getNearestNode(double x, double y);
 

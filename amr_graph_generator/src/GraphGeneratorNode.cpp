@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
         nMsg.point.pose.x = node.x;
         nMsg.point.pose.y = node.y;
         nMsg.successors = node.successors;
+        nMsg.isBidirectional = node.bidirectional;
         graphMsg.nodes.push_back(nMsg);
     }
 

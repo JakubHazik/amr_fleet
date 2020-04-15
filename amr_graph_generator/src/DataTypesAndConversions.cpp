@@ -22,10 +22,11 @@ std::ostream& operator<<(std::ostream& os, const Node& n) {
     return os << n.uuid;
 }
 
-Node::Node(int uuid, double x, double y) {
+Node::Node(int uuid, double x, double y, bool bidirectional) {
     this->uuid = uuid;
     this->posX = x;
     this->posY = y;
+    this->isBidirectional = bidirectional;
 }
 
 geometry_msgs::Pose node2pose(const Node& n) {
