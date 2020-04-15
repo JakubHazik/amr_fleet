@@ -62,7 +62,7 @@ private:
      * @param end
      * @return vector of path samples, ordered from start to end
      */
-    std::vector<Node> sampleLine(const Eigen::Vector2d& start, const Eigen::Vector2d& end);
+    std::vector<Node> sampleLine(const Eigen::Vector2d& start, const Eigen::Vector2d& end, const bool bidirectional=false);
     std::vector<Node> sampleArc(const DL_ArcData& arc);
 
     std::vector<Node> convertBlockToSegments(const Block& block, const DL_InsertData& insert);
@@ -77,6 +77,9 @@ private:
     bool nodePosesAreEqual(const Node& n1, const Node& n2);
 
     bool pointPositionsAreEqual(double x1, double y1, double x2, double y2);
+
+    template<typename T>
+    bool removeElemByValue(std::vector<T>& v, T value);
 
     unsigned int addNodeCounter = 1;    // nodes uuid-s will start from 1, uuid=0 is not valid node
     double maxEdgeLength;

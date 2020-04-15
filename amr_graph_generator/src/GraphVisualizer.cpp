@@ -12,7 +12,7 @@ GraphVisualizer::GraphVisualizer(const std::vector<Node>& graph) {
     }
 
     // todo configurable
-    visual_tools.reset(new rvt::RvizVisualTools("map", "/amr_rviz_tools"));
+    visual_tools.reset(new rvt::RvizVisualTools("map", "/generated_graph"));
     visual_tools->loadMarkerPub(false, true);  // create publisher before waiting
 
     // Clear messages
@@ -27,7 +27,11 @@ void GraphVisualizer::drawGraph() {
     for (const auto& node: graphNodes) {
         // draw nodes (spheres)
         geometry_msgs::Point point = node2point(node.second);
-        visual_tools->publishSphere(point, rvt::colors::RED, rvt::scales::LARGE);
+        if (node.second.bidirectional) {
+            visual_tools->publishSphere(point, rvt::colors::CYAN, rvt::scales::LARGE);
+        } else {
+            visual_tools->publishSphere(point, rvt::colors::RED, rvt::scales::LARGE);
+        }
         publishLabelHelper(node2pose(node.second), std::to_string(node.second.uuid));
 
         // draw edges (arrows)
