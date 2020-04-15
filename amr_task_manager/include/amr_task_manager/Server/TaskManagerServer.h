@@ -28,6 +28,7 @@ private:
     ros::ServiceServer getTaskSrvServer;
     ros::ServiceServer doCustomTaskServer;
     ros::ServiceClient planPathSrvClient;
+    ros::Publisher clientPathsPub;
     ros::Subscriber clientInfoSub;
 
 

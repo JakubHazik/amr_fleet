@@ -108,6 +108,7 @@ SemaphoreServer::SemaphoreServer(ros::NodeHandle& nh) {
     nodesOccupancy = std::make_shared<NodesOccupancyContainer>(3);
 
     graphSub = nh.subscribe("/graph_generator/graph", 5, &SemaphoreServer::graphCb, this);
+    clientsPathsSub = nh.subscribe("/task_manager_server/client_paths", 10, &SemaphoreServer::clientPathsCb, this);
     lockNodeSrv = nh.advertiseService("lock_node", &SemaphoreServer::lockNodeCb, this);
 
     // prepare visualizer
@@ -116,6 +117,7 @@ SemaphoreServer::SemaphoreServer(ros::NodeHandle& nh) {
     // clear messages
     visual_tools->deleteAllMarkers();
     visual_tools->enableBatchPublishing();
+    visual_tools->trigger();
 }
 
 bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res) {
@@ -209,5 +211,9 @@ void SemaphoreServer::visualizeNodesOccupancy() {
 
 void SemaphoreServer::graphCb(const amr_msgs::GraphPtr &msg) {
     graph.readNewGraph(*msg);
+}
+
+void SemaphoreServer::clientPathsCb(const amr_msgs::ClientPathConstPtr &msg) {
+    clientsPaths[msg->clientId] = msg->waypoints;
 }
 

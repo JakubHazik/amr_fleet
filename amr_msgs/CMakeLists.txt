@@ -20,6 +20,7 @@ add_message_files(
         GetTaskErrorCodes.msg
         ClientInfo.msg
         HardwareStatus.msg
+        ClientPath.msg
 )
 
 add_service_files(

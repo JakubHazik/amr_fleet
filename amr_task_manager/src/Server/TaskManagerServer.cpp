@@ -4,9 +4,10 @@
 
 #include <amr_task_manager/Server/TaskManagerServer.h>
 #include <amr_msgs/GetTaskErrorCodes.h>
-#include <amr_msgs/PlanPath.h>
+#include <amr_msgs/ClientPath.h>
 #include <ros/package.h>
 #include <boost/filesystem.hpp>
+#include <amr_msgs/PlanPath.h>
 
 TaskManagerServer::TaskManagerServer() {
     ros::NodeHandle nh("~");
@@ -23,6 +24,7 @@ TaskManagerServer::TaskManagerServer() {
     nh.getParam("planPathService", planPathService);
 
     clientInfoSub = nh.subscribe("/client_info", 10, &TaskManagerServer::clientInfoCb, this);
+    clientPathsPub = nh.advertise<amr_msgs::ClientPath>("client_paths", 10, true);
     getTaskSrvServer = nh.advertiseService("get_task", &TaskManagerServer::getTaskCb, this);
     doCustomTaskServer = nh.advertiseService("do_custom_task", &TaskManagerServer::doCustomTaskAsapCb, this);
     planPathSrvClient = nh.serviceClient<amr_msgs::PlanPath>(planPathService);
@@ -61,7 +63,12 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
                     res.error.code = amr_msgs::GetTaskErrorCodes::PLANNING_FAILED;
                     return true;
                 }
-
+                // send info about planned path for client
+                amr_msgs::ClientPath clientPath;
+                clientPath.clientId = req.clientId;
+                clientPath.waypoints = srv.response.pathWaypoints;
+                clientPathsPub.publish(clientPath);
+                // fill in srv response
                 res.task.waypoints = srv.response.pathWaypoints;
                 res.task.taskId.id = amr_msgs::TaskId::PERFORM_WAYPOINTS;
                 res.error.code = amr_msgs::GetTaskErrorCodes::OK;

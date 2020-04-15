@@ -9,6 +9,7 @@
 #include <amr_msgs/LockPoint.h>
 #include <amr_msgs/Point.h>
 #include <amr_msgs/Graph.h>
+#include <amr_msgs/ClientPath.h>
 #include <rviz_visual_tools/rviz_visual_tools.h>
 #include <amr_graph_representation/Graph.h>
 #include <amr_graph_representation/DataTypesAndConversions.h>
@@ -57,15 +58,18 @@ private:
     Graph graph;
 
     ros::Subscriber graphSub;
+    ros::Subscriber clientsPathsSub;
     ros::ServiceServer lockNodeSrv;
     rvt::RvizVisualToolsPtr visual_tools;
 
     std::shared_ptr<NodesOccupancyContainer> nodesOccupancy;
-//    std::map<unsigned int, std::string> lockedNodes;  // <nodeId, clientId>
+    std::map<std::string, std::vector<amr_msgs::Point>> clientsPaths;
 
     bool lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res);
 
     void graphCb(const amr_msgs::GraphPtr& msg);
+
+    void clientPathsCb(const amr_msgs::ClientPathConstPtr& msg);
 
     void visualizeNodesOccupancy();
 
