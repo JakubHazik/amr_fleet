@@ -2,7 +2,7 @@
 // Created by jakub on 27.2.2020.
 //
 
-#include <amr_planner/DataTypesAndConversions.h>
+#include <amr_graph_representation/DataTypesAndConversions.h>
 
 
 double Node::distance(const Node& n1, const Node& n2) {

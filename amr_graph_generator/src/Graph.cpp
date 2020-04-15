@@ -2,7 +2,7 @@
 // Created by jakub on 21.2.2020.
 //
 
-#include <amr_planner/Graph.h>
+#include <amr_graph_representation/Graph.h>
 
 #include <fstream>
 #include <boost/graph/adjacency_list.hpp>
@@ -11,6 +11,21 @@
 
 using namespace boost;
 
+void Graph::readNewGraph(const amr_msgs::Graph& graphMsg) {
+    clear();
+
+    for (const amr_msgs::Node &node: graphMsg.nodes) {
+        Node nFrom(node.point.uuid, node.point.pose.x, node.point.pose.y);
+        for (const auto &successorNode: node.successors) {
+            auto nodesIt = std::find_if(graphMsg.nodes.begin(), graphMsg.nodes.end(),
+                                        [&successorNode](const amr_msgs::Node& obj) {return obj.point.uuid == successorNode;});
+            auto index = std::distance(graphMsg.nodes.begin(), nodesIt);
+            auto nextNode = graphMsg.nodes[index];
+            Node nTo(nextNode.point.uuid, nextNode.point.pose.x, nextNode.point.pose.y);
+            addEdge(nFrom, nTo);
+        }
+    }
+}
 
 void Graph::addEdge(const Node& nFrom, const Node& nTo) {
     vertex_t v1, v2;

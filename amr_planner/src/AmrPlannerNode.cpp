@@ -4,7 +4,6 @@
 
 #include <ros/ros.h>
 #include <amr_planner/RosWrapper.h>
-#include <amr_planner/Graph.h>
 
 int main ( int argc, char **argv ) {
     ros::init ( argc, argv, "planner" );

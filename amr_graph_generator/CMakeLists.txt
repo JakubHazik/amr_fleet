@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
         rviz_visual_tools
         )
 find_package(Eigen3 REQUIRED)
+find_package(Boost REQUIRED COMPONENTS graph)
 
 find_library(DXF_LIB dxflib)
 if (NOT DXF_LIB)
@@ -18,6 +19,8 @@ if (NOT DXF_LIB)
 endif ()
 
 catkin_package(
+        LIBRARIES amr_graph_representation
+        INCLUDE_DIRS include
         CATKIN_DEPENDS amr_msgs rviz_visual_tools
         DEPENDS dxflib
 )
@@ -28,7 +31,17 @@ include_directories(
         ${catkin_INCLUDE_DIRS}
 )
 
+# library for graph representation
+add_library(amr_graph_representation
+        src/Graph.cpp
+        src/DataTypesAndConversions.cpp
+)
+add_dependencies(amr_graph_representation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(amr_graph_representation
+        ${catkin_LIBRARIES}
+)
 
+# graph generator executable
 add_executable(amr_graph_generator
         src/GraphGeneratorNode.cpp
         src/PathDxfParser.cpp

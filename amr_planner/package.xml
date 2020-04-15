@@ -57,6 +57,8 @@
   <build_depend>amr_msgs</build_depend>
   <exec_depend>amr_msgs</exec_depend>
 
+  <depend>amr_graph_generator</depend>
+
 
 
   <!-- The export tag contains other, unspecified, tags -->

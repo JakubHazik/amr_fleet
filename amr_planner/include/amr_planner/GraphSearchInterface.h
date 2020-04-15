@@ -8,7 +8,7 @@
 #define PROJECT_GRAPHSEARCHINTERFACE_H
 
 #include <vector>
-#include <amr_planner/Graph.h>
+#include <amr_graph_representation/Graph.h>
 
 class GraphSearchInterface {
 public:
