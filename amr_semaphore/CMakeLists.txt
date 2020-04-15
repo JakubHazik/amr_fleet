@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
         amr_msgs
         roscpp
         rviz_visual_tools
+        amr_graph_generator
         )
 
 catkin_package(

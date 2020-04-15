@@ -57,6 +57,7 @@
   <exec_depend>roscpp</exec_depend>
 
   <depend>rviz_visual_tools</depend>
+  <depend>amr_graph_generator</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

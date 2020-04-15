@@ -10,32 +10,28 @@ NodesOccupancyContainer::NodesOccupancyContainer(const unsigned int occupancyLen
     bufferMaxLength = occupancyLength;
 }
 
-std::map<std::string, std::list<amr_msgs::Point>> NodesOccupancyContainer::getOccupancyData() {
+std::map<std::string, std::list<Node>> NodesOccupancyContainer::getOccupancyData() {
     return data;
 }
 
-bool NodesOccupancyContainer::lockNode(const std::string &ownerId, const amr_msgs::Point& node) {
+bool NodesOccupancyContainer::lockNode(const std::string &ownerId, const Node& node, bool itIsCurrentNode) {
     if (isNodeAlreadyLocked(node)) {
         return false;
     } else {
         auto targetOwnerIt = data.find(ownerId);
         if (targetOwnerIt == data.end()) {
             // ownerId has not exist already, add it
-            std::pair<std::string, std::list<amr_msgs::Point>> ownerArray(ownerId, {});
+            std::pair<std::string, std::list<Node>> ownerArray(ownerId, {});
             auto insertResult = data.insert(ownerArray);
             targetOwnerIt = insertResult.first;
         }
 
         auto& nodesArray = targetOwnerIt->second;
         nodesArray.push_back(node);
-        if (nodesArray.size() > bufferMaxLength) {
-            nodesArray.pop_front();
-        }
-        return true;
     }
 }
 
-bool NodesOccupancyContainer::unlockNode(const std::string &ownerId, const amr_msgs::Point &node) {
+bool NodesOccupancyContainer::unlockNode(const std::string &ownerId, const Node &node) {
     auto targetOwnerIt = data.find(ownerId);
     if (targetOwnerIt == data.end()) {
         return false; // owner does not exist
@@ -52,7 +48,7 @@ bool NodesOccupancyContainer::unlockNode(const std::string &ownerId, const amr_m
     return false;   // node is not locked
 }
 
-bool NodesOccupancyContainer::isNodeAlreadyLocked(const amr_msgs::Point& node) {
+bool NodesOccupancyContainer::isNodeAlreadyLocked(const Node& node) {
     for (const auto& ownerNodes : data) {
         for (const auto& nodesIt : ownerNodes.second) {
             if (nodesIt.uuid == node.uuid) {
@@ -64,16 +60,54 @@ bool NodesOccupancyContainer::isNodeAlreadyLocked(const amr_msgs::Point& node) {
     return false;
 }
 
-void NodesOccupancyContainer::unlockAllNodes(const std::string &ownerId) {
-    data[ownerId] = std::list<amr_msgs::Point>();
+bool NodesOccupancyContainer::isNodeAlreadyLockedBy(const std::string& ownerId, const Node &node) {
+    auto ownerNodesIt = data.find(ownerId);
+    if (ownerNodesIt == data.end()) {
+        // owner does not exist
+        return false;
+    }
+
+    for (const auto& n: ownerNodesIt->second) {
+        if (n.uuid == node.uuid) {
+            return true;
+        }
+    }
+    return false;
 }
 
+void NodesOccupancyContainer::unlockAllNodes(const std::string &ownerId) {
+    data[ownerId] = std::list<Node>();
+}
+
+void NodesOccupancyContainer::checkMaxNodesAndRemove(const std::string& ownerId, const Node& referencedNode) {
+    auto targetOwnerIt = data.find(ownerId);
+    if (targetOwnerIt == data.end()) {
+        // owner does not exist, nothing to check
+        return;
+    }
+
+    auto& nodesArray = targetOwnerIt->second;
+    if (nodesArray.size() > bufferMaxLength) {
+        auto refNodeIt = std::find(nodesArray.begin(), nodesArray.end(), referencedNode);
+
+        for (int i = 0; i < bufferMaxLength; i++) {
+            if (refNodeIt == nodesArray.begin()) {
+                // max number of nodes has not been achieved
+                return;
+            }
+            refNodeIt--;
+        }
+
+        nodesArray.erase(nodesArray.begin(), ++refNodeIt);
+    }
+}
 
 SemaphoreServer::SemaphoreServer(ros::NodeHandle& nh) {
 
     //todo config
     nodesOccupancy = std::make_shared<NodesOccupancyContainer>(3);
 
+    graphSub = nh.subscribe("/graph_generator/graph", 5, &SemaphoreServer::graphCb, this);
     lockNodeSrv = nh.advertiseService("lock_node", &SemaphoreServer::lockNodeCb, this);
 
     // prepare visualizer
@@ -91,17 +125,46 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
         return true;
     }
 
-    if (req.lock) {     // lock node
-        if (nodesOccupancy->lockNode(req.clientId, req.point)) {
+    auto node = graph.getNode(req.point.uuid);
+
+    if (req.lock) {
+        // lock node
+        if (nodesOccupancy->isNodeAlreadyLockedBy(req.clientId, node)) {
+            nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
+            res.message = "Node is already locked by you";
+            res.success = true;
+        } else if (nodesOccupancy->lockNode(req.clientId, node, true)) {
             // successfully locked
+            nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
             res.success = true;
         } else {
             // not locked
             res.message = "Node is already locked";
             res.success = false;
         }
+
+        // If first bidirectional node is locked without problems, all others
+        // bidirectional nodes would be locked also without problems
+        if (node.isBidirectional) {
+            // we need to lock also all bidirectional nodes
+            auto neighbors = graph.getNeighbors(node).first;
+            std::list<Node> bidNodes(neighbors.begin(), neighbors.end());
+            while (!bidNodes.empty()) {
+                // todo check isNodeAlreadyLocked only for target owner, it would be better
+                if (!bidNodes.front().isBidirectional || nodesOccupancy->isNodeAlreadyLocked(bidNodes.front())) {
+                    bidNodes.pop_front();
+                    continue;
+                }
+
+                // this is bidirectional node
+                nodesOccupancy->lockNode(req.clientId, bidNodes.front());
+                neighbors = graph.getNeighbors(bidNodes.front()).first;
+                bidNodes.pop_front();
+                bidNodes.insert(bidNodes.end(), neighbors.begin(), neighbors.end());
+            }
+        }
     } else {            // unlock node
-        if (nodesOccupancy->unlockNode(req.clientId, req.point)) {
+        if (nodesOccupancy->unlockNode(req.clientId, node)) {
             // successfully unlocked
             res.success = true;
         } else {
@@ -130,8 +193,8 @@ void SemaphoreServer::visualizeNodesOccupancy() {
     for (const auto& ownerNodes: nodesOccupancy->getOccupancyData()) {
         for (const auto& nodes: ownerNodes.second) {
             geometry_msgs::Point point;
-            point.x = nodes.pose.x;
-            point.y = nodes.pose.y;
+            point.x = nodes.posX;
+            point.y = nodes.posY;
 
             visual_tools->publishSphere(point, getColorHash(ownerNodes.first), rvt::scales::XLARGE);
             geometry_msgs::Pose pose;
@@ -142,5 +205,9 @@ void SemaphoreServer::visualizeNodesOccupancy() {
     }
 
     visual_tools->trigger();
+}
+
+void SemaphoreServer::graphCb(const amr_msgs::GraphPtr &msg) {
+    graph.readNewGraph(*msg);
 }
 
