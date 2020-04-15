@@ -19,7 +19,6 @@ int main(int argc, char **argv) {
 
     n.getParam("maxEdgeLength", maxEdgeLength);
     n.getParam("dxfFilepath", dxfFilepath);
-    n.getParam("graphVisualizationRate", graphVisualizationRate);
 
     ROS_INFO_STREAM("Dxf input file: " + dxfFilepath);
 
@@ -46,11 +45,8 @@ int main(int argc, char **argv) {
 
     GraphVisualizer visualizer(graph);
     visualizer.publish();
-    ros::Rate r(1.0/graphVisualizationRate);
-    while (ros::ok()) {
 
-        r.sleep();
-    }
+    ros::spin();
 
     return 0;
 }
