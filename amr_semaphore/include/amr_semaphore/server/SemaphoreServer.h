@@ -28,7 +28,7 @@ class NodesOccupancyContainer {
 public:
     NodesOccupancyContainer(unsigned int occupancyLength);
 
-    bool lockNode(const std::string& ownerId, const Node& node, bool itIsCurrentNode = false);
+    bool lockNode(const std::string &ownerId, const Node &node, bool lockVirtually);
 
     bool unlockNode(const std::string& ownerId, const Node& node);
 
@@ -41,6 +41,13 @@ public:
     bool isNodeAlreadyLockedBy(const std::string& ownerId, const Node& node);
 
     void checkMaxNodesAndRemove(const std::string& ownerId, const Node& referencedNode);
+
+    // return owner ID if node is locked in critical buffer of robot length
+    std::string isNodeReallyLocked(const Node& node);
+
+    // return owner ID if node is locked and is not in critical buffer of robot length (bidirectioanl nodes)
+    std::string isNodeVirtuallyLocked(const Node& node);
+
 
 private:
     std::map<std::string, std::list<Node>> data;
@@ -63,7 +70,7 @@ private:
     rvt::RvizVisualToolsPtr visual_tools;
 
     std::shared_ptr<NodesOccupancyContainer> nodesOccupancy;
-    std::map<std::string, std::vector<amr_msgs::Point>> clientsPaths;
+    std::map<std::string, std::vector<Node>> clientsPaths;
 
     bool lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res);
 
@@ -72,6 +79,10 @@ private:
     void clientPathsCb(const amr_msgs::ClientPathConstPtr& msg);
 
     void visualizeNodesOccupancy();
+
+    void lockAllBidirectionalNeighbours(const std::string& clientId, const Node& node);
+
+    Node getClientNextWaypoint(const std::string& clientId, const Node& node);
 
 };
 

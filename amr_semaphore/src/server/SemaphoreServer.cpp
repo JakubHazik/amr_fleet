@@ -14,8 +14,8 @@ std::map<std::string, std::list<Node>> NodesOccupancyContainer::getOccupancyData
     return data;
 }
 
-bool NodesOccupancyContainer::lockNode(const std::string &ownerId, const Node& node, bool itIsCurrentNode) {
-    if (isNodeAlreadyLocked(node)) {
+bool NodesOccupancyContainer::lockNode(const std::string &ownerId, const Node &node, bool lockVirtually) {
+    if (!lockVirtually && isNodeAlreadyLocked(node)) {
         return false;
     } else {
         auto targetOwnerIt = data.find(ownerId);
@@ -102,6 +102,41 @@ void NodesOccupancyContainer::checkMaxNodesAndRemove(const std::string& ownerId,
     }
 }
 
+std::string NodesOccupancyContainer::isNodeReallyLocked(const Node &node) {
+    for (const auto& ownerNodes : data) {
+        auto targetNodeIt = std::find(ownerNodes.second.begin(), ownerNodes.second.end(), node);
+
+        if (targetNodeIt == ownerNodes.second.end()) {
+            // node is not in this owner array
+            continue;
+        }
+
+        // check if node is in critical buffer range
+        if (std::distance(ownerNodes.second.begin(), targetNodeIt) < bufferMaxLength) {
+            return ownerNodes.first;
+        }
+    }
+    return {};
+}
+
+std::string NodesOccupancyContainer::isNodeVirtuallyLocked(const Node& node) {
+    for (const auto& ownerNodes : data) {
+        auto targetNodeIt = std::find(ownerNodes.second.begin(), ownerNodes.second.end(), node);
+
+        if (targetNodeIt == ownerNodes.second.end()) {
+            // node is not in this owner array
+            continue;
+        }
+
+        // check if node is in critical buffer range
+        if (std::distance(ownerNodes.second.begin(), targetNodeIt) >= bufferMaxLength) {
+            return ownerNodes.first;
+        }
+    }
+    return {};
+}
+
+
 SemaphoreServer::SemaphoreServer(ros::NodeHandle& nh) {
 
     //todo config
@@ -135,7 +170,7 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
             nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
             res.message = "Node is already locked by you";
             res.success = true;
-        } else if (nodesOccupancy->lockNode(req.clientId, node, true)) {
+        } else if (nodesOccupancy->lockNode(req.clientId, node)) {
             // successfully locked
             nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
             res.success = true;
@@ -148,23 +183,9 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
         // If first bidirectional node is locked without problems, all others
         // bidirectional nodes would be locked also without problems
         if (node.isBidirectional) {
-            // we need to lock also all bidirectional nodes
-            auto neighbors = graph.getNeighbors(node).first;
-            std::list<Node> bidNodes(neighbors.begin(), neighbors.end());
-            while (!bidNodes.empty()) {
-                // todo check isNodeAlreadyLocked only for target owner, it would be better
-                if (!bidNodes.front().isBidirectional || nodesOccupancy->isNodeAlreadyLocked(bidNodes.front())) {
-                    bidNodes.pop_front();
-                    continue;
-                }
-
-                // this is bidirectional node
-                nodesOccupancy->lockNode(req.clientId, bidNodes.front());
-                neighbors = graph.getNeighbors(bidNodes.front()).first;
-                bidNodes.pop_front();
-                bidNodes.insert(bidNodes.end(), neighbors.begin(), neighbors.end());
-            }
+            lockAllBidirectionalNeighbours(req.clientId, node);
         }
+
     } else {            // unlock node
         if (nodesOccupancy->unlockNode(req.clientId, node)) {
             // successfully unlocked
@@ -214,6 +235,46 @@ void SemaphoreServer::graphCb(const amr_msgs::GraphPtr &msg) {
 }
 
 void SemaphoreServer::clientPathsCb(const amr_msgs::ClientPathConstPtr &msg) {
-    clientsPaths[msg->clientId] = msg->waypoints;
+    clientsPaths[msg->clientId] = {};
+    for (const auto& wp: msg->waypoints) {
+        auto node = graph.getNode(wp.uuid);
+        clientsPaths[msg->clientId].push_back(node);
+    }
+}
+
+void SemaphoreServer::lockAllBidirectionalNeighbours(const std::string& clientId, const Node& node) {
+    auto neighbors = graph.getNeighbors(node).first;
+    std::list<Node> bidNodes(neighbors.begin(), neighbors.end());
+    while (!bidNodes.empty()) {
+        // todo check isNodeAlreadyLocked only for target owner, it would be better
+        if (!bidNodes.front().isBidirectional || nodesOccupancy->isNodeAlreadyLocked(bidNodes.front())) {
+            bidNodes.pop_front();
+            continue;
+        }
+
+        // this is bidirectional node
+        nodesOccupancy->lockNode(clientId, bidNodes.front(), true);
+        neighbors = graph.getNeighbors(bidNodes.front()).first;
+        bidNodes.pop_front();
+        bidNodes.insert(bidNodes.end(), neighbors.begin(), neighbors.end());
+    }
+}
+
+Node SemaphoreServer::getClientNextWaypoint(const std::string& clientId, const Node& node) {
+    auto clientIt = clientsPaths.find(clientId);
+    auto currentNodeIt = std::find(clientIt->second.begin(), clientIt->second.end(), node);
+
+    if (currentNodeIt == clientIt->second.end()) {
+        // node is not between waypoints
+        return {};
+    } else {
+        currentNodeIt++;
+        if (currentNodeIt == clientIt->second.end()) {
+            // this is last node, it have not successors
+            return {};
+        }
+
+        return *(currentNodeIt);  // return next node
+    }
 }
 
