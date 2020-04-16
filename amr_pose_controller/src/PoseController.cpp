@@ -93,12 +93,17 @@ PoseController::PoseController(ros::NodeHandle& nh)
                     cmdVelPub.publish(controller->getControllerAction());
 
                     // check if next node has been locked successfully
-                    if (nodeLocked.valid()
-                        && nodeLocked.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-                        //result form previous node lock received
-                        if (!nodeLocked.get()) {
-                            // node has not been locked successfully, try it again
-                            nodeLocked = semaphoreClient->lockNodeAsync(waypoints.front()); //todo timer call
+                    if (nodeLocked.valid()) {
+                        if (nodeLocked.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+                            //result form previous node lock received
+                            if (!nodeLocked.get()) {
+                                // node has not been locked successfully, try it again
+                                nodeLocked = semaphoreClient->lockNodeAsync(waypoints.front()); //todo timer call
+                                rate.sleep();
+                                continue;
+                            }
+                        } else {
+                            // async lock response has not been received yet
                             rate.sleep();
                             continue;
                         }
