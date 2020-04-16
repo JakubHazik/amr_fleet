@@ -14,6 +14,10 @@ SemaphoreClient::SemaphoreClient(const std::string &lockServiceName) {
     }
 
     clientId = ros::this_node::getNamespace();
+    // remove slash from client namespace
+    if (!clientId.empty() && clientId[0] == '/') {
+        clientId.erase(0, 1);
+    }
 }
 
 bool SemaphoreClient::lockNode(const amr_msgs::Point &node) {
@@ -22,7 +26,10 @@ bool SemaphoreClient::lockNode(const amr_msgs::Point &node) {
     srv.request.point = node;
     srv.request.lock = true;
 
-    lockNodeSrv.call(srv);
+    if (!lockNodeSrv.call(srv)) {
+        ROS_ERROR("Unable to call lock_node service");
+        return false;
+    }
 
     if (srv.response.success) {
         return true;
@@ -38,7 +45,10 @@ bool SemaphoreClient::unlockNode(const amr_msgs::Point& node) {
     srv.request.point = node;
     srv.request.lock = false;
 
-    lockNodeSrv.call(srv);
+    if (!lockNodeSrv.call(srv)) {
+        ROS_ERROR("Unable to call lock_node service");
+        return false;
+    }
 
     if (srv.response.success) {
         return true;
@@ -56,7 +66,11 @@ bool SemaphoreClient::unlockAllNodes() {
     amr_msgs::LockPoint srv;
     srv.request.clientId = clientId;
     srv.request.unlockAll = true;
-    lockNodeSrv.call(srv);
+
+    if (!lockNodeSrv.call(srv)) {
+        ROS_ERROR("Unable to call lock_node service");
+        return false;
+    }
 
     if (srv.response.success) {
         return true;
