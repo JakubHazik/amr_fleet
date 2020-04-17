@@ -28,7 +28,7 @@ class NodesOccupancyContainer {
 public:
     NodesOccupancyContainer(unsigned int occupancyLength);
 
-    bool lockNode(const std::string &ownerId, const Node &node, bool lockVirtually);
+    bool lockNode(const std::string &ownerId, const Node &node, bool lockVirtually = false);
 
     bool unlockNode(const std::string& ownerId, const Node& node);
 

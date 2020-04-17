@@ -15,8 +15,11 @@ std::map<std::string, std::list<Node>> NodesOccupancyContainer::getOccupancyData
 }
 
 bool NodesOccupancyContainer::lockNode(const std::string &ownerId, const Node &node, bool lockVirtually) {
-    if (!lockVirtually && isNodeAlreadyLocked(node)) {
+    if (!lockVirtually && !isNodeReallyLocked(node).empty()) {
         return false;
+    } else if (ownerId == isNodeVirtuallyLocked(node)) {
+        // node is already owned by this owner, but only virtually, next lock is not needed
+        return true;
     } else {
         auto targetOwnerIt = data.find(ownerId);
         if (targetOwnerIt == data.end()) {
@@ -164,29 +167,8 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
 
     auto node = graph.getNode(req.point.uuid);
 
-    if (req.lock) {
-        // lock node
-        if (nodesOccupancy->isNodeAlreadyLockedBy(req.clientId, node)) {
-            nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
-            res.message = "Node is already locked by you";
-            res.success = true;
-        } else if (nodesOccupancy->lockNode(req.clientId, node)) {
-            // successfully locked
-            nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
-            res.success = true;
-        } else {
-            // not locked
-            res.message = "Node is already locked";
-            res.success = false;
-        }
-
-        // If first bidirectional node is locked without problems, all others
-        // bidirectional nodes would be locked also without problems
-        if (node.isBidirectional) {
-            lockAllBidirectionalNeighbours(req.clientId, node);
-        }
-
-    } else {            // unlock node
+    // unlock node
+    if (!req.lock) {
         if (nodesOccupancy->unlockNode(req.clientId, node)) {
             // successfully unlocked
             res.success = true;
@@ -197,6 +179,57 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
         }
     }
 
+    std::string realNodeOwner = nodesOccupancy->isNodeReallyLocked(node);
+    if (realNodeOwner.empty()) {
+        // node is not really locked
+        std::string bidNodeOwner = nodesOccupancy->isNodeVirtuallyLocked(node);
+
+        if (bidNodeOwner.empty()) {
+            // node is not not virtually locked and also not really locked
+            // we can lock the node
+            nodesOccupancy->lockNode(req.clientId, node);
+            nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
+
+            auto clientNextNode = getClientNextWaypoint(req.clientId, node);
+            if (node.isBidirectional && clientNextNode.isValid() && clientNextNode.isBidirectional) {
+                lockAllBidirectionalNeighbours(req.clientId, node);
+            }
+            res.message = "Node successfully locked";
+            res.success = true;
+        } else {
+            // node is virtually locked
+            if (bidNodeOwner == req.clientId) {
+                // owner of virtual node is requested client, we can lock it
+                nodesOccupancy->lockNode(req.clientId, node);
+                nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
+            } else {
+                // this virtual node is owned by other client
+                // check if client path continue wit bidirectional paths
+                auto clientNextNode = getClientNextWaypoint(req.clientId, node);
+                if (clientNextNode.isValid() && clientNextNode.isBidirectional) {
+                    res.message = "Node is already locked";
+                    res.success = false;
+                } else {
+                    nodesOccupancy->lockNode(req.clientId, node);
+                    nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
+                    res.message = "Node successfully locked";
+                    res.success = true;
+                }
+            }
+        }
+    } else {
+        // node is really locked
+        if (realNodeOwner == req.clientId) {
+            // by requested client
+            res.message = "Node is already locked by you";
+            res.success = true;
+        } else {
+            // by other owner
+            res.message = "Node is already locked";
+            res.success = false;
+        }
+    }
+
     // update visualization
     std::async(std::launch::async, &SemaphoreServer::visualizeNodesOccupancy, this);
 
@@ -204,20 +237,24 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
 }
 
 rvt::colors getColorHash(const std::string& ownerId) {
-    return static_cast<rvt::colors>(std::hash<std::string>{}(ownerId) % 18);
+    return static_cast<rvt::colors>(std::hash<std::string>{}(ownerId) % 15);
 }
 
 void SemaphoreServer::visualizeNodesOccupancy() {
     visual_tools->deleteAllMarkers();
 
-    std_msgs::ColorRGBA color = visual_tools->getColorScale(0);
-    geometry_msgs::Vector3 scale = visual_tools->getScale(rvt::LARGE);
+//    srand( time(NULL) );
 
     for (const auto& ownerNodes: nodesOccupancy->getOccupancyData()) {
         for (const auto& nodes: ownerNodes.second) {
             geometry_msgs::Point point;
             point.x = nodes.posX;
             point.y = nodes.posY;
+
+            if (nodes.isBidirectional) {
+                double randNum = -1 + (std::rand() % ( 1 - (-1) + 1 ));
+                point.x += randNum/100;
+            }
 
             visual_tools->publishSphere(point, getColorHash(ownerNodes.first), rvt::scales::XLARGE);
             geometry_msgs::Pose pose;
@@ -262,7 +299,12 @@ void SemaphoreServer::lockAllBidirectionalNeighbours(const std::string& clientId
 
 Node SemaphoreServer::getClientNextWaypoint(const std::string& clientId, const Node& node) {
     auto clientIt = clientsPaths.find(clientId);
-    auto currentNodeIt = std::find(clientIt->second.begin(), clientIt->second.end(), node);
+    if (clientIt == clientsPaths.end()) {
+        // client waypoints has not been received
+        return {};
+    }
+    auto waypointNodes = clientIt->second;
+    auto currentNodeIt = std::find(waypointNodes.begin(), waypointNodes.end(), node);
 
     if (currentNodeIt == clientIt->second.end()) {
         // node is not between waypoints

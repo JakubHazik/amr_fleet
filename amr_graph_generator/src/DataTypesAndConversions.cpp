@@ -13,6 +13,10 @@ double Node::distance(const Node& n1, double nx, double ny) {
     return std::sqrt(sqr(n1.posX - nx) + sqr(n1.posY - ny));
 }
 
+bool Node::isValid() {
+    return uuid != 0;
+}
+
 bool Node::operator==(const Node& n) const {
     return this->uuid == n.uuid;
 }
