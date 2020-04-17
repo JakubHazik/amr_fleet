@@ -57,6 +57,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
     visual_tools->enableBatchPublishing();
 
 
+    usleep(1000 * 1000 * 1);
     ros::Rate rate(config.controllerFrequency);
     while(ros::ok()) {
         ros::spinOnce();

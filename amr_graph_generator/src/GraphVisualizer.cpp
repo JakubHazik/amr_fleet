@@ -21,9 +21,6 @@ GraphVisualizer::GraphVisualizer(const std::vector<Node>& graph) {
 }
 
 void GraphVisualizer::drawGraph() {
-    std_msgs::ColorRGBA color = visual_tools->getColorScale(0);
-    geometry_msgs::Vector3 scale = visual_tools->getScale(rvt::LARGE);
-
     for (const auto& node: graphNodes) {
         // draw nodes (spheres)
         geometry_msgs::Point point = node2point(node.second);
@@ -36,7 +33,7 @@ void GraphVisualizer::drawGraph() {
 
         // draw edges (arrows)
         for (const auto& successor: node.second.successors) {
-            visual_tools->publishArrow(point, node2point(graphNodes[successor]));
+            visual_tools->publishArrow(point, node2point(graphNodes[successor]), rvt::colors::BLUE, rvt::scales::MEDIUM);
         }
     }
 
