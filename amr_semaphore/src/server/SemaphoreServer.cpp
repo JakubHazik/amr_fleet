@@ -6,144 +6,12 @@
 #include <algorithm>
 #include <future>
 
-NodesOccupancyContainer::NodesOccupancyContainer(const unsigned int occupancyLength) {
-    bufferMaxLength = occupancyLength;
-}
-
-std::map<std::string, std::list<Node>> NodesOccupancyContainer::getOccupancyData() {
-    return data;
-}
-
-bool NodesOccupancyContainer::lockNode(const std::string &ownerId, const Node &node, bool lockVirtually) {
-    if (!lockVirtually && !isNodeReallyLocked(node).empty()) {
-        return false;
-    } else if (ownerId == isNodeVirtuallyLocked(node)) {
-        // node is already owned by this owner, but only virtually, next lock is not needed
-        return true;
-    } else {
-        auto targetOwnerIt = data.find(ownerId);
-        if (targetOwnerIt == data.end()) {
-            // ownerId has not exist already, add it
-            std::pair<std::string, std::list<Node>> ownerArray(ownerId, {});
-            auto insertResult = data.insert(ownerArray);
-            targetOwnerIt = insertResult.first;
-        }
-
-        auto& nodesArray = targetOwnerIt->second;
-        nodesArray.push_back(node);
-    }
-}
-
-bool NodesOccupancyContainer::unlockNode(const std::string &ownerId, const Node &node) {
-    auto targetOwnerIt = data.find(ownerId);
-    if (targetOwnerIt == data.end()) {
-        return false; // owner does not exist
-    }
-
-    auto& nodesArray = targetOwnerIt->second;
-    for (auto lockedNodeIt = nodesArray.begin(); lockedNodeIt != nodesArray.end(); lockedNodeIt++) {
-        if (lockedNodeIt->uuid == node.uuid) {
-            nodesArray.erase(lockedNodeIt);
-            return true;
-        }
-    }
-
-    return false;   // node is not locked
-}
-
-bool NodesOccupancyContainer::isNodeAlreadyLocked(const Node& node) {
-    for (const auto& ownerNodes : data) {
-        for (const auto& nodesIt : ownerNodes.second) {
-            if (nodesIt.uuid == node.uuid) {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-bool NodesOccupancyContainer::isNodeAlreadyLockedBy(const std::string& ownerId, const Node &node) {
-    auto ownerNodesIt = data.find(ownerId);
-    if (ownerNodesIt == data.end()) {
-        // owner does not exist
-        return false;
-    }
-
-    for (const auto& n: ownerNodesIt->second) {
-        if (n.uuid == node.uuid) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void NodesOccupancyContainer::unlockAllNodes(const std::string &ownerId) {
-    data[ownerId] = std::list<Node>();
-}
-
-void NodesOccupancyContainer::checkMaxNodesAndRemove(const std::string& ownerId, const Node& referencedNode) {
-    auto targetOwnerIt = data.find(ownerId);
-    if (targetOwnerIt == data.end()) {
-        // owner does not exist, nothing to check
-        return;
-    }
-
-    auto& nodesArray = targetOwnerIt->second;
-    if (nodesArray.size() > bufferMaxLength) {
-        auto refNodeIt = std::find(nodesArray.begin(), nodesArray.end(), referencedNode);
-
-        for (int i = 0; i < bufferMaxLength; i++) {
-            if (refNodeIt == nodesArray.begin()) {
-                // max number of nodes has not been achieved
-                return;
-            }
-            refNodeIt--;
-        }
-
-        nodesArray.erase(nodesArray.begin(), ++refNodeIt);
-    }
-}
-
-std::string NodesOccupancyContainer::isNodeReallyLocked(const Node &node) {
-    for (const auto& ownerNodes : data) {
-        auto targetNodeIt = std::find(ownerNodes.second.begin(), ownerNodes.second.end(), node);
-
-        if (targetNodeIt == ownerNodes.second.end()) {
-            // node is not in this owner array
-            continue;
-        }
-
-        // check if node is in critical buffer range
-        if (std::distance(ownerNodes.second.begin(), targetNodeIt) < bufferMaxLength) {
-            return ownerNodes.first;
-        }
-    }
-    return {};
-}
-
-std::string NodesOccupancyContainer::isNodeVirtuallyLocked(const Node& node) {
-    for (const auto& ownerNodes : data) {
-        auto targetNodeIt = std::find(ownerNodes.second.begin(), ownerNodes.second.end(), node);
-
-        if (targetNodeIt == ownerNodes.second.end()) {
-            // node is not in this owner array
-            continue;
-        }
-
-        // check if node is in critical buffer range
-        if (std::distance(ownerNodes.second.begin(), targetNodeIt) >= bufferMaxLength) {
-            return ownerNodes.first;
-        }
-    }
-    return {};
-}
-
-
 SemaphoreServer::SemaphoreServer(ros::NodeHandle& nh) {
 
     //todo config
-    nodesOccupancy = std::make_shared<NodesOccupancyContainer>(3);
+    areaLocks = std::make_shared<AreaBasedLocks>();
+    areaLocks->setupArea({22, 59, 58, 72, 71, 69, 68, 66, 65, 63, 62}, 1);
+    nodesOccupancyLocks = std::make_shared<NodesOccupancyContainer>(3, areaLocks);
 
     graphSub = nh.subscribe("/graph_generator/graph", 5, &SemaphoreServer::graphCb, this);
     clientsPathsSub = nh.subscribe("/task_manager_server/client_paths", 10, &SemaphoreServer::clientPathsCb, this);
@@ -160,7 +28,8 @@ SemaphoreServer::SemaphoreServer(ros::NodeHandle& nh) {
 
 bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res) {
     if (req.unlockAll) {
-        nodesOccupancy->unlockAllNodes(req.clientId);
+        nodesOccupancyLocks->unlockAllNodes(req.clientId);
+        areaLocks->unlockAllNodes(req.clientId);
         res.success = true;
         return true;
     }
@@ -169,7 +38,8 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
 
     // unlock node
     if (!req.lock) {
-        if (nodesOccupancy->unlockNode(req.clientId, node)) {
+        if (nodesOccupancyLocks->unlockNode(req.clientId, node)) {
+            areaLocks->unlockNode(req.clientId, node);
             // successfully unlocked
             res.success = true;
         } else {
@@ -179,16 +49,25 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
         }
     }
 
-    std::string realNodeOwner = nodesOccupancy->isNodeReallyLocked(node);
+    // area locking
+    if (!areaLocks->canBeNodeLocked(req.clientId, node)) {
+        res.message = "Node can not be locked, area is full";
+        res.success = false;
+        return true;
+    }
+
+    std::string realNodeOwner = nodesOccupancyLocks->isNodeReallyLocked(node);
     if (realNodeOwner.empty()) {
         // node is not really locked
-        std::string bidNodeOwner = nodesOccupancy->isNodeVirtuallyLocked(node);
+        std::string bidNodeOwner = nodesOccupancyLocks->isNodeVirtuallyLocked(node);
 
         if (bidNodeOwner.empty()) {
             // node is not not virtually locked and also not really locked
             // we can lock the node
-            nodesOccupancy->lockNode(req.clientId, node);
-            nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
+            nodesOccupancyLocks->lockNode(req.clientId, node);
+            areaLocks->lockNode(req.clientId, node);
+            auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
+            areaLocks->unlockNode(req.clientId, removedNodes);
 
             auto clientNextNode = getClientNextWaypoint(req.clientId, node);
             if (node.isBidirectional && clientNextNode.isValid() && clientNextNode.isBidirectional) {
@@ -200,8 +79,12 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
             // node is virtually locked
             if (bidNodeOwner == req.clientId) {
                 // owner of virtual node is requested client, we can lock it
-                nodesOccupancy->lockNode(req.clientId, node);
-                nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
+                nodesOccupancyLocks->lockNode(req.clientId, node);
+                areaLocks->lockNode(req.clientId, node);
+                auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
+                areaLocks->unlockNode(req.clientId, removedNodes);
+                res.message = "Node successfully locked";
+                res.success = true;
             } else {
                 // this virtual node is owned by other client
                 // check if client path continue wit bidirectional paths
@@ -210,8 +93,10 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
                     res.message = "Node is already locked";
                     res.success = false;
                 } else {
-                    nodesOccupancy->lockNode(req.clientId, node);
-                    nodesOccupancy->checkMaxNodesAndRemove(req.clientId, node);
+                    nodesOccupancyLocks->lockNode(req.clientId, node);
+                    areaLocks->lockNode(req.clientId, node);
+                    auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
+                    areaLocks->unlockNode(req.clientId, removedNodes);
                     res.message = "Node successfully locked";
                     res.success = true;
                 }
@@ -245,7 +130,7 @@ void SemaphoreServer::visualizeNodesOccupancy() {
 
 //    srand( time(NULL) );
 
-    for (const auto& ownerNodes: nodesOccupancy->getOccupancyData()) {
+    for (const auto& ownerNodes: nodesOccupancyLocks->getOccupancyData()) {
         for (const auto& nodes: ownerNodes.second) {
             geometry_msgs::Point point;
             point.x = nodes.posX;
@@ -284,13 +169,13 @@ void SemaphoreServer::lockAllBidirectionalNeighbours(const std::string& clientId
     std::list<Node> bidNodes(neighbors.begin(), neighbors.end());
     while (!bidNodes.empty()) {
         // todo check isNodeAlreadyLocked only for target owner, it would be better
-        if (!bidNodes.front().isBidirectional || nodesOccupancy->isNodeAlreadyLocked(bidNodes.front())) {
+        if (!bidNodes.front().isBidirectional || nodesOccupancyLocks->isNodeAlreadyLocked(bidNodes.front())) {
             bidNodes.pop_front();
             continue;
         }
 
         // this is bidirectional node
-        nodesOccupancy->lockNode(clientId, bidNodes.front(), true);
+        nodesOccupancyLocks->lockNode(clientId, bidNodes.front(), true);
         neighbors = graph.getNeighbors(bidNodes.front()).first;
         bidNodes.pop_front();
         bidNodes.insert(bidNodes.end(), neighbors.begin(), neighbors.end());

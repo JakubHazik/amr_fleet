@@ -33,6 +33,8 @@ public:
 
     bool operator==(const Node& n) const;
 
+    bool operator<(const Node& n) const;
+
     friend std::ostream& operator<<(std::ostream& os, const Node& n);
 };
 

@@ -21,6 +21,9 @@ bool Node::operator==(const Node& n) const {
     return this->uuid == n.uuid;
 }
 
+bool Node::operator<(const Node &n) const {
+    return this->uuid < n.uuid;
+}
 
 std::ostream& operator<<(std::ostream& os, const Node& n) {
     return os << n.uuid;

@@ -13,6 +13,7 @@
 #include <rviz_visual_tools/rviz_visual_tools.h>
 #include <amr_graph_representation/Graph.h>
 #include <amr_graph_representation/DataTypesAndConversions.h>
+#include <amr_semaphore/server/LockContainers.h>
 
 #include <queue>
 #include <deque>
@@ -22,39 +23,6 @@
 
 
 namespace rvt = rviz_visual_tools;
-
-
-class NodesOccupancyContainer {
-public:
-    NodesOccupancyContainer(unsigned int occupancyLength);
-
-    bool lockNode(const std::string &ownerId, const Node &node, bool lockVirtually = false);
-
-    bool unlockNode(const std::string& ownerId, const Node& node);
-
-    void unlockAllNodes(const std::string& ownerId);
-
-    std::map<std::string, std::list<Node>> getOccupancyData();
-
-    bool isNodeAlreadyLocked(const Node& node);
-
-    bool isNodeAlreadyLockedBy(const std::string& ownerId, const Node& node);
-
-    void checkMaxNodesAndRemove(const std::string& ownerId, const Node& referencedNode);
-
-    // return owner ID if node is locked in critical buffer of robot length
-    std::string isNodeReallyLocked(const Node& node);
-
-    // return owner ID if node is locked and is not in critical buffer of robot length (bidirectioanl nodes)
-    std::string isNodeVirtuallyLocked(const Node& node);
-
-
-private:
-    std::map<std::string, std::list<Node>> data;
-    unsigned int bufferMaxLength;
-};
-
-
 
 class SemaphoreServer {
 
@@ -69,7 +37,8 @@ private:
     ros::ServiceServer lockNodeSrv;
     rvt::RvizVisualToolsPtr visual_tools;
 
-    std::shared_ptr<NodesOccupancyContainer> nodesOccupancy;
+    std::shared_ptr<NodesOccupancyContainer> nodesOccupancyLocks;
+    std::shared_ptr<AreaBasedLocks> areaLocks;
     std::map<std::string, std::vector<Node>> clientsPaths;
 
     bool lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res);
