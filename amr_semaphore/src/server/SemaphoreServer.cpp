@@ -6,12 +6,32 @@
 #include <algorithm>
 #include <future>
 
-SemaphoreServer::SemaphoreServer(ros::NodeHandle& nh) {
+SemaphoreServer::SemaphoreServer() {
+    ros::NodeHandle nh("~");
 
-    //todo config
+    // setup area locks
     areaLocks = std::make_shared<AreaBasedLocks>();
-    areaLocks->setupArea({22, 59, 58, 72, 71, 69, 68, 66, 65, 63, 62}, 1);
-    nodesOccupancyLocks = std::make_shared<NodesOccupancyContainer>(3, areaLocks);
+    XmlRpc::XmlRpcValue areasList;
+    nh.getParam("limitedAreas", areasList);
+    for (int i = 0; i < areasList.size(); ++i) {
+        XmlRpc::XmlRpcValue area = areasList[i]["area"];
+        XmlRpc::XmlRpcValue nodes = area["nodes"];
+        int maxNumClients = area["maxNumClients"];
+
+        std::set<int> areaNodes;
+        for (int in = 0; in < nodes.size(); ++in) {
+            areaNodes.insert(nodes[in]);
+        }
+        areaLocks->setupArea(areaNodes, maxNumClients);
+    }
+
+    // setup occupancy of graph vertexes
+    std::map<std::string, int> occupancyParams;
+    nh.getParam("occupancyLengths", occupancyParams);
+    nodesOccupancyLocks = std::make_shared<NodesOccupancyContainer>();
+    for (const auto& occupancy: occupancyParams) {
+        nodesOccupancyLocks->setupClient(occupancy.first, occupancy.second);
+    }
 
     graphSub = nh.subscribe("/graph_generator/graph", 5, &SemaphoreServer::graphCb, this);
     clientsPathsSub = nh.subscribe("/task_manager_server/client_paths", 10, &SemaphoreServer::clientPathsCb, this);

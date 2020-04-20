@@ -1,4 +1,5 @@
 <launch>
     <node pkg="amr_semaphore" type="semaphore_server" name="semaphore_server" output="screen">
+        <rosparam command="load" file="$(find amr_semaphore)/config/server_config.yaml" />
     </node>
 </launch>

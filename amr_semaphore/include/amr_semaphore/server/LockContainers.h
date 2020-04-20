@@ -19,7 +19,9 @@ class AreaBasedLocks;
 
 class NodesOccupancyContainer {
 public:
-    NodesOccupancyContainer(unsigned int occupancyLength, std::shared_ptr<AreaBasedLocks> areaBasedLocks);
+    NodesOccupancyContainer();
+
+    void setupClient(const std::string &ownerId, unsigned int occupancyLength);
 
     bool lockNode(const std::string &ownerId, const Node &node, bool lockVirtually = false);
 
@@ -45,8 +47,7 @@ public:
 
 private:
     std::map<std::string, std::list<Node>> data;
-    std::shared_ptr<AreaBasedLocks> areaLocks;
-    unsigned int bufferMaxLength;
+    std::map<std::string, unsigned int> clientOccupancyLength;
 };
 
 
