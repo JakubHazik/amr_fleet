@@ -2,7 +2,7 @@
 // Created by jakub on 21.2.2020.
 //
 
-#include <amr_planner/Graph.h>
+#include <amr_graph_representation/Graph.h>
 
 #include <fstream>
 #include <boost/graph/adjacency_list.hpp>
@@ -11,6 +11,21 @@
 
 using namespace boost;
 
+void Graph::readNewGraph(const amr_msgs::Graph& graphMsg) {
+    clear();
+
+    for (const amr_msgs::Node &node: graphMsg.nodes) {
+        Node nFrom(node.point.uuid, node.point.pose.x, node.point.pose.y, node.isBidirectional);
+        for (const auto &successorNode: node.successors) {
+            auto nodesIt = std::find_if(graphMsg.nodes.begin(), graphMsg.nodes.end(),
+                                        [&successorNode](const amr_msgs::Node& obj) {return obj.point.uuid == successorNode;});
+            auto index = std::distance(graphMsg.nodes.begin(), nodesIt);
+            auto nextNode = graphMsg.nodes[index];
+            Node nTo(nextNode.point.uuid, nextNode.point.pose.x, nextNode.point.pose.y, nextNode.isBidirectional);
+            addEdge(nFrom, nTo);
+        }
+    }
+}
 
 void Graph::addEdge(const Node& nFrom, const Node& nTo) {
     vertex_t v1, v2;
@@ -24,7 +39,6 @@ void Graph::addEdge(const Node& nFrom, const Node& nTo) {
     // Create an edge conecting those two vertices
     // add edge if not exist
     if (!boost::edge(v1, v2, graph).second) {
-        Edge edge {Node::distance(nFrom, nTo)}; // compute distance between nodes
         boost::add_edge(v1, v2, Node::distance(nFrom, nTo), graph);
     }
 }
@@ -63,27 +77,23 @@ graph_t Graph::getBoostGraph() {
 
 
 
-std::vector<Neighbor> Graph::getNeighbors(const Node& currentNode) {
+std::pair<std::vector<Node>, std::vector<double>> Graph::getNeighbors(const Node& currentNode) {
+    std::vector<Node> nodes;
+    std::vector<double> weights;
 
     vertex_t currentVertex;
     if (findVertex(currentNode, currentVertex)) {
-
-        std::vector<Neighbor> result;
         auto neighbours = adjacent_vertices(currentVertex, graph);
-
-
         for (auto n : make_iterator_range(neighbours)) {
-
             std::pair<edge_t, bool> ed = boost::edge(currentVertex, n, graph);
             double weight = get(boost::edge_weight_t(), graph, ed.first);
-
-            Neighbor tmp {graph[n], weight};
-            result.push_back(tmp);
+            nodes.push_back(graph[n]);
+            weights.push_back(weight);
         }
 
-        return result;
+        return {nodes, weights};
     } else {
-        return std::vector<Neighbor> {};
+        return {};
     }
 }
 

@@ -12,7 +12,7 @@ GraphVisualizer::GraphVisualizer(const std::vector<Node>& graph) {
     }
 
     // todo configurable
-    visual_tools.reset(new rvt::RvizVisualTools("map", "/amr_rviz_tools"));
+    visual_tools.reset(new rvt::RvizVisualTools("map", "/generated_graph"));
     visual_tools->loadMarkerPub(false, true);  // create publisher before waiting
 
     // Clear messages
@@ -21,18 +21,19 @@ GraphVisualizer::GraphVisualizer(const std::vector<Node>& graph) {
 }
 
 void GraphVisualizer::drawGraph() {
-    std_msgs::ColorRGBA color = visual_tools->getColorScale(0);
-    geometry_msgs::Vector3 scale = visual_tools->getScale(rvt::LARGE);
-
     for (const auto& node: graphNodes) {
         // draw nodes (spheres)
         geometry_msgs::Point point = node2point(node.second);
-        visual_tools->publishSphere(point, rvt::colors::RED, rvt::scales::LARGE);
+        if (node.second.bidirectional) {
+            visual_tools->publishSphere(point, rvt::colors::CYAN, rvt::scales::LARGE);
+        } else {
+            visual_tools->publishSphere(point, rvt::colors::RED, rvt::scales::LARGE);
+        }
         publishLabelHelper(node2pose(node.second), std::to_string(node.second.uuid));
 
         // draw edges (arrows)
         for (const auto& successor: node.second.successors) {
-            visual_tools->publishArrow(point, node2point(graphNodes[successor]));
+            visual_tools->publishArrow(point, node2point(graphNodes[successor]), rvt::colors::BLUE, rvt::scales::MEDIUM);
         }
     }
 

@@ -69,7 +69,11 @@ bool TaskManagerClient::getNewTask() {
     amr_msgs::GetTask taskSrv;
 
     taskSrv.request.clientId = clientId;
-    getTaskSrvClient.call(taskSrv);
+    if (!getTaskSrvClient.call(taskSrv)) {
+        ROS_ERROR("Service get_new_task is not available, yet");
+        callGetNewTaskServiceAfterTime(5);
+        return false;
+    }
     currentTaskPub.publish(taskSrv.response.task);
     switch (taskSrv.response.error.code) {
         case amr_msgs::GetTaskErrorCodes::OK: {

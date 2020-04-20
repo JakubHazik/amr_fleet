@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
         amr_msgs
         roscpp
         rviz_visual_tools
+        amr_graph_generator
         )
 
 catkin_package(
@@ -25,6 +26,7 @@ include_directories(
 add_executable(semaphore_server
         src/server/SemaphoreServer.cpp
         src/server/SemaphoreServerNode.cpp
+        src/server/LockContainers.cpp
         )
 add_dependencies(semaphore_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 

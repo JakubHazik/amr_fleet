@@ -98,9 +98,9 @@ public:
 
         auto n = graph.getNeighbors(s);
 
-        for (auto i : n) {
-            if (i.node.isReachable) {
-                neighbors.emplace_back(mrp::Neighbor<State, Action, double>(i.node, Action::Next, i.weight));
+        for (int i = 0; i < n.first.size(); i++) {
+            if (n.first[i].isReachable) {
+                neighbors.emplace_back(mrp::Neighbor<State, Action, double>(n.first[i], Action::Next, n.second[i]));
             }
         }
     }

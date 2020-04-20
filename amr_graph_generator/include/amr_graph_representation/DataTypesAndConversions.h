@@ -19,16 +19,21 @@ public:
     double posX;
     double posY;
     bool isReachable = true;
+    bool isBidirectional = false;
 
     Node() = default;
 
-    Node(int uuid, double x, double y);
+    Node(int uuid, double x, double y, bool bidirectional);
+
+    bool isValid();
 
     static double distance(const Node& n1, const Node& n2);
 
     static double distance(const Node& n1, double nx, double ny);
 
     bool operator==(const Node& n) const;
+
+    bool operator<(const Node& n) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Node& n);
 };

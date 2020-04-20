@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
         rospy
         amr_msgs
         std_srvs
+        amr_graph_generator
         )
 
 ## System dependencies are found with CMake's conventions
@@ -28,10 +29,8 @@ include_directories(
 add_executable(amr_planner
         src/AmrPlannerNode.cpp
         src/RosWrapper.cpp
-        src/Graph.cpp
         src/GraphSearchBoost.cpp
         src/GraphSearchMultiRobot.cpp
-        src/DataTypesAndConversions.cpp
         )
 
 add_dependencies(amr_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

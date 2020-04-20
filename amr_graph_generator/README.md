@@ -22,4 +22,4 @@
 
 ## Known issues
 * Non handled case when drown path length is shortest as maxEdgeLength parameter 
-
+* Arcs can not be parsed as bidirectional routes

@@ -21,6 +21,7 @@ struct Line {
 
 struct Node {
     unsigned int uuid;
+    bool bidirectional = false;
     double x;
     double y;
     std::vector<unsigned int> successors;

@@ -6,6 +6,7 @@
 #include <dxflib/dl_dxf.h>
 #include <string>
 #include <cmath>
+#include <algorithm>
 
 
 PathDxfParser::PathDxfParser(const std::string& dxfFilepath, double maxEdgeLenght)
@@ -100,6 +101,7 @@ std::vector<Node> PathDxfParser::convertBlockToSegments(const Block& block, cons
         }
 
     } else if (!block.pathLines.empty()){
+        // path is defined by Line
         DL_LineData pathLine = block.pathLines.back();
 
         auto direction = detectPathDirection(
@@ -108,16 +110,18 @@ std::vector<Node> PathDxfParser::convertBlockToSegments(const Block& block, cons
                 block.arrowLines);
         assertPathDirection(direction, insert.name);
 
-        if (direction.first) {
+        Eigen::Vector2d start{pathLine.x2 + insert.ipx, pathLine.y2 + insert.ipy};
+        Eigen::Vector2d end{pathLine.x1 + insert.ipx, pathLine.y1 + insert.ipy};
+
+        if (direction.first && direction.second) {
+            // bidirectional
+            return sampleLine(start, end, true);
+        } else if (direction.first) {
             // start is in x2,y2, end is in x1,y1
-            Eigen::Vector2d start{pathLine.x2 + insert.ipx, pathLine.y2 + insert.ipy};
-            Eigen::Vector2d end{pathLine.x1 + insert.ipx, pathLine.y1 + insert.ipy};
             return sampleLine(start, end);
         } else if (direction.second) {
             // start is in x1,y1, end is in x2,y2,
-            Eigen::Vector2d end{pathLine.x2 + insert.ipx, pathLine.y2 + insert.ipy};
-            Eigen::Vector2d start{pathLine.x1 + insert.ipx, pathLine.y1 + insert.ipy};
-            return sampleLine(start, end);
+            return sampleLine(end, start);
         }
     }
 
@@ -128,7 +132,9 @@ void PathDxfParser::endBlock() {
     currentBlockName = "";
 }
 
-std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d& start, const Eigen::Vector2d& end) {
+std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d &start,
+                                            const Eigen::Vector2d &end,
+                                            const bool bidirectional) {
     std::vector<Node> samplePoints;
 
     double length = std::abs((end - start).norm());
@@ -140,6 +146,7 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d& start, const 
     for (unsigned int i = 0; i < splits; i++) {
         Node n;
         n.uuid = addNodeCounter;
+        n.bidirectional = bidirectional;
         n.x = current[0];
         n.y = current[1];
         samplePoints.push_back(n);
@@ -147,6 +154,10 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d& start, const 
         // add successor for the previous node
         if (i > 0) {
             samplePoints.at(i - 1).successors.push_back(addNodeCounter);
+
+            if (bidirectional) {
+                samplePoints.at(i).successors.push_back(addNodeCounter - 1);
+            }
         }
 
         addNodeCounter++;
@@ -154,23 +165,34 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d& start, const 
     }
 
     if (!samplePoints.empty()) {
+        // add end node, due to precision
         Node n;
         n.uuid = addNodeCounter;
+        n.bidirectional = bidirectional;
         n.x = end[0];
         n.y = end[1];
         samplePoints.back().successors.push_back(addNodeCounter);
+        if (bidirectional) {
+            n.successors.push_back(addNodeCounter - 1);
+        }
         samplePoints.push_back(n);
         addNodeCounter++;
     } else {
+        // no points has been sampled, add only start and end points
         Node nEnd;
         nEnd.uuid = addNodeCounter;
+        nEnd.bidirectional = bidirectional;
         nEnd.x = end[0];
         nEnd.y = end[1];
+        if (bidirectional) {
+            nEnd.successors.push_back(addNodeCounter + 1);
+        }
         samplePoints.push_back(nEnd);
         addNodeCounter++;
 
         Node nStart;
         nStart.uuid = addNodeCounter;
+        nStart.bidirectional = bidirectional;
         nStart.x = start[0];
         nStart.y = start[1];
         nStart.successors.push_back(addNodeCounter -1);
@@ -271,9 +293,10 @@ bool PathDxfParser::intersectPointWithLineEndpoints(double x, double y, const DL
 }
 
 void PathDxfParser::assertPathDirection(const std::pair<bool, bool>& direction, const std::string& blockName) {
-    if (direction.first && direction.second) {
-        throw std::runtime_error("Detected two arrows in '" + blockName + "' block.");
-    } else if (!direction.first && !direction.second) {
+//    if (direction.first && direction.second) {
+//        throw std::runtime_error("Detected two arrows in '" + blockName + "' block.");
+//    } else
+    if (!direction.first && !direction.second) {
         throw std::runtime_error("No direction detected in '" + blockName + "' block.");
     }
 }
@@ -285,12 +308,39 @@ std::vector<Node> PathDxfParser::generateGraph() {
         for (auto segmentInsideIt = currentSegmentIt + 1; segmentInsideIt < sampledPathNodes.end(); segmentInsideIt++) {
             // unify end Nodes
             if (nodePosesAreEqual(currentSegmentIt->back(), segmentInsideIt->back())) {
+                auto nodeToBeRemoved = segmentInsideIt->back();
+
+                currentSegmentIt->back().successors.insert(
+                        currentSegmentIt->back().successors.end(),
+                        segmentInsideIt->back().successors.begin(),
+                        segmentInsideIt->back().successors.end());      // inherit successors
+
+                currentSegmentIt->back().bidirectional = nodeToBeRemoved.bidirectional || currentSegmentIt->back().bidirectional;  // inherit direction
                 segmentInsideIt->erase(segmentInsideIt->end());     // remove last node in vector
-                segmentInsideIt->back().successors[0] = (currentSegmentIt->back().uuid);    // change successor
+
+                removeElemByValue(segmentInsideIt->back().successors, nodeToBeRemoved.uuid); // remove target successor
+                segmentInsideIt->back().successors.push_back(currentSegmentIt->back().uuid);    // change successor
             }
+
             // unify first nodes
             if (nodePosesAreEqual(currentSegmentIt->front(), segmentInsideIt->front())) {
-                segmentInsideIt->front().uuid = currentSegmentIt->front().uuid;
+                auto nodeToBeRemoved = segmentInsideIt->front();
+
+                // inherit predecessors
+                for (auto nextSucc: segmentInsideIt->at(1).successors) {
+                    if (nodeToBeRemoved.uuid == nextSucc) {
+                        if (removeElemByValue(segmentInsideIt->at(1).successors, nodeToBeRemoved.uuid)) {
+                            segmentInsideIt->at(1).successors.push_back(currentSegmentIt->front().uuid);
+                        }
+                    }
+                }
+
+                currentSegmentIt->front().successors.insert(
+                        currentSegmentIt->front().successors.end(),
+                        segmentInsideIt->front().successors.begin(),
+                        segmentInsideIt->front().successors.end());      // inherit successors
+                currentSegmentIt->front().bidirectional = nodeToBeRemoved.bidirectional || currentSegmentIt->front().bidirectional;  // inherit direction
+                segmentInsideIt->erase(segmentInsideIt->begin());   // remove first element
             }
         }
     }
@@ -300,8 +350,27 @@ std::vector<Node> PathDxfParser::generateGraph() {
     for (auto segmentEndIt = sampledPathNodes.begin(); segmentEndIt < sampledPathNodes.end(); segmentEndIt++) {
         for (auto segmentFrontIt = sampledPathNodes.begin(); segmentFrontIt < sampledPathNodes.end(); segmentFrontIt++) {
             if (nodePosesAreEqual(segmentEndIt->back(), segmentFrontIt->front())) {
-                segmentFrontIt->erase(segmentFrontIt->begin());                             // remove useless Node
-                segmentEndIt->back().successors.push_back(segmentFrontIt->front().uuid);    //chain segments
+                auto nodeToBeRemoved = segmentFrontIt->front();
+
+                // inherit direction
+                segmentEndIt->back().bidirectional = nodeToBeRemoved.bidirectional || segmentEndIt->back().bidirectional;
+
+                // inherit predecessors
+                for (auto nextSucc: segmentFrontIt->at(1).successors) {
+                    if (nodeToBeRemoved.uuid == nextSucc) {
+                        if (removeElemByValue(segmentFrontIt->at(1).successors, nodeToBeRemoved.uuid)) {
+                            segmentFrontIt->at(1).successors.push_back(segmentEndIt->back().uuid);
+                        }
+                    }
+                }
+
+                // inherit successors
+                segmentEndIt->back().successors.insert(
+                        segmentEndIt->back().successors.end(),
+                        segmentFrontIt->front().successors.begin(),
+                        segmentFrontIt->front().successors.end());
+
+                segmentFrontIt->erase(segmentFrontIt->begin());         // remove useless Node
             }
         }
     }
@@ -312,4 +381,15 @@ std::vector<Node> PathDxfParser::generateGraph() {
         nodes.insert(nodes.end(), sampledPath.begin(), sampledPath.end());
     }
     return nodes;
+}
+
+template<typename T>
+bool PathDxfParser::removeElemByValue(std::vector<T>& v, T value) {
+    auto position = std::find(v.begin(), v.end(), value);
+    if (position != v.end()) {
+        v.erase(position);
+        return true;
+    } else {
+        return false;
+    }
 }

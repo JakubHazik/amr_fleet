@@ -18,7 +18,8 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>    // for sqrt
-#include <amr_planner/DataTypesAndConversions.h>
+#include "DataTypesAndConversions.h"
+#include <amr_msgs/Graph.h>
 
 
 
@@ -95,6 +96,8 @@ class Graph {
 public:
     Graph() = default;
 
+    void readNewGraph(const amr_msgs::Graph& graphMsg);
+
     void addEdge(const Node& nFrom, const Node& nTo);
 //    void add_node(const Node& n);
     void writeToFile(const std::string& filepath);
@@ -103,13 +106,13 @@ public:
 
     bool findVertex(const Node& node, vertex_t& foundNodeIt);
 
-    std::vector<Neighbor> getNeighbors(const Node& currentNode);
+    std::pair<std::vector<Node>, std::vector<double>> getNeighbors(const Node& currentNode);
 
     Node getNearestNode(double x, double y);
 
     Node getNode(unsigned int uuid);
 
-    void printGraph();
+//    void printGraph();
 
     void clear();
 

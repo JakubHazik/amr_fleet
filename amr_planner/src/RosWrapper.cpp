@@ -4,9 +4,7 @@
 
 #include <amr_planner/RosWrapper.h>
 
-#include <boost/graph/directed_graph.hpp>
 #include <boost/graph/astar_search.hpp>
-#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/random.hpp>
 #include <amr_planner/GraphSearchMultiRobot.h>
 
@@ -22,21 +20,9 @@ RosWrapper::RosWrapper(ros::NodeHandle& nh) {
 void RosWrapper::newGraphCb(const amr_msgs::Graph::ConstPtr& graphMsg) {
     ROS_INFO("New graph segments received");
 
-    graph.clear();
+    graph.readNewGraph(*graphMsg);
 
-    for (const amr_msgs::Node &node: graphMsg->nodes) {
-        Node nFrom(node.point.uuid, node.point.pose.x, node.point.pose.y);
-        for (const auto &successorNode: node.successors) {
-            auto nodesIt = std::find_if(graphMsg->nodes.begin(), graphMsg->nodes.end(),
-                    [&successorNode](const amr_msgs::Node& obj) {return obj.point.uuid == successorNode;});
-            auto index = std::distance(graphMsg->nodes.begin(), nodesIt);
-            auto nextNode = graphMsg->nodes[index];
-            Node nTo(nextNode.point.uuid, nextNode.point.pose.x, nextNode.point.pose.y);
-            graph.addEdge(nFrom, nTo);
-        }
-    }
-
-    graph.writeToFile("/home/jakub/amr_ws/ros_result.dot");
+//    graph.writeToFile("/home/jakub/amr_ws/ros_result.dot");
     ROS_INFO("Graph has been generated successfully");
 }
 

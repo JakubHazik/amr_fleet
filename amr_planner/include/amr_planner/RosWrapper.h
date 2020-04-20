@@ -15,8 +15,8 @@
 #include <amr_msgs/SetNodeProperties.h>
 
 #include <amr_planner/GraphSearchInterface.h>
-#include <amr_planner/DataTypesAndConversions.h>
-#include <amr_planner/Graph.h>
+#include <amr_graph_representation/DataTypesAndConversions.h>
+#include <amr_graph_representation/Graph.h>
 
 
 class RosWrapper {
