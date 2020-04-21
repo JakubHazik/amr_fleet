@@ -1,12 +1,3 @@
-# for turtlesim
-#controller:
-#  linearKp: 0.7
-#  rotationKp: 0.6
-#  controllerFrequency: 10   #[1/s]
-#  maxLinearSpeed: 1         # [m/s]
-#  minLinearSpeed: 0       # [m/s]
-#  maxLinearAcceleration: 0.3 # [m/s^2]
-
 controller:
   linearKp: 1
   rotationKp: 0.9
@@ -18,12 +9,10 @@ controller:
   maxAngularAcceleration: 0.5
   goalDeadZone: 0.1              # [m]
 
-
 semaphoreService: "/semaphore_server/lock_node"
-#cmdVelTopic: "/cmd_vel"
-#cmdVelTopic: "/cmd_vel"
 cmdVelTopic: "/mobile_base/commands/velocity"
-#robotPoseTopic: "/pose"
-#robotPoseTopic: "amcl_pose"
 waypointZone: 0.3           # [m]
 
+semaphoreLockedNodes:
+  robotSize: 3
+  robotSpeedForward: 1    # must be more that 0
