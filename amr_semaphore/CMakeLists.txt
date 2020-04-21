@@ -37,6 +37,7 @@ target_link_libraries(semaphore_server
 # Client
 add_library(semaphore_client
         src/client/SemaphoreClient.cpp
+        src/client/SemaphoreAutomaticClient.cpp
         )
 add_dependencies(semaphore_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
