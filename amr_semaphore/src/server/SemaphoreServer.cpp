@@ -67,6 +67,9 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
             res.message = "Target node has not been locked yet or client ID is wrong.";
             res.success = true;
         }
+
+        std::async(std::launch::async, &SemaphoreServer::visualizeNodesOccupancy, this);
+        return true;
     }
 
     // area locking
@@ -80,7 +83,6 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
     if (realNodeOwner.empty()) {
         // node is not really locked
         std::string bidNodeOwner = nodesOccupancyLocks->isNodeVirtuallyLocked(node);
-
         if (bidNodeOwner.empty()) {
             // node is not not virtually locked and also not really locked
             // we can lock the node
@@ -211,12 +213,12 @@ Node SemaphoreServer::getClientNextWaypoint(const std::string& clientId, const N
     auto waypointNodes = clientIt->second;
     auto currentNodeIt = std::find(waypointNodes.begin(), waypointNodes.end(), node);
 
-    if (currentNodeIt == clientIt->second.end()) {
+    if (currentNodeIt == waypointNodes.end()) {
         // node is not between waypoints
         return {};
     } else {
         currentNodeIt++;
-        if (currentNodeIt == clientIt->second.end()) {
+        if (currentNodeIt == waypointNodes.end()) {
             // this is last node, it have not successors
             return {};
         }
