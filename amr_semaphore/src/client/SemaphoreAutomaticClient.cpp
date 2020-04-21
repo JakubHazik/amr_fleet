@@ -36,7 +36,7 @@ void SemaphoreAutomaticClient::setNodeAsCurrentGoal(const amr_msgs::Point &node)
 }
 
 void SemaphoreAutomaticClient::setNewPath(const std::vector<amr_msgs::Point> &pathWaypoints) {
-//    unlockAllNodes();
+    unlockAllNodes();
     this->waypoints = pathWaypoints;
     robotCurrentPointIt = this->waypoints.begin();
     lockedNodesBack = this->waypoints.begin();
@@ -66,9 +66,9 @@ void SemaphoreAutomaticClient::lockingLoop() {
                 // successfully locked
                 lockedNodesFront++;
                 // accept automatic unlocking
-                if (std::distance(lockedNodesBack, lockedNodesFront) > numLockedNodesBack + numLockedNodesAhead) {
-                    lockedNodesBack++;
-                }
+//                if (std::distance(lockedNodesBack, lockedNodesFront) > numLockedNodesBack + numLockedNodesAhead) {
+//                    lockedNodesBack++;
+//                }
             } else {
                 // unable to lock next node, wait a moment and try it again
                 rate.sleep();

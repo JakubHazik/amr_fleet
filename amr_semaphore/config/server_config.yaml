@@ -1,6 +1,6 @@
-occupancyLengths:
-    r1: 4
-    r2: 4
+#occupancyLengths:
+#    r1: 4
+#    r2: 4
 
 limitedAreas:
     - area:

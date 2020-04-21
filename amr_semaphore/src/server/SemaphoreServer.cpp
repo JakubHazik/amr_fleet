@@ -26,12 +26,12 @@ SemaphoreServer::SemaphoreServer() {
     }
 
     // setup occupancy of graph vertexes
-    std::map<std::string, int> occupancyParams;
-    nh.getParam("occupancyLengths", occupancyParams);
+//    std::map<std::string, int> occupancyParams;
+//    nh.getParam("occupancyLengths", occupancyParams);
     nodesOccupancyLocks = std::make_shared<NodesOccupancyContainer>();
-    for (const auto& occupancy: occupancyParams) {
-        nodesOccupancyLocks->setupClient(occupancy.first, occupancy.second);
-    }
+//    for (const auto& occupancy: occupancyParams) {
+//        nodesOccupancyLocks->setupClient(occupancy.first, occupancy.second);
+//    }
 
     graphSub = nh.subscribe("/graph_generator/graph", 5, &SemaphoreServer::graphCb, this);
     clientsPathsSub = nh.subscribe("/task_manager_server/client_paths", 10, &SemaphoreServer::clientPathsCb, this);
@@ -88,8 +88,8 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
             // we can lock the node
             nodesOccupancyLocks->lockNode(req.clientId, node);
             areaLocks->lockNode(req.clientId, node);
-            auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
-            areaLocks->unlockNode(req.clientId, removedNodes);
+//            auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
+//            areaLocks->unlockNode(req.clientId, removedNodes);
 
             auto clientNextNode = getClientNextWaypoint(req.clientId, node);
             if (node.isBidirectional && clientNextNode.isValid() && clientNextNode.isBidirectional) {
@@ -103,8 +103,8 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
                 // owner of virtual node is requested client, we can lock it
                 nodesOccupancyLocks->lockNode(req.clientId, node);
                 areaLocks->lockNode(req.clientId, node);
-                auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
-                areaLocks->unlockNode(req.clientId, removedNodes);
+//                auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
+//                areaLocks->unlockNode(req.clientId, removedNodes);
                 res.message = "Node successfully locked";
                 res.success = true;
             } else {
@@ -117,8 +117,8 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
                 } else {
                     nodesOccupancyLocks->lockNode(req.clientId, node);
                     areaLocks->lockNode(req.clientId, node);
-                    auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
-                    areaLocks->unlockNode(req.clientId, removedNodes);
+//                    auto removedNodes = nodesOccupancyLocks->checkMaxNodesAndRemove(req.clientId, node);
+//                    areaLocks->unlockNode(req.clientId, removedNodes);
                     res.message = "Node successfully locked";
                     res.success = true;
                 }
