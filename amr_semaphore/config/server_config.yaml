@@ -1,8 +1,8 @@
 occupancyLengths:
-    r1: 5
+    r1: 4
     r2: 4
 
 limitedAreas:
     - area:
           nodes: [22, 59, 58, 72, 71, 69, 68, 66, 65, 63, 62]
-          maxNumClients: 1
+          maxNumClients: 2
