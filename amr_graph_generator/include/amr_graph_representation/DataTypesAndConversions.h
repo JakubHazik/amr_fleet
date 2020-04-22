@@ -21,7 +21,7 @@ public:
     bool isReachable = true;
     bool isBidirectional = false;
 
-    Node() = default;
+    Node();
 
     Node(int uuid, double x, double y, bool bidirectional);
 

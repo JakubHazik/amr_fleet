@@ -27,7 +27,7 @@ namespace rvt = rviz_visual_tools;
 class SemaphoreServer {
 
 public:
-    SemaphoreServer(ros::NodeHandle& nh);
+    SemaphoreServer();
 
 private:
     Graph graph;

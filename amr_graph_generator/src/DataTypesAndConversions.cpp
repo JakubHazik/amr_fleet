@@ -29,6 +29,10 @@ std::ostream& operator<<(std::ostream& os, const Node& n) {
     return os << n.uuid;
 }
 
+Node::Node() {
+    uuid = 0;   // no valid Node
+}
+
 Node::Node(int uuid, double x, double y, bool bidirectional) {
     this->uuid = uuid;
     this->posX = x;

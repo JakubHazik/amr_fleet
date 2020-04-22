@@ -12,6 +12,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <amr_pose_controller/Controller.h>
 #include <tf/transform_listener.h>
+#include <amr_semaphore/client/SemaphoreAutomaticClient.h>
 
 // msgs
 #include <geometry_msgs/Pose.h>
@@ -61,17 +62,13 @@ private:
     std::queue<amr_msgs::Point> waypoints;
     double waypointZone;
     bool robotPoseReceived = false;
-    std::shared_ptr<SemaphoreClient> semaphoreClient;
+    std::shared_ptr<SemaphoreAutomaticClient> semaphoreClient;
     std::future<bool> nodeLocked;
     rvt::RvizVisualToolsPtr visual_tools;
 
     bool poseControlSwitchCb(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
 
     void updateRobotPose();
-
-//    void robotPoseCb(const geometry_msgs::PoseConstPtr& poseMsg);
-//
-//    void turtlesimPoseCb(const turtlesim::PoseConstPtr& poseMsg);
 
     void acGoalCb();
     void acCancelCb();

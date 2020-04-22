@@ -9,9 +9,8 @@
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "semaphore_server");
-    ros::NodeHandle nh("~");
 
-    SemaphoreServer semaphoreServer(nh);
+    SemaphoreServer semaphoreServer;
 
     ros::spin();
 

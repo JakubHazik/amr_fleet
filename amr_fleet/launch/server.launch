@@ -7,7 +7,7 @@
     <include file="$(find amr_fleet)/launch/simulation/gazebo_simulation.launch"/>
 
     <!-- Map -->
-    <include file="$(find amr_fleet)/launch/path_planning/map_server.launch"/>
+    <include file="$(find amr_fleet)/launch/map_server.launch"/>
 
     <!-- Graph generator -->
     <include file="$(find amr_graph_generator)/launch/graph_generator.launch"/>
@@ -22,7 +22,7 @@
     <include file="$(find amr_semaphore)/launch/semaphore_server.launch"/>
 
     <!-- Fleet control gui -->
-    <include file="$(find amr_gui)/launch/gui.launch"/>
+<!--    <include file="$(find amr_gui)/launch/gui.launch"/>-->
 
     <!-- Rviz -->
     <include file="$(find amr_fleet)/launch/rviz.launch"/>

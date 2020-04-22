@@ -12,8 +12,9 @@
 
 class SemaphoreClient {
 public:
-    //Todo add argument for the robot length
     SemaphoreClient(const std::string& lockServiceName);
+
+    virtual ~SemaphoreClient() = default;
 
     // TODO instead of bool use pair<bool, message>
     bool lockNode(const amr_msgs::Point &node);
@@ -27,9 +28,6 @@ public:
 private:
     std::string clientId;
     ros::ServiceClient lockNodeSrv;
-
-
-
 };
 
 

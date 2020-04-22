@@ -7,10 +7,12 @@
 #include <utility>
 
 
-NodesOccupancyContainer::NodesOccupancyContainer(const unsigned int occupancyLength,
-                                                 std::shared_ptr<AreaBasedLocks> areaBasedLocks) {
-    bufferMaxLength = occupancyLength;
-    areaLocks = areaBasedLocks;
+NodesOccupancyContainer::NodesOccupancyContainer() {
+
+}
+
+void NodesOccupancyContainer::setupClient(const std::string &ownerId, unsigned int occupancyLength) {
+    clientOccupancyLength[ownerId] = occupancyLength;
 }
 
 std::map<std::string, std::list<Node>> NodesOccupancyContainer::getOccupancyData() {
@@ -95,10 +97,10 @@ std::vector<Node> NodesOccupancyContainer::checkMaxNodesAndRemove(const std::str
     }
 
     auto& nodesArray = targetOwnerIt->second;
-    if (nodesArray.size() > bufferMaxLength) {
+    if (nodesArray.size() > clientOccupancyLength[ownerId]) {
         auto refNodeIt = std::find(nodesArray.begin(), nodesArray.end(), referencedNode);
 
-        for (int i = 0; i < bufferMaxLength; i++) {
+        for (int i = 0; i < clientOccupancyLength[ownerId]; i++) {
             if (refNodeIt == nodesArray.begin()) {
                 // max number of nodes has not been achieved
                 return removedNodes;
@@ -124,7 +126,7 @@ std::string NodesOccupancyContainer::isNodeReallyLocked(const Node &node) {
         }
 
         // check if node is in critical buffer range
-        if (std::distance(ownerNodes.second.begin(), targetNodeIt) < bufferMaxLength) {
+        if (std::distance(ownerNodes.second.begin(), targetNodeIt) < clientOccupancyLength[ownerNodes.first]) {
             return ownerNodes.first;
         }
     }
@@ -141,7 +143,7 @@ std::string NodesOccupancyContainer::isNodeVirtuallyLocked(const Node& node) {
         }
 
         // check if node is in critical buffer range
-        if (std::distance(ownerNodes.second.begin(), targetNodeIt) >= bufferMaxLength) {
+        if (std::distance(ownerNodes.second.begin(), targetNodeIt) >= clientOccupancyLength[ownerNodes.first]) {
             return ownerNodes.first;
         }
     }

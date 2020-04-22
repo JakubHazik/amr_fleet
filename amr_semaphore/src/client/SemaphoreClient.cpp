@@ -34,7 +34,7 @@ bool SemaphoreClient::lockNode(const amr_msgs::Point &node) {
     if (srv.response.success) {
         return true;
     } else {
-//        ROS_WARN("Unable to lock node: %s", srv.response.message.c_str());
+        ROS_WARN("Unable to lock node: %s", srv.response.message.c_str());
         return false;
     }
 }
