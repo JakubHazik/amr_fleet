@@ -31,6 +31,8 @@
     <!--    <include file="$(find amr_gui)/launch/gui.launch"/>-->
     <!-- Rviz -->
     <include file="$(find amr_fleet)/launch/rviz.launch"/>
+    <!--    Monitoring logger-->
+    <include file="$(find amr_monitor)/launch/monitor_logger.launch"/>
 
 
     <!-- spaw r1 robot -->

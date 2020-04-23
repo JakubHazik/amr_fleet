@@ -46,6 +46,8 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
     client->waitForNewClientInfo();
     auto task = client->getNewTask();
 
+    res.task.taskUuid = std::hash<unsigned long int>{}(ros::Time::now().toSec());
+
     switch (task.taskId.id) {
         case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
             amr_msgs::PlanPath srv;
