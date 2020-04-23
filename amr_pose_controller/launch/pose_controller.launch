@@ -1,9 +1,11 @@
 <launch>
     <arg name="robot_id" default="r1"/>
+    <arg name="max_speed" default="0.5"/>
 
     <group ns="$(arg robot_id)">
         <node pkg="amr_pose_controller" type="pose_controller" name="pose_controller" output="screen">
             <rosparam command="load" file="$(find amr_pose_controller)/config/config.yaml" />
+            <param name="controller/maxLinearSpeed" value="$(arg max_speed)"/>
             <param name="tf_prefix" value="$(arg robot_id)"/>
         </node>
     </group>

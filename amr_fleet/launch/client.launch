@@ -5,6 +5,7 @@
     <arg name="x_pos" default="1.8"/>
     <arg name="y_pos" default="-0.7"/>
     <arg name="a_pos" default="3.14"/>
+    <arg name="max_speed" default="0.5"/>
 
     <!-- spaw robot: robot_description + state publisher -->
     <include file="$(find amr_fleet)/launch/simulation/spawn_kobuki_robot.launch">
@@ -30,6 +31,7 @@
     <!-- Client pose control -->
     <include file="$(find amr_pose_controller)/launch/pose_controller.launch">
         <arg name="robot_id" value="$(arg robot_id)"/>
+        <arg name="max_speed" value="$(arg max_speed)"/>
     </include>
 
     <!-- Client pose control -->

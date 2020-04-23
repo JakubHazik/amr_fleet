@@ -41,6 +41,7 @@
         <arg name="x_pos" default="-0.73"/>
         <arg name="y_pos" default="2.76"/>
         <arg name="a_pos" default="0"/>
+        <arg name="max_speed" value="0.5"/>
     </include>
 
     <!-- spaw r2 robot -->
@@ -48,6 +49,7 @@
         <arg name="robot_id" value="r2"/>
         <arg name="x_pos" value="-0.76"/>
         <arg name="y_pos" value="1.03"/>
-        <arg name="a_pos" value="1.56"/>
+        <arg name="a_pos" value="0"/>
+        <arg name="max_speed" value="0.5"/>
     </include>
 </launch>
