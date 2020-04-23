@@ -112,7 +112,6 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
 
     switch (task.taskId.id) {
         case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
-            performWaypointsAc.cancelAllGoals();
             // create goal
             amr_msgs::PerformGoalsGoal goal;
             goal.waypoinst = task.waypoints;
