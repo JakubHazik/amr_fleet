@@ -61,7 +61,15 @@ void SemaphoreAutomaticClient::lockingLoop() {
     ros::Rate rate(ros::Duration(0.2));
     while (threadExitFut.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
 
-        if (std::distance(robotCurrentPointIt, lockedNodesFront) <= numLockedNodesAhead
+        if (std::distance(lockedNodesBack, robotCurrentPointIt) >= numLockedNodesBack) {
+            if (unlockNode(*lockedNodesBack)) {
+                // successfully unlocked
+                lockedNodesBack++;
+            } else {
+                // unable to unlock next node, wait a moment and try it again
+                rate.sleep();
+            }
+        } else if (std::distance(robotCurrentPointIt, lockedNodesFront) <= numLockedNodesAhead
             && lockedNodesFront != waypoints.end()) {
             if (lockNode(*lockedNodesFront)) {
                 // successfully locked
@@ -72,14 +80,6 @@ void SemaphoreAutomaticClient::lockingLoop() {
 //                }
             } else {
                 // unable to lock next node, wait a moment and try it again
-                rate.sleep();
-            }
-        } else if (std::distance(lockedNodesBack, robotCurrentPointIt) >= numLockedNodesBack) {
-            if (unlockNode(*lockedNodesBack)) {
-                // successfully unlocked
-                lockedNodesBack++;
-            } else {
-                // unable to unlock next node, wait a moment and try it again
                 rate.sleep();
             }
         } else {
