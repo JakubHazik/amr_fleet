@@ -78,6 +78,8 @@ private:
 
     bool pointPositionsAreEqual(double x1, double y1, double x2, double y2);
 
+    std::map<unsigned int, Node>::iterator findSameNodePosition(std::map<unsigned int, Node>& graph, const Node& node);
+
     template<typename T>
     bool removeElemByValue(std::vector<T>& v, T value);
 

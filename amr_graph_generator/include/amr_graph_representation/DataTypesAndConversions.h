@@ -11,7 +11,10 @@
 #include <amr_msgs/Point.h>
 #include <geometry_msgs/Pose.h>
 
-#define sqr(x) ((x)*(x))
+template<typename T>
+constexpr T sqr(T x) {
+    return ((x)*(x));
+}
 
 class Node {
 public:

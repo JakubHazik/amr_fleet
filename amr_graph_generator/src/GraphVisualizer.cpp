@@ -24,7 +24,7 @@ void GraphVisualizer::drawGraph() {
     for (const auto& node: graphNodes) {
         // draw nodes (spheres)
         geometry_msgs::Point point = node2point(node.second);
-        if (node.second.bidirectional) {
+        if (node.second.isBidirectional) {
             visual_tools->publishSphere(point, rvt::colors::CYAN, rvt::scales::LARGE);
         } else {
             visual_tools->publishSphere(point, rvt::colors::RED, rvt::scales::LARGE);
@@ -52,14 +52,14 @@ void GraphVisualizer::publish() {
 
 geometry_msgs::Pose GraphVisualizer::node2pose(const Node& n) {
     geometry_msgs::Pose pose;
-    pose.position.x = n.x;
-    pose.position.y = n.y;
+    pose.position.x = n.posX;
+    pose.position.y = n.posY;
     return pose;
 }
 
 geometry_msgs::Point GraphVisualizer::node2point(const Node& n) {
     geometry_msgs::Point point;
-    point.x = n.x;
-    point.y = n.y;
+    point.x = n.posX;
+    point.y = n.posY;
     return point;
 }
