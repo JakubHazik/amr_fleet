@@ -13,12 +13,9 @@ TaskManagerServer::TaskManagerServer() {
     ros::NodeHandle nh("~");
 
     // read tasks
-    boost::filesystem::path packagePath(ros::package::getPath("amr_task_manager"));
-    std::string tasksConfigFile;
-    nh.getParam("tasksConfigurationFile", tasksConfigFile);
-    boost::filesystem::path packageRelativePath(tasksConfigFile);
-    auto fullPath = packagePath / packageRelativePath;
-    parseTasks(fullPath.string());
+    std::string tasksConfigFilePath;
+    nh.getParam("tasksConfigurationFile", tasksConfigFilePath);
+    parseTasks(tasksConfigFilePath);
 
     std::string planPathService;
     nh.getParam("planPathService", planPathService);
@@ -129,13 +126,14 @@ void TaskManagerServer::clientInfoCb(const amr_msgs::ClientInfoConstPtr& msg) {
 void TaskManagerServer::parseTasks(const std::string &configFile) {
     YAML::Node config = YAML::LoadFile(configFile);
 
+    bool runTasksPeriodically = config["runTasksPeriodically"];
     YAML::Node clientsSeq = config["clients"];
     for (YAML::iterator it = clientsSeq.begin(); it != clientsSeq.end(); ++it) {
         for (const auto &clientData : *it) {
             std::string clientId = clientData.first.as<std::string>();
             YAML::Node tasksSeq = clientData.second;  // tasks seq
 
-            auto client = std::make_shared<ClientRepresentation>(clientId);
+            auto client = std::make_shared<ClientRepresentation>(clientId, runTasksPeriodically);
             clients.insert(std::make_pair(clientId, client));
 
             for (YAML::iterator taskIt = tasksSeq.begin(); taskIt != tasksSeq.end(); ++taskIt) {
