@@ -10,32 +10,23 @@ runTasksPeriodically: true
 
 clients:
     - r1:
-#        - task:
-#            taskId: 1
-#            goalId: 62
-#        - task:
-#            taskId: 1
-#            goalId: 25
-
         - task:
             taskId: 1
-            goalId: 22
-
+            goalId: 102
         - task:
             taskId: 1
-            goalId: 53
+            goalId: 65
         - task:
             taskId: 1
-            goalId: 33
+            goalId: 14
     - r2:
         - task:
             taskId: 1
-            goalId: 62
+            goalId: 102
         - task:
             taskId: 1
-            goalId: 66
-
+            goalId: 65
         - task:
             taskId: 4
-            timeout: 5
+            timeout: 117
 

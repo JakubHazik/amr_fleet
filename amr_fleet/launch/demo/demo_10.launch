@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="world" default="sim_world_1"/>
+    <arg name="tasks_config_path" value="$(find amr_fleet)/launch/demo/tasks_demo_10.yaml"/>
+    <arg name="gazebo_headless" value="true"/>
+
+    <!-- Gazebo simulation -->
+    <include file="$(find amr_gazebo)/launch/world.launch">
+        <arg name="world" value="$(arg world)"/>
+        <arg name="headless" value="$(arg gazebo_headless)"/>
+    </include>
+    <!-- Map -->
+    <include file="$(find amr_fleet)/launch/map_server.launch">
+        <arg name="map" value="$(arg world)"/>
+    </include>
+    <!-- Graph generator -->
+    <include file="$(find amr_graph_generator)/launch/graph_generator.launch">
+        <arg name="world" value="$(arg world)"/>
+    </include>
+    <!-- Planner -->
+    <include file="$(find amr_planner)/launch/planner.launch"/>
+    <!-- Task manager -->
+    <include file="$(find amr_task_manager)/launch/task_manager_server.launch">
+        <arg name="tasks_config_path" value="$(arg tasks_config_path)"/>
+    </include>
+    <!-- Semaphore server -->
+    <include file="$(find amr_semaphore)/launch/semaphore_server.launch"/>
+    <!-- Fleet control gui -->
+    <!--    <include file="$(find amr_gui)/launch/gui.launch"/>-->
+    <!-- Rviz -->
+    <include file="$(find amr_fleet)/launch/rviz.launch"/>
+
+
+    <!-- spaw r1 robot -->
+    <include file="$(find amr_fleet)/launch/client.launch">
+        <arg name="robot_id" value="r1"/>
+        <arg name="x_pos" default="-0.73"/>
+        <arg name="y_pos" default="2.76"/>
+        <arg name="a_pos" default="0"/>
+    </include>
+
+    <!-- spaw r2 robot -->
+    <include file="$(find amr_fleet)/launch/client.launch">
+        <arg name="robot_id" value="r2"/>
+        <arg name="x_pos" value="-0.76"/>
+        <arg name="y_pos" value="1.03"/>
+        <arg name="a_pos" value="1.56"/>
+    </include>
+</launch>

@@ -7,7 +7,6 @@ Panels:
         - /Global Options1
         - /PlanningGraph1/Namespaces1
         - /OccupiedNodes1/Namespaces1
-        - /TF1
         - /TF1/Frames1
       Splitter Ratio: 0.6529411673545837
     Tree Height: 1074
@@ -85,159 +84,167 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /r1/pose_controller/amr_current_goal
       Name: R1Goal
       Namespaces:
-        Arrow: true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /r2/pose_controller/amr_current_goal
       Name: R2Goal
       Namespaces:
-        Arrow: true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        base_scan:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        caster_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        caster_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        cliff_sensor_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        cliff_sensor_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        cliff_sensor_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gyro_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        wheel_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: /r1/robot_description
       TF Prefix: r1
       Update Interval: 0
-      Value: false
+      Value: true
       Visual Enabled: true
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        base_scan:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        caster_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        caster_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        cliff_sensor_front_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        cliff_sensor_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        cliff_sensor_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        gyro_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        wheel_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: /r2/robot_description
       TF Prefix: r2
       Update Interval: 0
-      Value: false
+      Value: true
       Visual Enabled: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        map:
-          Value: false
-        r1/base_footprint:
-          Value: false
-        r1/base_link:
-          Value: true
-        r1/base_scan:
-          Value: false
-        r1/caster_back_link:
-          Value: false
-        r1/caster_front_link:
-          Value: false
-        r1/cliff_sensor_front_link:
-          Value: false
-        r1/cliff_sensor_left_link:
-          Value: false
-        r1/cliff_sensor_right_link:
-          Value: false
-        r1/gyro_link:
-          Value: false
-        r1/odom:
-          Value: false
-        r1/wheel_left_link:
-          Value: false
-        r1/wheel_right_link:
-          Value: false
-        r2/base_footprint:
-          Value: false
-        r2/base_link:
-          Value: true
-        r2/base_scan:
-          Value: false
-        r2/caster_back_link:
-          Value: false
-        r2/caster_front_link:
-          Value: false
-        r2/cliff_sensor_front_link:
-          Value: false
-        r2/cliff_sensor_left_link:
-          Value: false
-        r2/cliff_sensor_right_link:
-          Value: false
-        r2/gyro_link:
-          Value: false
-        r2/odom:
-          Value: false
-        r2/wheel_left_link:
-          Value: false
-        r2/wheel_right_link:
-          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          r1/odom:
-            r1/base_footprint:
-              r1/base_link:
-                r1/base_scan:
-                  {}
-                r1/caster_back_link:
-                  {}
-                r1/caster_front_link:
-                  {}
-                r1/cliff_sensor_front_link:
-                  {}
-                r1/cliff_sensor_left_link:
-                  {}
-                r1/cliff_sensor_right_link:
-                  {}
-                r1/gyro_link:
-                  {}
-                r1/wheel_left_link:
-                  {}
-                r1/wheel_right_link:
-                  {}
-          r2/odom:
-            r2/base_footprint:
-              r2/base_link:
-                r2/base_scan:
-                  {}
-                r2/caster_back_link:
-                  {}
-                r2/caster_front_link:
-                  {}
-                r2/cliff_sensor_front_link:
-                  {}
-                r2/cliff_sensor_left_link:
-                  {}
-                r2/cliff_sensor_right_link:
-                  {}
-                r2/gyro_link:
-                  {}
-                r2/wheel_left_link:
-                  {}
-                r2/wheel_right_link:
-                  {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -266,25 +273,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 4.967240810394287
+      Distance: 14.284449577331543
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.196081280708313
-        Y: -1.3777345418930054
-        Z: 0.13504278659820557
+        X: -1.0071371793746948
+        Y: -0.31673237681388855
+        Z: 0.17245084047317505
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4247963428497314
+      Pitch: 1.5647963285446167
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.135410785675049
+      Yaw: 4.709105491638184
     Saved: ~
 Window Geometry:
   Displays:

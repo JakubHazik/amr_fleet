@@ -7,7 +7,7 @@
     <arg name="a_pos" default="3.14"/>
 
     <!-- Gazebo simulation -->
-    <include file="$(find amr_gazebo)/launch/sim_world_1.launch"/>
+    <include file="$(find amr_gazebo)/launch/world.launch"/>
 
     <!--    Gmapping   -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
