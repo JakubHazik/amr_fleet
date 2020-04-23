@@ -25,7 +25,7 @@ https://github.com/ros-teleop/teleop_twist_keyboard
 
 and run:
 ```
-rosrun teleop_twist_keyboard teleop_twist_keyboard.py cmd_vel:="/r1/mobile_base/commands/velocity"
+rosrun teleop_twist_keyboard teleop_twist_keyboard.py cmd_vel:="/mobile_base/commands/velocity"
 ```
 
 For save the map:

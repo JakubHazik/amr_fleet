@@ -313,7 +313,7 @@ std::map<unsigned int, Node>::iterator PathDxfParser::findSameNodePosition(
     return graph.end();
 }
 
-std::vector<Node> PathDxfParser::generateGraph() {
+std::vector<Node> PathDxfParser::generateGraph(double offsetX, double offsetY) {
     std::map<unsigned int, Node> graph;
     std::map<unsigned int, Node> mergedNodes;
 
@@ -354,6 +354,8 @@ std::vector<Node> PathDxfParser::generateGraph() {
     std::vector<Node> nodes;
     for (const auto& graphNodes: graph) {
         nodes.push_back(graphNodes.second);
+        nodes.back().posX += offsetX;
+        nodes.back().posY += offsetY;
     }
     return nodes;
 }

@@ -44,7 +44,7 @@ public:
 
     explicit PathDxfParser(const std::string& dxfFilepath, double edgeLength);
 
-    std::vector<Node> generateGraph();
+    std::vector<Node> generateGraph(double offsetX, double offsetY);
 
 
 private:

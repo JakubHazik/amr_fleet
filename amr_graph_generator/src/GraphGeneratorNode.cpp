@@ -18,13 +18,15 @@ int main(int argc, char **argv) {
 
     n.getParam("maxEdgeLength", maxEdgeLength);
     n.getParam("dxfFilepath", dxfFilepath);
+    std::map<std::string, double> graphOffset;
+    n.getParam("graphOffset", graphOffset);
 
     ROS_INFO_STREAM("Dxf input file: " + dxfFilepath);
 
     ros::Publisher graphPublisher = n.advertise<amr_msgs::Graph>("graph", 1, true);
 
     PathDxfParser pathParser(dxfFilepath, maxEdgeLength);
-    auto graph = pathParser.generateGraph();
+    auto graph = pathParser.generateGraph(graphOffset["x"], graphOffset["y"]);
 
     amr_msgs::Graph graphMsg;
     graphMsg.header.stamp = ros::Time();

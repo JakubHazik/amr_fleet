@@ -7,10 +7,13 @@
     <arg name="a_pos" default="3.14"/>
 
     <!-- Gazebo simulation -->
-    <include file="$(find amr_gazebo)/launch/sim_world_2.launch"/>
+    <include file="$(find amr_gazebo)/launch/sim_world_1.launch"/>
 
     <!--    Gmapping   -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+        <param name="delta" value="0.03"/>
+        <param name="particles" value="50"/>
+        <param name="map_update_interval" value="2"/>
     </node>
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find kobuki_description)/urdf/kobuki_standalone.urdf.xacro'"/>
