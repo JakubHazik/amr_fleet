@@ -5,9 +5,10 @@
 #include <amr_semaphore/client/SemaphoreAutomaticClient.h>
 
 SemaphoreAutomaticClient::SemaphoreAutomaticClient(const std::string &lockServiceName,
+                                                   const std::string& setupServiceName,
                                                    int numLockedNodesBack,
                                                    int numLockedNodesAhead)
-        : SemaphoreClient(lockServiceName),
+        : SemaphoreClient(lockServiceName, setupServiceName, numLockedNodesBack + numLockedNodesAhead),
           numLockedNodesBack(numLockedNodesBack),
           numLockedNodesAhead(numLockedNodesAhead) {
 

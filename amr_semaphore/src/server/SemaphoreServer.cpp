@@ -36,6 +36,7 @@ SemaphoreServer::SemaphoreServer() {
     graphSub = nh.subscribe("/graph_generator/graph", 5, &SemaphoreServer::graphCb, this);
     clientsPathsSub = nh.subscribe("/task_manager_server/client_paths", 10, &SemaphoreServer::clientPathsCb, this);
     lockNodeSrv = nh.advertiseService("lock_node", &SemaphoreServer::lockNodeCb, this);
+    setupSemaphoreSrv = nh.advertiseService("setup_semaphore", &SemaphoreServer::setupSemaphoreCb, this);
 
     // prepare visualizer
     visual_tools.reset(new rvt::RvizVisualTools("map", "/amr_occupied_nodes"));
@@ -227,3 +228,8 @@ Node SemaphoreServer::getClientNextWaypoint(const std::string& clientId, const N
     }
 }
 
+bool SemaphoreServer::setupSemaphoreCb(amr_msgs::SetupSemaphore::Request& req, amr_msgs::SetupSemaphore::Response& res) {
+    nodesOccupancyLocks->setupClient(req.clientId, req.numReallyLockedNodes);
+    res.success = true;
+    return true;
+}

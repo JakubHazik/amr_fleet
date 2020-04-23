@@ -9,7 +9,8 @@
 
 class SemaphoreAutomaticClient : public SemaphoreClient {
 public:
-    SemaphoreAutomaticClient(const std::string& lockServiceName, int numLockedNodesBack, int numLockedNodesAhead);
+    SemaphoreAutomaticClient(const std::string& lockServiceName, const std::string& setupServiceName,
+                                int numLockedNodesBack, int numLockedNodesAhead);
 
     ~SemaphoreAutomaticClient();
 

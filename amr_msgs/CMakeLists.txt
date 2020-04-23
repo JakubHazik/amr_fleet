@@ -32,6 +32,7 @@ add_service_files(
         LockPoint.srv
         SetNodeProperties.srv
         DoCustomTaskAsap.srv
+        SetupSemaphore.srv
 )
 
 add_action_files(

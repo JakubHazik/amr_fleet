@@ -9,7 +9,8 @@ controller:
   maxAngularAcceleration: 0.5
   goalDeadZone: 0.1              # [m]
 
-semaphoreService: "/semaphore_server/lock_node"
+semaphoreLockService: "/semaphore_server/lock_node"
+semaphoreSetupService: "/semaphore_server/setup_semaphore"
 cmdVelTopic: "/mobile_base/commands/velocity"
 waypointZone: 0.3           # [m]
 

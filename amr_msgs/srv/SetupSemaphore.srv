@@ -1,0 +1,5 @@
+string clientId
+uint32 numReallyLockedNodes
+---
+bool success
+string message

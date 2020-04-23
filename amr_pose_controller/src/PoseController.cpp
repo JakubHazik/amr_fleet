@@ -37,12 +37,14 @@ PoseController::PoseController(ros::NodeHandle& nh)
     performGoalAs.start();
 
     // init semaphore client
-    std::string semaphoreService;
-    nh.getParam("semaphoreService", semaphoreService);
+    std::string semaphoreLockService;
+    nh.getParam("semaphoreLockService", semaphoreLockService);
+    std::string semaphoreSetupService;
+    nh.getParam("semaphoreSetupService", semaphoreSetupService);
     std::map<std::string, int> semaphoreLockedNodesParam;
     nh.getParam("semaphoreLockedNodes", semaphoreLockedNodesParam);
-    semaphoreClient = std::make_shared<SemaphoreAutomaticClient>(semaphoreService,
-            semaphoreLockedNodesParam["robotSize"], semaphoreLockedNodesParam["robotSpeedForward"]);
+    semaphoreClient = std::make_shared<SemaphoreAutomaticClient>(semaphoreLockService, semaphoreSetupService,
+                         semaphoreLockedNodesParam["robotSize"], semaphoreLockedNodesParam["robotSpeedForward"]);
 
     visual_tools.reset(new rvt::RvizVisualTools("map", "amr_current_goal"));
     visual_tools->loadMarkerPub(false, true);  // create publisher before waiting

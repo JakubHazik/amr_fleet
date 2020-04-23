@@ -12,7 +12,7 @@ ControlInterface::ControlInterface() {
 
     setNodePropertiesSrv = nh.serviceClient<amr_msgs::SetNodeProperties>("/planner/set_node_properties");
     doCustomTaskSrv = nh.serviceClient<amr_msgs::DoCustomTaskAsap>("/task_manager_server/do_custom_task");
-    semaphoreClient = std::make_shared<SemaphoreClient>("/semaphore_server/lock_node");
+    semaphoreClient = std::make_shared<SemaphoreClient>("/semaphore_server/lock_node", "/semaphore_server/setup_semaphore");
 }
 
 Result ControlInterface::setNodeReachability(unsigned int nodeUuid, bool reachable) {

@@ -4,20 +4,30 @@
 
 #include <amr_semaphore/client/SemaphoreClient.h>
 #include <amr_msgs/LockPoint.h>
+#include <amr_msgs/SetupSemaphore.h>
 
-SemaphoreClient::SemaphoreClient(const std::string &lockServiceName) {
+SemaphoreClient::SemaphoreClient(const std::string &lockServiceName, const std::string& setupServiceName, unsigned int nodesNum) {
     ros::NodeHandle nh;
-    lockNodeSrv = nh.serviceClient<amr_msgs::LockPoint>(lockServiceName);
-    if (!lockNodeSrv.waitForExistence(ros::Duration(5))) {
-        ROS_ERROR("Unable to contact semaphore_server service: %s", lockServiceName.c_str());
-        ros::shutdown();
-    }
-
     clientId = ros::this_node::getNamespace();
     // remove slash from client namespace
     if (!clientId.empty() && clientId[0] == '/') {
         clientId.erase(0, 1);
     }
+
+    setupSemaphoreSrv = nh.serviceClient<amr_msgs::SetupSemaphore>(setupServiceName);
+    if (!setupSemaphoreSrv.waitForExistence(ros::Duration(5))) {
+        ROS_ERROR("Unable to contact semaphore_server service: %s", setupServiceName.c_str());
+        ros::shutdown();
+    }
+    amr_msgs::SetupSemaphore srv;
+    srv.request.clientId = clientId;
+    srv.request.numReallyLockedNodes = nodesNum;
+    if (!setupSemaphoreSrv.call(srv) || !srv.response.success) {
+        ROS_ERROR("Error occurred while service: %s has been called", setupServiceName.c_str());
+        ros::shutdown();
+    }
+
+    lockNodeSrv = nh.serviceClient<amr_msgs::LockPoint>(lockServiceName);
 }
 
 bool SemaphoreClient::lockNode(const amr_msgs::Point &node) {

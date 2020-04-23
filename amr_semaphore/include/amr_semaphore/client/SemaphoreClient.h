@@ -12,7 +12,9 @@
 
 class SemaphoreClient {
 public:
-    SemaphoreClient(const std::string& lockServiceName);
+    SemaphoreClient(const std::string &lockServiceName,
+                    const std::string &setupServiceName,
+                    unsigned int nodesNum = std::numeric_limits<unsigned int>::max());
 
     virtual ~SemaphoreClient() = default;
 
@@ -28,6 +30,7 @@ public:
 private:
     std::string clientId;
     ros::ServiceClient lockNodeSrv;
+    ros::ServiceClient setupSemaphoreSrv;
 };
 
 
