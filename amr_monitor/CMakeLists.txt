@@ -46,3 +46,12 @@ target_link_libraries(monitor_logger
         ${catkin_LIBRARIES}
         ${Boost_LIBRARIES}
 )
+
+# monitor visualizer
+add_executable(monitor_visualizer
+        src/server/MonitoringVisualizer.cpp
+        )
+add_dependencies(monitor_visualizer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(monitor_visualizer
+        ${catkin_LIBRARIES}
+        )
