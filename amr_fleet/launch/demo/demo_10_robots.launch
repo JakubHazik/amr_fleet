@@ -16,7 +16,7 @@
         <arg name="x_pos" value="-0.76"/>
         <arg name="y_pos" value="1.03"/>
         <arg name="a_pos" value="0"/>
-        <arg name="max_speed" value="0.5"/>
+        <arg name="max_speed" value="0.2"/>
     </include>
 
     <!-- spaw r3 robot -->
@@ -34,7 +34,7 @@
         <arg name="x_pos" value="-2.13"/>
         <arg name="y_pos" value="-2.13"/>
         <arg name="a_pos" value="0"/>
-        <arg name="max_speed" value="0.5"/>
+        <arg name="max_speed" value="0.2"/>
     </include>
 
     <!-- spaw r5 robot -->
@@ -52,7 +52,7 @@
         <arg name="x_pos" value="2.57"/>
         <arg name="y_pos" value="1.04"/>
         <arg name="a_pos" value="0"/>
-        <arg name="max_speed" value="0.5"/>
+        <arg name="max_speed" value="0.2"/>
     </include>
 
     <!-- spaw r7 robot -->
@@ -70,7 +70,7 @@
         <arg name="x_pos" value="2.58"/>
         <arg name="y_pos" value="-2.05"/>
         <arg name="a_pos" value="0"/>
-        <arg name="max_speed" value="0.5"/>
+        <arg name="max_speed" value="0.2"/>
     </include>
 
     <!-- spaw r9 robot -->
@@ -88,6 +88,6 @@
         <arg name="x_pos" value="6.23"/>
         <arg name="y_pos" value="-0.43"/>
         <arg name="a_pos" value="0"/>
-        <arg name="max_speed" value="0.5"/>
+        <arg name="max_speed" value="0.2"/>
     </include>
 </launch>
