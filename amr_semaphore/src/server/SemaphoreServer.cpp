@@ -33,6 +33,8 @@ SemaphoreServer::SemaphoreServer() {
 //        nodesOccupancyLocks->setupClient(occupancy.first, occupancy.second);
 //    }
 
+    nh.getParam("lockingOff", lockingOff);
+
     graphSub = nh.subscribe("/graph_generator/graph", 5, &SemaphoreServer::graphCb, this);
     clientsPathsSub = nh.subscribe("/task_manager_server/client_paths", 10, &SemaphoreServer::clientPathsCb, this);
     lockNodeSrv = nh.advertiseService("lock_node", &SemaphoreServer::lockNodeCb, this);
@@ -48,6 +50,11 @@ SemaphoreServer::SemaphoreServer() {
 }
 
 bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res) {
+    if (lockingOff) {
+        res.success = true;
+        return true;
+    }
+
     if (req.unlockAll) {
         nodesOccupancyLocks->unlockAllNodes(req.clientId);
         areaLocks->unlockAllNodes(req.clientId);

@@ -42,6 +42,7 @@ private:
     std::shared_ptr<NodesOccupancyContainer> nodesOccupancyLocks;
     std::shared_ptr<AreaBasedLocks> areaLocks;
     std::map<std::string, std::vector<Node>> clientsPaths;
+    bool lockingOff;
 
     bool lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res);
 
