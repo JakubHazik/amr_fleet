@@ -67,7 +67,11 @@ void ClientRepresentation::setClientInfo(const amr_msgs::ClientInfo &clientInfo)
     clientInfoMtx.unlock();
 
     if (newClientInfo) {
-        newClientInfo->set_value();
+        try {
+            newClientInfo->set_value();
+        } catch (std::future_error &e) {
+            // nothing
+        }
     }
 }
 

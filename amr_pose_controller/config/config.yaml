@@ -12,8 +12,8 @@ controller:
 semaphoreLockService: "/semaphore_server/lock_node"
 semaphoreSetupService: "/semaphore_server/setup_semaphore"
 cmdVelTopic: "/mobile_base/commands/velocity"
-waypointZone: 0.3           # [m]
+waypointZone: 0.25           # [m]
 
 semaphoreLockedNodes:
-  robotSize: 3
+  robotSize: 2
   robotSpeedForward: 1    # must be more that 0

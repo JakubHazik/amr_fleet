@@ -1,8 +1,7 @@
 <launch>
     <node pkg="amr_graph_generator" type="amr_graph_generator" name="graph_generator" output="screen">
 <!--        <param name="maxEdgeLength" value="0.7"/>-->
-<!--        <param name="dxfFilepath"-->
-<!--               value="/home/jakub/amr_ws/src/amr_fleet/amr_graph_generator/config/cesta_2.dxf"/>-->
+        <param name="dxfFilepath" value="$(find amr_graph_generator)/config/sim_world_1.dxf"/>
         <rosparam command="load" file="$(find amr_graph_generator)/config/config.yaml" />
     </node>
 

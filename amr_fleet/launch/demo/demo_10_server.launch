@@ -5,8 +5,6 @@
     <arg name="world" default="sim_world_1"/>
     <arg name="tasks_config_path" value="$(find amr_fleet)/launch/demo/tasks_demo_10.yaml"/>
     <arg name="gazebo_headless" value="true"/>
-    <arg name="spawn_robots" value="true"/>
-
 
     <!-- Gazebo simulation -->
     <include file="$(find amr_gazebo)/launch/world.launch">
@@ -33,98 +31,8 @@
     <!--    <include file="$(find amr_gui)/launch/gui.launch"/>-->
     <!-- Rviz -->
     <include file="$(find amr_fleet)/launch/rviz.launch"/>
-    <!--    Monitoring logger-->
+    <!--    Monitoring -->
     <include file="$(find amr_monitor)/launch/monitor_logger.launch"/>
+    <include file="$(find amr_monitor)/launch/monitor_visualizer.launch"/>
 
-    <group if="$(eval arg('spawn_robots'))">
-        <!-- spaw r1 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r1"/>
-            <arg name="x_pos" default="-0.73"/>
-            <arg name="y_pos" default="2.76"/>
-            <arg name="a_pos" default="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r2 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r2"/>
-            <arg name="x_pos" value="-0.76"/>
-            <arg name="y_pos" value="1.03"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r3 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r3"/>
-            <arg name="x_pos" value="-0.78"/>
-            <arg name="y_pos" value="-0.69"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r4 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r4"/>
-            <arg name="x_pos" value="-2.13"/>
-            <arg name="y_pos" value="-2.13"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r5 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r5"/>
-            <arg name="x_pos" value="-0.49"/>
-            <arg name="y_pos" value="-4.14"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r6 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r6"/>
-            <arg name="x_pos" value="2.57"/>
-            <arg name="y_pos" value="1.04"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r7 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r7"/>
-            <arg name="x_pos" value="4.32"/>
-            <arg name="y_pos" value="1.03"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r8 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r8"/>
-            <arg name="x_pos" value="4.32"/>
-            <arg name="y_pos" value="1.22"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r9 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r9"/>
-            <arg name="x_pos" value="4.32"/>
-            <arg name="y_pos" value="-2.42"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-
-        <!-- spaw r10 robot -->
-        <include file="$(find amr_fleet)/launch/client.launch">
-            <arg name="robot_id" value="r10"/>
-            <arg name="x_pos" value="6.23"/>
-            <arg name="y_pos" value="-0.43"/>
-            <arg name="a_pos" value="0"/>
-            <arg name="max_speed" value="0.5"/>
-        </include>
-    </group>
 </launch>

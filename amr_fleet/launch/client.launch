@@ -34,7 +34,7 @@
         <arg name="max_speed" value="$(arg max_speed)"/>
     </include>
 
-    <!-- Client pose control -->
+    <!-- Client monitoring  -->
     <include file="$(find amr_monitor)/launch/monitor_client.launch">
         <arg name="robot_id" value="$(arg robot_id)"/>
     </include>
