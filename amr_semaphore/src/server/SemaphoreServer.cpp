@@ -145,7 +145,10 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
 }
 
 rvt::colors getColorHash(const std::string& ownerId) {
-    return static_cast<rvt::colors>(std::hash<std::string>{}(ownerId) % 15);
+//    return static_cast<rvt::colors>(std::hash<std::string>{}(ownerId) % 15);
+
+    int robotId = std::stoi(std::string(ownerId.substr(1, std::string::npos)));
+    return static_cast<rvt::colors>(robotId);
 }
 
 void SemaphoreServer::visualizeNodesOccupancy() {

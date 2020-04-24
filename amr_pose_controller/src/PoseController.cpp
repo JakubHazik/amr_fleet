@@ -9,16 +9,6 @@
 #include <future>
 #include <sstream>
 
-void PoseController::printWaypoints() {
-    std::lock_guard<std::mutex> lk(waypointsMutex);
-    std::stringstream ss;
-    for (auto& point: waypoints) {
-        ss << point.uuid << " -> ";
-    }
-
-    ROS_INFO("Waypoints: %s", ss.str().c_str());
-}
-
 
 PoseController::PoseController(ros::NodeHandle& nh)
     :   performGoalAs(nh, "perform_goals", false) {
@@ -169,6 +159,8 @@ void PoseController::acGoalCb() {
     }
     waypointsMutex.unlock();
 
+    printWaypoints();
+
     // call it async due to service calls inside
     std::async(std::launch::async, &SemaphoreAutomaticClient::setNewPath, semaphoreClient, goal->waypoinst);
 }
@@ -229,4 +221,14 @@ bool PoseController::poseControlSwitchCb(std_srvs::SetBool::Request &req, std_sr
     }
     res.success = true;
     return true;
+}
+
+void PoseController::printWaypoints() {
+    std::lock_guard<std::mutex> lk(waypointsMutex);
+    std::stringstream ss;
+    for (auto& point: waypoints) {
+        ss << point.uuid << " -> ";
+    }
+
+    ROS_INFO("Waypoints: %s", ss.str().c_str());
 }

@@ -19,10 +19,11 @@ void monitorDataCb(const amr_msgs::ClientInfoPtr& msg) {
 void drawPoses() {
     visual_tools->deleteAllMarkers();
     for (auto& client: clientPoses) {
-        visual_tools->publishArrow(client.second, rvt::colors::GREEN, rvt::scales::LARGE, 0.15);
+        visual_tools->publishArrow(client.second, rvt::colors::GREEN, rvt::scales::XLARGE, 0.15);
         geometry_msgs::Pose textPose = client.second;
         textPose.position.x += 0.1;
-        visual_tools->publishText(textPose, client.first, rvt::colors::GREEN, rvt::scales::XXXLARGE);
+        visual_tools->publishText(textPose, client.first, rvt::colors::GREEN, rvt::scales::XXXLARGE, false);
+        visual_tools->publishCylinder(client.second, rvt::colors::TRANSLUCENT_DARK, 0.01, 0.35);
     }
     visual_tools->trigger();
 }
@@ -41,7 +42,7 @@ int main ( int argc, char **argv ) {
     visual_tools->deleteAllMarkers();
     visual_tools->enableBatchPublishing();
 
-    ros::Rate r(1);
+    ros::Rate r(2);
     while (ros::ok()) {
         ros::spinOnce();
         drawPoses();

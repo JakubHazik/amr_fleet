@@ -50,10 +50,10 @@ bool RosWrapper::planPathCallback(amr_msgs::PlanPath::Request& req, amr_msgs::Pl
 
     auto result = graphSearch->getPath(startNode, endNode);
 
-    std::cout<<"Result path:\n";
-    for (auto n: result) {
-        std::cout<<n.uuid<<" -> ";
-    }
+//    std::cout<<"Result path:\n";
+//    for (auto n: result) {
+//        std::cout<<n.uuid<<" -> ";
+//    }
     std::cout<<std::endl;
 
     res.pathWaypoints = nodes2msgPoints(result);
@@ -67,10 +67,10 @@ bool RosWrapper::planPathNodesCallback(amr_msgs::PlanPathNodes::Request& req, am
     auto endNode = graphSearch->getNode(req.endUuid);
     auto result = graphSearch->getPath(startNode, endNode);
 
-    std::cout<<"Result path:\n";
-    for (auto n: result) {
-        std::cout<<n.uuid<<" -> ";
-    }
+//    std::cout<<"Result path:\n";
+//    for (auto n: result) {
+//        std::cout<<n.uuid<<" -> ";
+//    }
     std::cout<<std::endl;
 
     res.pathWaypoints = nodes2msgPoints(result);
