@@ -202,6 +202,7 @@ void SemaphoreServer::lockAllBidirectionalNeighbours(const std::string& clientId
 
         // this is bidirectional node
         nodesOccupancyLocks->lockNode(clientId, bidNodes.front(), true);
+        areaLocks->lockNode(clientId, bidNodes.front());
         neighbors = graph.getNeighbors(bidNodes.front()).first;
         bidNodes.pop_front();
         bidNodes.insert(bidNodes.end(), neighbors.begin(), neighbors.end());
