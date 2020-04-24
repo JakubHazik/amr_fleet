@@ -18,6 +18,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
     nh.getParam("controller/rotationKp", config.rotationKp);
     nh.getParam("controller/controllerFrequency", config.controllerFrequency);
     nh.getParam("controller/maxLinearSpeed", config.maxLinearSpeed);
+    nh.getParam("controller/minLinearSpeed", config.minLinearSpeed);
     nh.getParam("controller/maxAngularSpeed", config.maxAngularSpeed);
     nh.getParam("controller/maxLinearAcceleration", config.maxLinearAcceleration);
     nh.getParam("controller/maxAngularAcceleration", config.maxAngularAcceleration);
@@ -110,8 +111,6 @@ PoseController::PoseController(ros::NodeHandle& nh)
                 case State::NO_POSE_CONTROL:
                     break;
             }
-
-            robotPoseReceived = false;
         } else {
             // stop the robot
             cmdVelPub.publish(controller->getStopAction());
@@ -119,6 +118,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
             ROS_WARN("No robot position received longer that %f [s].", 1 / config.controllerFrequency);
         }
 
+        robotPoseReceived = false;
         visualizeAndPublishCurrentGoal();
         rate.sleep();
     }
