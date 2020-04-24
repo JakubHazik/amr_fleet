@@ -7,11 +7,6 @@
     <arg name="tasks_config_path" value="$(find amr_fleet)/launch/demo/tasks_demo_10.yaml"/>
     <arg name="gazebo_headless" value="false"/>
 
-    <!-- Gazebo simulation -->
-    <include file="$(find amr_gazebo)/launch/world.launch">
-        <arg name="world" value="$(arg world)"/>
-        <arg name="headless" value="$(arg gazebo_headless)"/>
-    </include>
     <!-- Map -->
     <include file="$(find amr_fleet)/launch/map_server.launch">
         <arg name="map" value="$(arg map)"/>
