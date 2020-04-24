@@ -28,7 +28,8 @@ TaskManagerServer::TaskManagerServer() {
 
     ROS_INFO("Server task manager launched successful");
 
-    ros::AsyncSpinner spinner(4); // Use 4 threads
+    numRunningSrvCallbacks = 0;
+    ros::AsyncSpinner spinner(maxRunningSrvCallbacks + 1); // Use 4 threads
     spinner.start();
     ros::waitForShutdown();
 }
@@ -43,6 +44,14 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
         return true;
     }
 
+    // check max number of running callback threads
+    if (numRunningSrvCallbacks >= maxRunningSrvCallbacks) {
+        res.task.timeout = 1;
+        res.task.taskId.id = amr_msgs::TaskId::DO_NOTHING;
+        return true;
+    }
+
+    numRunningSrvCallbacks++;
     client->waitForNewClientInfo();
     auto task = client->getNewTask();
 
@@ -60,6 +69,7 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
             if (planPathSrvClient.call(srv)) {
                 if (srv.response.pathWaypoints.empty()) {
                     res.error.code = amr_msgs::GetTaskErrorCodes::PLANNING_FAILED;
+                    numRunningSrvCallbacks--;
                     return true;
                 }
                 // send info about planned path for client
@@ -90,8 +100,8 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
         case amr_msgs::TaskId::DO_NOTHING:
             res.task.timeout = task.timeout;
             res.task.taskId.id = task.taskId.id;
-            return true;
     }
+    numRunningSrvCallbacks--;
     return true;
 }
 

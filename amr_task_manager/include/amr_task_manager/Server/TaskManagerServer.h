@@ -31,7 +31,8 @@ private:
     ros::Publisher clientPathsPub;
     ros::Subscriber clientInfoSub;
 
-
+    std::atomic_int numRunningSrvCallbacks;
+    const int maxRunningSrvCallbacks = 10;
     RobotClients clients;
 
     bool getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::GetTask::Response& res);
