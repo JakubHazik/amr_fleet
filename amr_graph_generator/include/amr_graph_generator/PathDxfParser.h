@@ -90,6 +90,7 @@ private:
     std::map<std::string, Block> blocks;
     std::vector<DL_ImageData> images;
     std::vector<std::vector<Node>> sampledPathNodes;
+    double graphLength = 0;
 };
 
 

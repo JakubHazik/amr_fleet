@@ -7,6 +7,7 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <ros/ros.h>
 
 
 PathDxfParser::PathDxfParser(const std::string& dxfFilepath, double maxEdgeLenght)
@@ -138,6 +139,7 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d &start,
     std::vector<Node> samplePoints;
 
     double length = std::abs((end - start).norm());
+    graphLength += length;
     auto splits = static_cast<unsigned int>(std::ceil(length / maxEdgeLength));
 
     Eigen::Vector2d increment = (end - start) / splits;
@@ -217,6 +219,7 @@ std::vector<Node> PathDxfParser::sampleArc(const DL_ArcData& arc) {
 //    }
 
     double arcLength = std::abs((angleEnd - angleStart) * arc.radius);
+    graphLength += arcLength;
     auto splits = static_cast<unsigned int>(std::ceil(arcLength / maxEdgeLength));
     double angleIncrement = (arcLength / splits) / arc.radius;
 
@@ -357,6 +360,9 @@ std::vector<Node> PathDxfParser::generateGraph(double offsetX, double offsetY) {
         nodes.back().posX += offsetX;
         nodes.back().posY += offsetY;
     }
+
+    ROS_INFO("Total graph length: %f", graphLength);
+    ROS_INFO("Total number of nodes: %ld", nodes.size());
     return nodes;
 }
 
