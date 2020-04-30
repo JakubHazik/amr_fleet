@@ -7,6 +7,7 @@
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <ros/ros.h>
 
 
 PathDxfParser::PathDxfParser(const std::string& dxfFilepath, double maxEdgeLenght)
@@ -138,6 +139,7 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d &start,
     std::vector<Node> samplePoints;
 
     double length = std::abs((end - start).norm());
+    graphLength += length;
     auto splits = static_cast<unsigned int>(std::ceil(length / maxEdgeLength));
 
     Eigen::Vector2d increment = (end - start) / splits;
@@ -146,9 +148,9 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d &start,
     for (unsigned int i = 0; i < splits; i++) {
         Node n;
         n.uuid = addNodeCounter;
-        n.bidirectional = bidirectional;
-        n.x = current[0];
-        n.y = current[1];
+        n.isBidirectional = bidirectional;
+        n.posX = current[0];
+        n.posY = current[1];
         samplePoints.push_back(n);
 
         // add successor for the previous node
@@ -168,9 +170,9 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d &start,
         // add end node, due to precision
         Node n;
         n.uuid = addNodeCounter;
-        n.bidirectional = bidirectional;
-        n.x = end[0];
-        n.y = end[1];
+        n.isBidirectional = bidirectional;
+        n.posX = end[0];
+        n.posY = end[1];
         samplePoints.back().successors.push_back(addNodeCounter);
         if (bidirectional) {
             n.successors.push_back(addNodeCounter - 1);
@@ -181,9 +183,9 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d &start,
         // no points has been sampled, add only start and end points
         Node nEnd;
         nEnd.uuid = addNodeCounter;
-        nEnd.bidirectional = bidirectional;
-        nEnd.x = end[0];
-        nEnd.y = end[1];
+        nEnd.isBidirectional = bidirectional;
+        nEnd.posX = end[0];
+        nEnd.posY = end[1];
         if (bidirectional) {
             nEnd.successors.push_back(addNodeCounter + 1);
         }
@@ -192,9 +194,9 @@ std::vector<Node> PathDxfParser::sampleLine(const Eigen::Vector2d &start,
 
         Node nStart;
         nStart.uuid = addNodeCounter;
-        nStart.bidirectional = bidirectional;
-        nStart.x = start[0];
-        nStart.y = start[1];
+        nStart.isBidirectional = bidirectional;
+        nStart.posX = start[0];
+        nStart.posY = start[1];
         nStart.successors.push_back(addNodeCounter -1);
         samplePoints.push_back(nStart);
         addNodeCounter++;
@@ -217,6 +219,7 @@ std::vector<Node> PathDxfParser::sampleArc(const DL_ArcData& arc) {
 //    }
 
     double arcLength = std::abs((angleEnd - angleStart) * arc.radius);
+    graphLength += arcLength;
     auto splits = static_cast<unsigned int>(std::ceil(arcLength / maxEdgeLength));
     double angleIncrement = (arcLength / splits) / arc.radius;
 
@@ -224,8 +227,8 @@ std::vector<Node> PathDxfParser::sampleArc(const DL_ArcData& arc) {
         double angle = angleEnd - i * angleIncrement;
         Node n;
         n.uuid = addNodeCounter;
-        n.x = arc.cx + arc.radius * cos(angle);
-        n.y = arc.cy + arc.radius * sin(angle);
+        n.posX = arc.cx + arc.radius * cos(angle);
+        n.posY = arc.cy + arc.radius * sin(angle);
         samplePoints.push_back(n);
 
         // add successor for the previous node
@@ -238,23 +241,23 @@ std::vector<Node> PathDxfParser::sampleArc(const DL_ArcData& arc) {
     if (!samplePoints.empty()) {
         Node n;
         n.uuid = addNodeCounter;
-        n.x = arc.cx + arc.radius * cos(angleStart);
-        n.y = arc.cy + arc.radius * sin(angleStart);
+        n.posX = arc.cx + arc.radius * cos(angleStart);
+        n.posY = arc.cy + arc.radius * sin(angleStart);
         samplePoints.back().successors.push_back(addNodeCounter);
         samplePoints.push_back(n);
         addNodeCounter++;
     } else {
         Node nEnd;
         nEnd.uuid = addNodeCounter;
-        nEnd.x = arc.cx + arc.radius * cos(angleEnd);
-        nEnd.y = arc.cy + arc.radius * sin(angleEnd);
+        nEnd.posX = arc.cx + arc.radius * cos(angleEnd);
+        nEnd.posY = arc.cy + arc.radius * sin(angleEnd);
         samplePoints.push_back(nEnd);
         addNodeCounter++;
 
         Node nStart;
         nStart.uuid = addNodeCounter;
-        nStart.x = arc.cx + arc.radius * cos(angleStart);
-        nStart.y = arc.cy + arc.radius * sin(angleStart);
+        nStart.posX = arc.cx + arc.radius * cos(angleStart);
+        nStart.posY = arc.cy + arc.radius * sin(angleStart);
         nStart.successors.push_back(addNodeCounter -1);
         samplePoints.push_back(nStart);
         addNodeCounter++;
@@ -264,7 +267,7 @@ std::vector<Node> PathDxfParser::sampleArc(const DL_ArcData& arc) {
 }
 
 bool PathDxfParser::nodePosesAreEqual(const Node& n1, const Node& n2) {
-    return pointPositionsAreEqual(n1.x, n1.y, n2.x, n2.y);
+    return pointPositionsAreEqual(n1.posX, n1.posY, n2.posX, n2.posY);
 }
 
 bool PathDxfParser::pointPositionsAreEqual(double x1, double y1, double x2, double y2) {
@@ -301,85 +304,65 @@ void PathDxfParser::assertPathDirection(const std::pair<bool, bool>& direction, 
     }
 }
 
-std::vector<Node> PathDxfParser::generateGraph() {
+std::map<unsigned int, Node>::iterator PathDxfParser::findSameNodePosition(
+        std::map<unsigned int, Node>& graph,
+        const Node& node) {
+    for (auto nodeIt = graph.begin(); nodeIt != graph.end(); nodeIt++) {
+        if (nodePosesAreEqual(nodeIt->second, node)) {
+            return nodeIt;
+        }
+    }
 
-    // unify first/end Nodes ids
-    for (auto currentSegmentIt = sampledPathNodes.begin(); currentSegmentIt < sampledPathNodes.end(); currentSegmentIt++) {
-        for (auto segmentInsideIt = currentSegmentIt + 1; segmentInsideIt < sampledPathNodes.end(); segmentInsideIt++) {
-            // unify end Nodes
-            if (nodePosesAreEqual(currentSegmentIt->back(), segmentInsideIt->back())) {
-                auto nodeToBeRemoved = segmentInsideIt->back();
+    return graph.end();
+}
 
-                currentSegmentIt->back().successors.insert(
-                        currentSegmentIt->back().successors.end(),
-                        segmentInsideIt->back().successors.begin(),
-                        segmentInsideIt->back().successors.end());      // inherit successors
+std::vector<Node> PathDxfParser::generateGraph(double offsetX, double offsetY) {
+    std::map<unsigned int, Node> graph;
+    std::map<unsigned int, Node> mergedNodes;
 
-                currentSegmentIt->back().bidirectional = nodeToBeRemoved.bidirectional || currentSegmentIt->back().bidirectional;  // inherit direction
-                segmentInsideIt->erase(segmentInsideIt->end());     // remove last node in vector
+    for (const auto& segment: sampledPathNodes) {
+        for (const auto& node : segment) {
+            if (node.uuid == segment.front().uuid || node.uuid == segment.back().uuid) {
+                auto sameNode = findSameNodePosition(graph, node);
+                if (sameNode == graph.end()) {
+                    // same position has not been found
+                    graph[node.uuid] = node;
+                } else {
+                    // add it to merged nodes map
+                    mergedNodes[node.uuid] = sameNode->second;
+                    sameNode->second.isBidirectional = sameNode->second.isBidirectional || node.isBidirectional;
+                    sameNode->second.successors.insert(sameNode->second.successors.end(),
+                                                       node.successors.begin(),
+                                                       node.successors.end());
 
-                removeElemByValue(segmentInsideIt->back().successors, nodeToBeRemoved.uuid); // remove target successor
-                segmentInsideIt->back().successors.push_back(currentSegmentIt->back().uuid);    // change successor
-            }
-
-            // unify first nodes
-            if (nodePosesAreEqual(currentSegmentIt->front(), segmentInsideIt->front())) {
-                auto nodeToBeRemoved = segmentInsideIt->front();
-
-                // inherit predecessors
-                for (auto nextSucc: segmentInsideIt->at(1).successors) {
-                    if (nodeToBeRemoved.uuid == nextSucc) {
-                        if (removeElemByValue(segmentInsideIt->at(1).successors, nodeToBeRemoved.uuid)) {
-                            segmentInsideIt->at(1).successors.push_back(currentSegmentIt->front().uuid);
-                        }
-                    }
                 }
-
-                currentSegmentIt->front().successors.insert(
-                        currentSegmentIt->front().successors.end(),
-                        segmentInsideIt->front().successors.begin(),
-                        segmentInsideIt->front().successors.end());      // inherit successors
-                currentSegmentIt->front().bidirectional = nodeToBeRemoved.bidirectional || currentSegmentIt->front().bidirectional;  // inherit direction
-                segmentInsideIt->erase(segmentInsideIt->begin());   // remove first element
+            } else {
+                graph[node.uuid] = node;
             }
         }
     }
 
-    // chain Nodes segments
-    // if a end and first Nodes are the same, remove first node and add successor for the end Node
-    for (auto segmentEndIt = sampledPathNodes.begin(); segmentEndIt < sampledPathNodes.end(); segmentEndIt++) {
-        for (auto segmentFrontIt = sampledPathNodes.begin(); segmentFrontIt < sampledPathNodes.end(); segmentFrontIt++) {
-            if (nodePosesAreEqual(segmentEndIt->back(), segmentFrontIt->front())) {
-                auto nodeToBeRemoved = segmentFrontIt->front();
+    for (auto& node: graph) {
+        for (auto& successor: node.second.successors) {
+            Node suc;
+            suc.uuid = successor;
 
-                // inherit direction
-                segmentEndIt->back().bidirectional = nodeToBeRemoved.bidirectional || segmentEndIt->back().bidirectional;
-
-                // inherit predecessors
-                for (auto nextSucc: segmentFrontIt->at(1).successors) {
-                    if (nodeToBeRemoved.uuid == nextSucc) {
-                        if (removeElemByValue(segmentFrontIt->at(1).successors, nodeToBeRemoved.uuid)) {
-                            segmentFrontIt->at(1).successors.push_back(segmentEndIt->back().uuid);
-                        }
-                    }
-                }
-
-                // inherit successors
-                segmentEndIt->back().successors.insert(
-                        segmentEndIt->back().successors.end(),
-                        segmentFrontIt->front().successors.begin(),
-                        segmentFrontIt->front().successors.end());
-
-                segmentFrontIt->erase(segmentFrontIt->begin());         // remove useless Node
+            auto foundIt = mergedNodes.find(successor);
+            if (foundIt != mergedNodes.end()) {
+                successor = foundIt->second.uuid;
             }
         }
     }
 
-    // merge all Nodes from all segments to one vector
     std::vector<Node> nodes;
-    for (const std::vector<Node>& sampledPath : sampledPathNodes) {
-        nodes.insert(nodes.end(), sampledPath.begin(), sampledPath.end());
+    for (const auto& graphNodes: graph) {
+        nodes.push_back(graphNodes.second);
+        nodes.back().posX += offsetX;
+        nodes.back().posY += offsetY;
     }
+
+    ROS_INFO("Total graph length: %f", graphLength);
+    ROS_INFO("Total number of nodes: %ld", nodes.size());
     return nodes;
 }
 

@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="amr_monitor" type="monitor_logger" name="monitor_logger" output="screen">
+    </node>
+</launch>

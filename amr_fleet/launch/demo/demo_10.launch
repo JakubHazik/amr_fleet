@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+    <include file="$(find amr_fleet)/launch/demo/demo_10_server.launch">
+    </include>
+
+    <include file="$(find amr_fleet)/launch/demo/demo_10_robots.launch">
+    </include>
+</launch>

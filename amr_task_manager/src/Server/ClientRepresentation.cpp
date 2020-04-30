@@ -5,8 +5,8 @@
 #include <amr_task_manager/Server/ClientRepresentation.h>
 
 
-ClientRepresentation::ClientRepresentation(const std::string &clientName)
-        :   clientName(clientName) {
+ClientRepresentation::ClientRepresentation(const std::string &clientName, bool runTasksPeriodically)
+        :   clientName(clientName), runTasksPeriodically(runTasksPeriodically) {
     ros::NodeHandle nh("/");
     resetTaskSrv = nh.serviceClient<amr_msgs::ResetTask>(clientName + "/task_manager_client/reset_task");
 }
@@ -35,6 +35,11 @@ amr_msgs::Task ClientRepresentation::getNewTask() {
     std::lock_guard<std::mutex> lck(tasksContainerMtx);
     currentPerformingTask = tasks.front();
     tasks.pop_front();
+
+    if (runTasksPeriodically) {
+        tasks.push_back(currentPerformingTask);
+    }
+
     return currentPerformingTask;
 }
 
@@ -62,7 +67,11 @@ void ClientRepresentation::setClientInfo(const amr_msgs::ClientInfo &clientInfo)
     clientInfoMtx.unlock();
 
     if (newClientInfo) {
-        newClientInfo->set_value();
+        try {
+            newClientInfo->set_value();
+        } catch (std::future_error &e) {
+            // nothing
+        }
     }
 }
 

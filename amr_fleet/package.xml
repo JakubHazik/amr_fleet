@@ -51,6 +51,8 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>map_server</depend>
   <depend>amcl</depend>
+  <depend>gmapping</depend>
+
 
 
   <!-- The export tag contains other, unspecified, tags -->

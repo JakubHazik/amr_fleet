@@ -3,7 +3,7 @@
 * Convert your ros map representation (.pgm) to .png image file. Notice image width (px).
 * Check your map metadata (map.yaml). Notice origin position and map resolution
 * Insert your .png image to CAD. As insertion position use map origin (from map metadata). Scale image, 
-  the image width in CAD should be as result of `image_width / map_resolution`
+  the image width [m] in CAD should be as result of `image_width_px * map_resolution`
   
 ##### Drawing rules
 * Create a line as path (path line) with default color. Arc can be also used.

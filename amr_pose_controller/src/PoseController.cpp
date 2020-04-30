@@ -7,6 +7,7 @@
 #include <tf/tf.h>
 #include <tf/transform_datatypes.h>
 #include <future>
+#include <sstream>
 
 
 PoseController::PoseController(ros::NodeHandle& nh)
@@ -17,6 +18,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
     nh.getParam("controller/rotationKp", config.rotationKp);
     nh.getParam("controller/controllerFrequency", config.controllerFrequency);
     nh.getParam("controller/maxLinearSpeed", config.maxLinearSpeed);
+    nh.getParam("controller/minLinearSpeed", config.minLinearSpeed);
     nh.getParam("controller/maxAngularSpeed", config.maxAngularSpeed);
     nh.getParam("controller/maxLinearAcceleration", config.maxLinearAcceleration);
     nh.getParam("controller/maxAngularAcceleration", config.maxAngularAcceleration);
@@ -37,12 +39,14 @@ PoseController::PoseController(ros::NodeHandle& nh)
     performGoalAs.start();
 
     // init semaphore client
-    std::string semaphoreService;
-    nh.getParam("semaphoreService", semaphoreService);
+    std::string semaphoreLockService;
+    nh.getParam("semaphoreLockService", semaphoreLockService);
+    std::string semaphoreSetupService;
+    nh.getParam("semaphoreSetupService", semaphoreSetupService);
     std::map<std::string, int> semaphoreLockedNodesParam;
     nh.getParam("semaphoreLockedNodes", semaphoreLockedNodesParam);
-    semaphoreClient = std::make_shared<SemaphoreAutomaticClient>(semaphoreService,
-            semaphoreLockedNodesParam["robotSize"], semaphoreLockedNodesParam["robotSpeedForward"]);
+    semaphoreClient = std::make_shared<SemaphoreAutomaticClient>(semaphoreLockService, semaphoreSetupService,
+                         semaphoreLockedNodesParam["robotSize"], semaphoreLockedNodesParam["robotSpeedForward"]);
 
     visual_tools.reset(new rvt::RvizVisualTools("map", "amr_current_goal"));
     visual_tools->loadMarkerPub(false, true);  // create publisher before waiting
@@ -50,7 +54,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
     visual_tools->enableBatchPublishing();
 
 
-    usleep(1000 * 1000 * 6);
+    usleep(1000 * 1000 * 1);
     ros::Rate rate(config.controllerFrequency);
     while(ros::ok()) {
         ros::spinOnce();
@@ -65,7 +69,8 @@ PoseController::PoseController(ros::NodeHandle& nh)
                     state = State::GET_NEW_GOAL;
                     break;
                 }
-                case State::GET_NEW_GOAL:
+                case State::GET_NEW_GOAL: {
+                    std::lock_guard<std::mutex> lk(waypointsMutex);
                     cmdVelPub.publish(controller->getControllerAction());
                     if (!waypoints.empty() && semaphoreClient->isNodeLocked(waypoints.front())) {
                         // set new required goal
@@ -73,14 +78,16 @@ PoseController::PoseController(ros::NodeHandle& nh)
                         semaphoreClient->setNodeAsCurrentGoal(waypoints.front());
                         controller->setRequiredPose(currentRequiredGoal.pose);
                         currentGoalPub.publish(currentRequiredGoal);
-                        waypoints.pop();
+                        waypoints.pop_front();
                         state = State::PERFORMING_GOAL;
                     }
-                    break;
-                case State::PERFORMING_GOAL:
+                }
+                break;
+                case State::PERFORMING_GOAL: {
                     cmdVelPub.publish(controller->getControllerAction());
                     publishAsFeedback();
 
+                    std::lock_guard<std::mutex> lk(waypointsMutex);
                     // detect last goal zone
                     if (waypoints.empty() && controller->isZoneAchieved(config.goalDeadZone)) {
 //                        ROS_INFO("Last goal zone achieved");
@@ -99,13 +106,11 @@ PoseController::PoseController(ros::NodeHandle& nh)
                         state = State::GET_NEW_GOAL;
                         break;
                     }
-
-                    break;
+                }
+                break;
                 case State::NO_POSE_CONTROL:
                     break;
             }
-
-            robotPoseReceived = false;
         } else {
             // stop the robot
             cmdVelPub.publish(controller->getStopAction());
@@ -113,6 +118,7 @@ PoseController::PoseController(ros::NodeHandle& nh)
             ROS_WARN("No robot position received longer that %f [s].", 1 / config.controllerFrequency);
         }
 
+        robotPoseReceived = false;
         visualizeAndPublishCurrentGoal();
         rate.sleep();
     }
@@ -144,21 +150,26 @@ void PoseController::acGoalCb() {
     ROS_INFO("New pose control goal received");
     auto goal = performGoalAs.acceptNewGoal();
 
+    waypointsMutex.lock();
     // clear waypoints queue
-    std::queue<amr_msgs::Point> empty;
-    waypoints.swap(empty);
-
+    waypoints = {};
     // fill in queue
     for (const auto& point: goal->waypoinst) {
-        waypoints.push(point);
+        waypoints.push_back(point);
     }
+    waypointsMutex.unlock();
 
-    semaphoreClient->setNewPath(goal->waypoinst);
-//    state = State::GET_NEW_GOAL;
+    printWaypoints();
+
+    // call it async due to service calls inside
+    std::async(std::launch::async, &SemaphoreAutomaticClient::setNewPath, semaphoreClient, goal->waypoinst);
 }
 
 void PoseController::acCancelCb() {
-    waypoints = std::queue<amr_msgs::Point>();  //clear waypoints queue
+    ROS_INFO("Cancel goal");
+    std::lock_guard<std::mutex> lk(waypointsMutex);
+    waypoints = {};  //clear waypoints queue
+    publishAsResult();
     state = State::GET_NEW_GOAL;
 }
 
@@ -210,4 +221,14 @@ bool PoseController::poseControlSwitchCb(std_srvs::SetBool::Request &req, std_sr
     }
     res.success = true;
     return true;
+}
+
+void PoseController::printWaypoints() {
+    std::lock_guard<std::mutex> lk(waypointsMutex);
+    std::stringstream ss;
+    for (auto& point: waypoints) {
+        ss << point.uuid << " -> ";
+    }
+
+    ROS_INFO("Waypoints: %s", ss.str().c_str());
 }

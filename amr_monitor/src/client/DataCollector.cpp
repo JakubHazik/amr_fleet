@@ -23,7 +23,7 @@ DataCollector::DataCollector() {
         clientInfo.clientId.erase(0, 1);
     }
 
-    ros::Rate r(1);
+    ros::Rate r(2);
     while (ros::ok()) {
         ros::spinOnce();
         if (readRobotPoseTf()) {

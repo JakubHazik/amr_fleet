@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="map" default="world2" />
+    <arg name="map" default="sim_world_1" />
 
     <node pkg="map_server" type="map_server" name="map_server" args="$(find amr_fleet)/maps/$(arg map)/map.yaml">
         <param name="frame_id" value="/map"/>

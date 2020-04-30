@@ -44,7 +44,7 @@ public:
 
     explicit PathDxfParser(const std::string& dxfFilepath, double edgeLength);
 
-    std::vector<Node> generateGraph();
+    std::vector<Node> generateGraph(double offsetX, double offsetY);
 
 
 private:
@@ -78,6 +78,8 @@ private:
 
     bool pointPositionsAreEqual(double x1, double y1, double x2, double y2);
 
+    std::map<unsigned int, Node>::iterator findSameNodePosition(std::map<unsigned int, Node>& graph, const Node& node);
+
     template<typename T>
     bool removeElemByValue(std::vector<T>& v, T value);
 
@@ -88,6 +90,7 @@ private:
     std::map<std::string, Block> blocks;
     std::vector<DL_ImageData> images;
     std::vector<std::vector<Node>> sampledPathNodes;
+    double graphLength = 0;
 };
 
 

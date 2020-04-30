@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="world" default="sim_world_1_collisions_off"/>
+    <arg name="map" default="sim_world_1"/>
+    <arg name="tasks_config_path" value="$(find amr_fleet)/launch/demo/tasks_demo_10.yaml"/>
+    <arg name="gazebo_headless" value="false"/>
+
+    <!-- Map -->
+    <include file="$(find amr_fleet)/launch/map_server.launch">
+        <arg name="map" value="$(arg map)"/>
+    </include>
+    <!-- Graph generator -->
+    <include file="$(find amr_graph_generator)/launch/graph_generator.launch">
+        <arg name="world" value="$(arg map)"/>
+    </include>
+    <!-- Planner -->
+    <include file="$(find amr_planner)/launch/planner.launch"/>
+    <!-- Task manager -->
+    <include file="$(find amr_task_manager)/launch/task_manager_server.launch">
+        <arg name="tasks_config_path" value="$(arg tasks_config_path)"/>
+    </include>
+    <!-- Semaphore server -->
+    <include file="$(find amr_semaphore)/launch/semaphore_server.launch"/>
+    <!-- Fleet control gui -->
+    <!--    <include file="$(find amr_gui)/launch/gui.launch"/>-->
+    <!-- Rviz -->
+    <include file="$(find amr_fleet)/launch/rviz.launch"/>
+    <!--    Monitoring -->
+    <include file="$(find amr_monitor)/launch/monitor_logger.launch"/>
+    <include file="$(find amr_monitor)/launch/monitor_visualizer.launch"/>
+
+</launch>

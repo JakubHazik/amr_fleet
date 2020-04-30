@@ -1,5 +1,8 @@
 <launch>
+    <arg name="tasks_config_path" default="$(find amr_task_manager)/config/TasksConfiguration.yaml"/>
+
     <node pkg="amr_task_manager" type="task_manager_server" name="task_manager_server" output="screen">
         <rosparam command="load" file="$(find amr_task_manager)/config/ServerConfig.yaml" />
+        <param name="tasksConfigurationFile" value="$(arg tasks_config_path)"/>
     </node>
 </launch>

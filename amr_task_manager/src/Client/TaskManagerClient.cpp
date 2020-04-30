@@ -11,7 +11,13 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
 
     std::string getTaskService;
     nh.getParam("getTaskService", getTaskService);
-    nh.getParam("client_id", clientId);
+//    nh.getParam("client_id", clientId);
+
+    clientId = ros::this_node::getNamespace();
+    // remove slash from client namespace
+    if (!clientId.empty() && clientId[0] == '/') {
+        clientId.erase(0, 1);
+    }
 
     resetTaskSrvServer = nh.advertiseService("reset_task", &TaskManagerClient::resetTaskServiceCb, this);
     getTaskSrvClient = nh.serviceClient<amr_msgs::GetTask>(getTaskService);
@@ -22,7 +28,7 @@ TaskManagerClient::TaskManagerClient(ros::NodeHandle& nh)
 
     // wait for action server
     if (!performWaypointsAc.waitForServer(ros::Duration(5))) {
-        ROS_ERROR("No action server presented");
+        ROS_ERROR("No action server for waypoints performing presented");
         ros::shutdown();
     }
 
@@ -112,7 +118,6 @@ bool TaskManagerClient::performTask(amr_msgs::Task& task) {
 
     switch (task.taskId.id) {
         case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
-            performWaypointsAc.cancelAllGoals();
             // create goal
             amr_msgs::PerformGoalsGoal goal;
             goal.waypoinst = task.waypoints;

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="robot_id" default="r1"/>
+    <arg name="x_pos" default="1.8"/>
+    <arg name="y_pos" default="-0.7"/>
+    <arg name="a_pos" default="3.14"/>
+    <arg name="max_speed" default="0.5"/>
+    <arg name="locked_nodes_forward" default="1"/>
+
+    <include file="$(find virtual_robot)/launch/virtual_robot.launch">
+        <arg name="robot_id" value="$(arg robot_id)"/>
+        <arg name="x_pos" value="$(arg x_pos)"/>
+        <arg name="y_pos" value="$(arg y_pos)"/>
+        <arg name="a_pos" value="$(arg a_pos)"/>
+    </include>
+
+    <!-- Client task manager -->
+    <include file="$(find amr_task_manager)/launch/task_manager_client.launch">
+        <arg name="robot_id" value="$(arg robot_id)"/>
+    </include>
+
+    <!-- Client pose control -->
+    <include file="$(find amr_pose_controller)/launch/pose_controller.launch">
+        <arg name="robot_id" value="$(arg robot_id)"/>
+        <arg name="max_speed" value="$(arg max_speed)"/>
+        <arg name="locked_nodes_forward" value="$(arg locked_nodes_forward)"/>
+    </include>
+
+    <!-- Client monitoring  -->
+    <include file="$(find amr_monitor)/launch/monitor_client.launch">
+        <arg name="robot_id" value="$(arg robot_id)"/>
+    </include>
+
+</launch>

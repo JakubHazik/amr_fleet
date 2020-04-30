@@ -6,21 +6,35 @@
 #uint32 DO_NOTHING = 4
 #uint32 TELEOPERATION = 5
 
+runTasksPeriodically: true
+
 clients:
     - r1:
-        - task:
-            taskId: 1
-            goalId: 64
 #        - task:
-#            taskId: 4
-#            timeout: 0
+#            taskId: 1
+#            goalId: 62
+#        - task:
+#            taskId: 1
+#            goalId: 25
+
         - task:
             taskId: 1
-            goalId: 4
+            goalId: 22
+
+        - task:
+            taskId: 1
+            goalId: 53
+        - task:
+            taskId: 1
+            goalId: 33
     - r2:
         - task:
             taskId: 1
-            goalId: 30
+            goalId: 62
+        - task:
+            taskId: 1
+            goalId: 66
+
         - task:
             taskId: 4
             timeout: 5

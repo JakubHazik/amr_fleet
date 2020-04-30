@@ -1,17 +1,18 @@
 controller:
-  linearKp: 1
-  rotationKp: 0.9
-  controllerFrequency: 10   #[1/s]
-  maxLinearSpeed: 0.7         # [m/s]
+  linearKp: 2
+  rotationKp: 15
+  controllerFrequency: 15   #[1/s]
+  maxLinearSpeed: 0.5      # [m/s]
   maxAngularSpeed: 2         # [m/s]
   minLinearSpeed: 0       # [m/s]
-  maxLinearAcceleration: 0.1 # [m/s^2]
-  maxAngularAcceleration: 0.5
+  maxLinearAcceleration: 0.2 # [m/s^2]
+  maxAngularAcceleration: 1.5
   goalDeadZone: 0.1              # [m]
 
-semaphoreService: "/semaphore_server/lock_node"
+semaphoreLockService: "/semaphore_server/lock_node"
+semaphoreSetupService: "/semaphore_server/setup_semaphore"
 cmdVelTopic: "/mobile_base/commands/velocity"
-waypointZone: 0.3           # [m]
+waypointZone: 0.25           # [m]
 
 semaphoreLockedNodes:
   robotSize: 3

@@ -1,10 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-
-    <rosparam command="load" file="$(find amr_fleet)/config/server_config.yaml" />
-
     <!-- Gazebo simulation -->
-    <include file="$(find amr_fleet)/launch/simulation/gazebo_simulation.launch"/>
+    <include file="$(find amr_gazebo)/launch/world.launch"/>
 
     <!-- Map -->
     <include file="$(find amr_fleet)/launch/map_server.launch"/>

@@ -1,5 +1,8 @@
 <launch>
+    <arg name="world" default="sim_world_1"/>
+
     <node pkg="amr_graph_generator" type="amr_graph_generator" name="graph_generator" output="screen">
         <rosparam command="load" file="$(find amr_graph_generator)/config/config.yaml" />
+        <param name="dxfFilepath" value="$(find amr_graph_generator)/config/$(arg world).dxf"/>
     </node>
 </launch>

@@ -7,7 +7,6 @@
 #include <amr_msgs/Graph.h>
 #include <amr_graph_generator/GraphVisualizer.h>
 
-
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "graph_generator"); /// initializes the ros node with default name
@@ -19,13 +18,15 @@ int main(int argc, char **argv) {
 
     n.getParam("maxEdgeLength", maxEdgeLength);
     n.getParam("dxfFilepath", dxfFilepath);
+    std::map<std::string, double> graphOffset;
+    n.getParam("graphOffset", graphOffset);
 
     ROS_INFO_STREAM("Dxf input file: " + dxfFilepath);
 
     ros::Publisher graphPublisher = n.advertise<amr_msgs::Graph>("graph", 1, true);
 
     PathDxfParser pathParser(dxfFilepath, maxEdgeLength);
-    auto graph = pathParser.generateGraph();
+    auto graph = pathParser.generateGraph(graphOffset["x"], graphOffset["y"]);
 
     amr_msgs::Graph graphMsg;
     graphMsg.header.stamp = ros::Time();
@@ -34,10 +35,10 @@ int main(int argc, char **argv) {
     for (const auto& node: graph) {
         amr_msgs::Node nMsg;
         nMsg.point.uuid = node.uuid;
-        nMsg.point.pose.x = node.x;
-        nMsg.point.pose.y = node.y;
+        nMsg.point.pose.x = node.posX;
+        nMsg.point.pose.y = node.posY;
         nMsg.successors = node.successors;
-        nMsg.isBidirectional = node.bidirectional;
+        nMsg.isBidirectional = node.isBidirectional;
         graphMsg.nodes.push_back(nMsg);
     }
 

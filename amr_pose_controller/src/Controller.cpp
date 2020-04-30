@@ -98,7 +98,7 @@ double Controller::getAngleError() {
 
     double goalAngle = atan2(requiredPose.y - currentPose.y, requiredPose.x - currentPose.x);
     double robotAngle = currentPose.theta;
-    double result;
+    double result = 0;
 
     if (signum(robotAngle) == signum(goalAngle)) {
         // angles are in the one half plane
@@ -122,13 +122,15 @@ double Controller::getAngleError() {
 
 
 double Controller::getDistanceError() {
-
     return sqrt(sqr(currentPose.x - requiredPose.x) + sqr(currentPose.y - requiredPose.y));
 }
 
 geometry_msgs::Twist Controller::getStopAction() {
     // todo ramp speed down
-    return { };
+    geometry_msgs::Twist stop;
+    stop.linear.x = 0.0;
+    stop.angular.z = 0.0;
+    return stop;
 }
 
 bool Controller::isZoneAchieved(double zoneDistance) {

@@ -13,12 +13,9 @@ TaskManagerServer::TaskManagerServer() {
     ros::NodeHandle nh("~");
 
     // read tasks
-    boost::filesystem::path packagePath(ros::package::getPath("amr_task_manager"));
-    std::string tasksConfigFile;
-    nh.getParam("tasksConfigurationFile", tasksConfigFile);
-    boost::filesystem::path packageRelativePath(tasksConfigFile);
-    auto fullPath = packagePath / packageRelativePath;
-    parseTasks(fullPath.string());
+    std::string tasksConfigFilePath;
+    nh.getParam("tasksConfigurationFile", tasksConfigFilePath);
+    parseTasks(tasksConfigFilePath);
 
     std::string planPathService;
     nh.getParam("planPathService", planPathService);
@@ -31,7 +28,8 @@ TaskManagerServer::TaskManagerServer() {
 
     ROS_INFO("Server task manager launched successful");
 
-    ros::AsyncSpinner spinner(4); // Use 4 threads
+    numRunningSrvCallbacks = 0;
+    ros::AsyncSpinner spinner(maxRunningSrvCallbacks + 1); // Use 4 threads
     spinner.start();
     ros::waitForShutdown();
 }
@@ -46,8 +44,18 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
         return true;
     }
 
+    // check max number of running callback threads
+    if (numRunningSrvCallbacks >= maxRunningSrvCallbacks) {
+        res.task.timeout = 1;
+        res.task.taskId.id = amr_msgs::TaskId::DO_NOTHING;
+        return true;
+    }
+
+    numRunningSrvCallbacks++;
     client->waitForNewClientInfo();
     auto task = client->getNewTask();
+
+    res.task.taskUuid = std::hash<unsigned long int>{}(ros::Time::now().toSec());
 
     switch (task.taskId.id) {
         case amr_msgs::TaskId::PERFORM_WAYPOINTS: {
@@ -61,6 +69,7 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
             if (planPathSrvClient.call(srv)) {
                 if (srv.response.pathWaypoints.empty()) {
                     res.error.code = amr_msgs::GetTaskErrorCodes::PLANNING_FAILED;
+                    numRunningSrvCallbacks--;
                     return true;
                 }
                 // send info about planned path for client
@@ -91,8 +100,8 @@ bool TaskManagerServer::getTaskCb(amr_msgs::GetTask::Request& req, amr_msgs::Get
         case amr_msgs::TaskId::DO_NOTHING:
             res.task.timeout = task.timeout;
             res.task.taskId.id = task.taskId.id;
-            return true;
     }
+    numRunningSrvCallbacks--;
     return true;
 }
 
@@ -129,13 +138,14 @@ void TaskManagerServer::clientInfoCb(const amr_msgs::ClientInfoConstPtr& msg) {
 void TaskManagerServer::parseTasks(const std::string &configFile) {
     YAML::Node config = YAML::LoadFile(configFile);
 
+    bool runTasksPeriodically = config["runTasksPeriodically"];
     YAML::Node clientsSeq = config["clients"];
     for (YAML::iterator it = clientsSeq.begin(); it != clientsSeq.end(); ++it) {
         for (const auto &clientData : *it) {
             std::string clientId = clientData.first.as<std::string>();
             YAML::Node tasksSeq = clientData.second;  // tasks seq
 
-            auto client = std::make_shared<ClientRepresentation>(clientId);
+            auto client = std::make_shared<ClientRepresentation>(clientId, runTasksPeriodically);
             clients.insert(std::make_pair(clientId, client));
 
             for (YAML::iterator taskIt = tasksSeq.begin(); taskIt != tasksSeq.end(); ++taskIt) {

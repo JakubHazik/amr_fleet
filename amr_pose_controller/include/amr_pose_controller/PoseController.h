@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <queue>
+#include <mutex>
 
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
@@ -59,12 +60,13 @@ private:
     std::string tfPrefix;
     State state = State::INIT_STATE;
     std::unique_ptr<Controller> controller;
-    std::queue<amr_msgs::Point> waypoints;
+    std::list<amr_msgs::Point> waypoints;
     double waypointZone;
     bool robotPoseReceived = false;
     std::shared_ptr<SemaphoreAutomaticClient> semaphoreClient;
     std::future<bool> nodeLocked;
     rvt::RvizVisualToolsPtr visual_tools;
+    std::mutex waypointsMutex;
 
     bool poseControlSwitchCb(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
 
@@ -78,6 +80,8 @@ private:
     void publishAsResult();
 
     void visualizeAndPublishCurrentGoal();
+
+    void printWaypoints();
 };
 
 

@@ -1,2 +1,4 @@
-maxEdgeLength: 0.35
-dxfFilepath: "/home/jakub/amr_ws/src/amr_fleet/amr_graph_generator/config/myPathTurtlebotV3.dxf"
+maxEdgeLength: 0.7
+graphOffset:
+  x: 2.4
+  y: 1.35

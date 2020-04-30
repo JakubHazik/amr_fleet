@@ -16,7 +16,7 @@
 
 class ClientRepresentation {
 public:
-    explicit ClientRepresentation(const std::string& clientName);
+    explicit ClientRepresentation(const std::string& clientName, bool runTasksPeriodically);
 
     void doCustomTaskAsap(const amr_msgs::Task& task, bool resumePreviousTask);
 
@@ -44,6 +44,7 @@ private:
 
     std::mutex tasksContainerMtx;
     std::mutex clientInfoMtx;
+    bool runTasksPeriodically;
 };
 
 

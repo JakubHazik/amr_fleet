@@ -1,9 +1,13 @@
 <launch>
     <node pkg="amr_graph_generator" type="amr_graph_generator" name="graph_generator" output="screen">
+<!--        <param name="maxEdgeLength" value="0.7"/>-->
+        <param name="dxfFilepath" value="$(find amr_graph_generator)/config/sim_world_1.dxf"/>
         <rosparam command="load" file="$(find amr_graph_generator)/config/config.yaml" />
     </node>
 
-    <include file="$(find amr_fleet)/launch/path_planning/map_server.launch"/>
+    <node pkg="map_server" type="map_server" name="map_server" args="$(find amr_fleet)/maps/sim_world_1/map.yaml">
+        <param name="frame_id" value="/map"/>
+    </node>
 
     <include file="$(find amr_fleet)/launch/rviz.launch"/>
 </launch>

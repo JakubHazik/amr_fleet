@@ -1,0 +1,84 @@
+# Task IDs:
+#uint32 NO_TASK = 0
+#uint32 PERFORM_WAYPOINTS = 1
+#uint32 WAIT_FOR_USER_ACK = 2
+#uint32 CHARGE_BATTERY = 3
+#uint32 DO_NOTHING = 4
+#uint32 TELEOPERATION = 5
+
+runTasksPeriodically: true
+
+clients:
+    - r1:
+          - task:
+                taskId: 1
+                goalId: 124
+          - task:
+                taskId: 1
+                goalId: 11
+    - r2:
+          - task:
+                taskId: 1
+                goalId: 11
+          - task:
+                taskId: 1
+                goalId: 35
+          - task:
+                taskId: 1
+                goalId: 84
+    - r3:
+          - task:
+                taskId: 1
+                goalId: 97
+          - task:
+                taskId: 1
+                goalId: 183
+    - r4:
+          - task:
+                taskId: 1
+                goalId: 56
+          - task:
+                taskId: 1
+                goalId: 84
+    - r5:
+          - task:
+                taskId: 1
+                goalId: 56
+          - task:
+                taskId: 1
+                goalId: 11
+    - r6:
+          - task:
+                taskId: 1
+                goalId: 183
+          - task:
+                taskId: 1
+                goalId: 141
+    - r7:
+          - task:
+                taskId: 1
+                goalId: 153
+          - task:
+                taskId: 1
+                goalId: 183
+    - r8:
+          - task:
+                taskId: 1
+                goalId: 35
+          - task:
+                taskId: 1
+                goalId: 153
+    - r9:
+          - task:
+                taskId: 1
+                goalId: 141
+          - task:
+                taskId: 1
+                goalId: 183
+    - r10:
+          - task:
+                taskId: 1
+                goalId: 183
+          - task:
+                taskId: 1
+                goalId: 124

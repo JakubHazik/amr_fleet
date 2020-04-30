@@ -33,9 +33,12 @@ SemaphoreServer::SemaphoreServer() {
 //        nodesOccupancyLocks->setupClient(occupancy.first, occupancy.second);
 //    }
 
+    nh.getParam("lockingOff", lockingOff);
+
     graphSub = nh.subscribe("/graph_generator/graph", 5, &SemaphoreServer::graphCb, this);
     clientsPathsSub = nh.subscribe("/task_manager_server/client_paths", 10, &SemaphoreServer::clientPathsCb, this);
     lockNodeSrv = nh.advertiseService("lock_node", &SemaphoreServer::lockNodeCb, this);
+    setupSemaphoreSrv = nh.advertiseService("setup_semaphore", &SemaphoreServer::setupSemaphoreCb, this);
 
     // prepare visualizer
     visual_tools.reset(new rvt::RvizVisualTools("map", "/amr_occupied_nodes"));
@@ -47,6 +50,11 @@ SemaphoreServer::SemaphoreServer() {
 }
 
 bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::LockPoint::Response& res) {
+    if (lockingOff) {
+        res.success = true;
+        return true;
+    }
+
     if (req.unlockAll) {
         nodesOccupancyLocks->unlockAllNodes(req.clientId);
         areaLocks->unlockAllNodes(req.clientId);
@@ -144,7 +152,10 @@ bool SemaphoreServer::lockNodeCb(amr_msgs::LockPoint::Request& req, amr_msgs::Lo
 }
 
 rvt::colors getColorHash(const std::string& ownerId) {
-    return static_cast<rvt::colors>(std::hash<std::string>{}(ownerId) % 15);
+//    return static_cast<rvt::colors>(std::hash<std::string>{}(ownerId) % 15);
+
+    int robotId = std::stoi(std::string(ownerId.substr(1, std::string::npos)));
+    return static_cast<rvt::colors>(robotId);
 }
 
 void SemaphoreServer::visualizeNodesOccupancy() {
@@ -198,6 +209,7 @@ void SemaphoreServer::lockAllBidirectionalNeighbours(const std::string& clientId
 
         // this is bidirectional node
         nodesOccupancyLocks->lockNode(clientId, bidNodes.front(), true);
+        areaLocks->lockNode(clientId, bidNodes.front());
         neighbors = graph.getNeighbors(bidNodes.front()).first;
         bidNodes.pop_front();
         bidNodes.insert(bidNodes.end(), neighbors.begin(), neighbors.end());
@@ -227,3 +239,8 @@ Node SemaphoreServer::getClientNextWaypoint(const std::string& clientId, const N
     }
 }
 
+bool SemaphoreServer::setupSemaphoreCb(amr_msgs::SetupSemaphore::Request& req, amr_msgs::SetupSemaphore::Response& res) {
+    nodesOccupancyLocks->setupClient(req.clientId, req.numReallyLockedNodes);
+    res.success = true;
+    return true;
+}

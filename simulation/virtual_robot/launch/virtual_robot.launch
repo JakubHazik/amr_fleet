@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="robot_id" default="r1"/>
+    <arg name="x_pos" default="1.8"/>
+    <arg name="y_pos" default="-0.7"/>
+    <arg name="a_pos" default="1.56"/>
+
+    <group ns="$(arg robot_id)">
+        <node pkg="virtual_robot" type="virtual_robot" name="virtual_robot">
+            <param name="init_pose/x" value="$(arg x_pos)"/>
+            <param name="init_pose/y" value="$(arg y_pos)"/>
+            <param name="init_pose/a" value="$(arg a_pos)"/>
+            <param name="tf_prefix"	value="$(arg robot_id)"/>
+        </node>
+    </group>
+
+</launch>
