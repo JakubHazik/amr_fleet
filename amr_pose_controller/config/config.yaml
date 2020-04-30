@@ -15,5 +15,5 @@ cmdVelTopic: "/mobile_base/commands/velocity"
 waypointZone: 0.25           # [m]
 
 semaphoreLockedNodes:
-  robotSize: 2
+  robotSize: 3
   robotSpeedForward: 1    # must be more that 0
